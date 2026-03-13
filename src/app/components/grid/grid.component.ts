@@ -25,7 +25,7 @@ import { Ability } from '../../models/ability';
           <div class="text-[10px] font-mono bg-stone-900/80 text-stone-400 p-1 px-2 rounded border border-stone-800 backdrop-blur-sm">
             Zoom: {{ (combat.zoom() * 100).toFixed(0) }}% | Pan: {{ combat.pan().x.toFixed(0) }}, {{ combat.pan().y.toFixed(0) }}
           </div>
-          <button (click)="resetView()" class="p-1 bg-stone-900/80 text-stone-400 hover:text-amber-500 rounded border border-stone-800 backdrop-blur-sm transition-colors" title="Reset View">
+          <button (click)="resetView()" class="p-1 bg-stone-900/80 text-stone-400 hover:text-amber-500 rounded border border-stone-800 backdrop-blur-sm transition-colors" title="Redefinir Visualização">
             <mat-icon style="font-size: 14px; width: 14px; height: 14px;">restart_alt</mat-icon>
           </button>
         </div>
@@ -41,7 +41,7 @@ import { Ability } from '../../models/ability';
               <img [src]="mapBackgroundImage()" 
                    class="absolute inset-0 w-full h-full object-contain pointer-events-none z-0 opacity-90" 
                    (load)="onMapLoad($event)"
-                   alt="Map Background" referrerpolicy="no-referrer" />
+                   alt="Fundo do Mapa" referrerpolicy="no-referrer" />
             } @else {
               <div class="absolute inset-0 w-full h-full bg-stone-900"></div>
             }

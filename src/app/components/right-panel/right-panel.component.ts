@@ -6,18 +6,22 @@ import { AuthService } from '../../services/auth.service';
 import { Ability, AreaShape } from '../../models/ability';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { ActionMenuComponent } from '../action-menu/action-menu.component';
 
 @Component({
   selector: 'app-right-panel',
   standalone: true,
-  imports: [CommonModule, MatIconModule, ReactiveFormsModule],
+  imports: [CommonModule, MatIconModule, ReactiveFormsModule, ActionMenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="w-80 h-full bg-stone-900 border-l border-stone-800 flex flex-col text-stone-300">
       <!-- Tabs -->
       <div class="flex border-b border-stone-800 text-xs font-mono">
-        <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="combat.rightPanelTab() === 'abilities'" [class.border-b-2]="combat.rightPanelTab() === 'abilities'" [class.border-amber-500]="combat.rightPanelTab() === 'abilities'" [class.bg-stone-800]="combat.rightPanelTab() === 'abilities'" (click)="combat.rightPanelTab.set('abilities')">Abilities</button>
-        <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="combat.rightPanelTab() === 'sheet'" [class.border-b-2]="combat.rightPanelTab() === 'sheet'" [class.border-amber-500]="combat.rightPanelTab() === 'sheet'" [class.bg-stone-800]="combat.rightPanelTab() === 'sheet'" (click)="combat.rightPanelTab.set('sheet')">Sheet</button>
+        <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="combat.rightPanelTab() === 'abilities'" [class.border-b-2]="combat.rightPanelTab() === 'abilities'" [class.border-amber-500]="combat.rightPanelTab() === 'abilities'" [class.bg-stone-800]="combat.rightPanelTab() === 'abilities'" (click)="combat.rightPanelTab.set('abilities')">Habilidades</button>
+        <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="combat.rightPanelTab() === 'sheet'" [class.border-b-2]="combat.rightPanelTab() === 'sheet'" [class.border-amber-500]="combat.rightPanelTab() === 'sheet'" [class.bg-stone-800]="combat.rightPanelTab() === 'sheet'" (click)="combat.rightPanelTab.set('sheet')">Ficha</button>
+        @if (auth.currentUser()?.role === 'GM') {
+          <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="combat.rightPanelTab() === 'actions'" [class.border-b-2]="combat.rightPanelTab() === 'actions'" [class.border-amber-500]="combat.rightPanelTab() === 'actions'" [class.bg-stone-800]="combat.rightPanelTab() === 'actions'" (click)="combat.rightPanelTab.set('actions')">Ações</button>
+        }
       </div>
       
       <!-- Abilities Tab -->
@@ -26,65 +30,65 @@ import { CommonModule } from '@angular/common';
           @if (combat.previewAbility()) {
             <div class="bg-amber-900/30 border border-amber-500/50 rounded p-3 text-sm text-amber-500 flex items-center gap-2 mb-4">
               <mat-icon>info</mat-icon>
-              <span>Preview mode active. Click on the map to confirm attack.</span>
-              <button class="ml-auto bg-stone-800 hover:bg-stone-700 text-stone-300 px-2 py-1 rounded text-xs" (click)="combat.cancelPreview()">Cancel</button>
+              <span>Modo de visualização ativo. Clique no mapa para confirmar o ataque.</span>
+              <button class="ml-auto bg-stone-800 hover:bg-stone-700 text-stone-300 px-2 py-1 rounded text-xs" (click)="combat.cancelPreview()">Cancelar</button>
             </div>
           }
 
           @if (!selectedToken()) {
             <div class="text-sm text-stone-500 italic p-4 text-center border border-dashed border-stone-700 rounded">
-              Select a token on the map to view its abilities.
+              Selecione um token no mapa para ver suas habilidades.
             </div>
           } @else {
             <!-- GM: Add Ability Form -->
             @if (auth.currentUser()?.role === 'GM') {
               <div class="bg-stone-800 rounded border border-stone-700 p-3 mb-4 space-y-3 shadow-md">
-                <h4 class="text-xs font-bold text-amber-500 uppercase">Add New Ability to {{ selectedToken()?.name }}</h4>
+                <h4 class="text-xs font-bold text-amber-500 uppercase">Adicionar Nova Habilidade para {{ selectedToken()?.name }}</h4>
                 <form [formGroup]="abilityForm" (ngSubmit)="addAbility()" class="space-y-2">
-                  <input formControlName="name" placeholder="Name" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                  <input formControlName="name" placeholder="Nome" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                   
                   <div class="grid grid-cols-2 gap-2">
                     <select formControlName="type" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
-                      <option value="action">Action</option>
-                      <option value="bonus_action">Bonus Action</option>
-                      <option value="reaction">Reaction</option>
-                      <option value="passive">Passive</option>
+                      <option value="action">Ação</option>
+                      <option value="bonus_action">Ação Bônus</option>
+                      <option value="reaction">Reação</option>
+                      <option value="passive">Passiva</option>
                     </select>
                     <select formControlName="areaShape" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
-                      <option value="none">No Area</option>
-                      <option value="circle">Circle</option>
+                      <option value="none">Sem Área</option>
+                      <option value="circle">Círculo</option>
                       <option value="cone">Cone</option>
-                      <option value="line">Line</option>
-                      <option value="rectangle">Rectangle</option>
+                      <option value="line">Linha</option>
+                      <option value="rectangle">Retângulo</option>
                     </select>
                   </div>
 
                   <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label for="abilityRange" class="text-[10px] text-stone-500 uppercase">Range (m)</label>
+                      <label for="abilityRange" class="text-[10px] text-stone-500 uppercase">Alcance (m)</label>
                       <input id="abilityRange" type="number" formControlName="range" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="abilityDamage" class="text-[10px] text-stone-500 uppercase">Damage</label>
-                      <input id="abilityDamage" formControlName="damage" placeholder="e.g. 8d6" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="abilityDamage" class="text-[10px] text-stone-500 uppercase">Dano</label>
+                      <input id="abilityDamage" formControlName="damage" placeholder="ex: 8d6" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-2 items-center">
                     <label class="flex items-center gap-2 text-xs text-stone-400 cursor-pointer">
                       <input type="checkbox" formControlName="requiresAttackRoll" class="accent-amber-500">
-                      Requires Attack Roll
+                      Requer Rolagem de Ataque
                     </label>
                     <div class="flex flex-col gap-1">
-                      <label for="attackBonus" class="text-[10px] text-stone-500 uppercase">Attack Bonus</label>
+                      <label for="attackBonus" class="text-[10px] text-stone-500 uppercase">Bônus de Ataque</label>
                       <input id="attackBonus" type="number" formControlName="attackBonus" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
-                  <textarea formControlName="description" placeholder="Description" rows="2" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500"></textarea>
+                  <textarea formControlName="description" placeholder="Descrição" rows="2" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500"></textarea>
 
                   <button type="submit" [disabled]="abilityForm.invalid" class="w-full py-1 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:hover:bg-amber-600 text-stone-900 font-bold rounded text-xs transition-colors">
-                    Add Ability
+                    Adicionar Habilidade
                   </button>
                 </form>
               </div>
@@ -92,7 +96,7 @@ import { CommonModule } from '@angular/common';
 
             @if (abilities().length === 0) {
               <div class="text-sm text-stone-500 italic p-4 text-center">
-                This token has no abilities yet.
+                Este token ainda não possui habilidades.
               </div>
             }
 
@@ -112,16 +116,16 @@ import { CommonModule } from '@angular/common';
                 <div class="p-3 text-sm space-y-3">
                   <p class="text-stone-400 text-xs">{{ ability.description }}</p>
                   <div class="grid grid-cols-2 gap-2 text-xs font-mono bg-stone-900 p-2 rounded border border-stone-700">
-                    <div><span class="text-stone-500">Range:</span> {{ ability.range }}m</div>
-                    <div><span class="text-stone-500">Area:</span> <span class="capitalize">{{ ability.areaShape }}</span></div>
-                    <div><span class="text-stone-500">Damage:</span> {{ ability.damage }}</div>
-                    <div><span class="text-stone-500">Type:</span> <span class="capitalize">{{ ability.damageType }}</span></div>
+                    <div><span class="text-stone-500">Alcance:</span> {{ ability.range }}m</div>
+                    <div><span class="text-stone-500">Área:</span> <span class="capitalize">{{ ability.areaShape }}</span></div>
+                    <div><span class="text-stone-500">Dano:</span> {{ ability.damage }}</div>
+                    <div><span class="text-stone-500">Tipo:</span> <span class="capitalize">{{ ability.damageType }}</span></div>
                   </div>
                   <button class="w-full py-2 bg-stone-700 hover:bg-amber-600 hover:text-stone-900 text-stone-300 font-bold rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:bg-stone-700 disabled:hover:text-stone-300 disabled:cursor-not-allowed"
                           [disabled]="!selectedToken()?.sheet"
-                          [title]="!selectedToken()?.sheet ? 'Token needs a character sheet to use abilities' : ''"
+                          [title]="!selectedToken()?.sheet ? 'O token precisa de uma ficha para usar habilidades' : ''"
                           (click)="useAbility(ability)">
-                    <mat-icon class="text-sm">my_location</mat-icon> Use Ability
+                    <mat-icon class="text-sm">my_location</mat-icon> Usar Habilidade
                   </button>
                 </div>
               </div>
@@ -134,102 +138,102 @@ import { CommonModule } from '@angular/common';
         <div class="flex-1 overflow-auto p-4 space-y-4">
           @if (!selectedToken()) {
             <div class="text-sm text-stone-500 italic p-4 text-center border border-dashed border-stone-700 rounded">
-              Select a token on the map to view its character sheet.
+              Selecione um token no mapa para ver sua ficha de personagem.
             </div>
           } @else {
             @if (isEditingSheet()) {
               <div class="bg-stone-800 rounded border border-stone-700 p-3 space-y-4 shadow-md text-xs">
                 <div class="flex justify-between items-center border-b border-stone-700 pb-2">
-                  <h3 class="font-bold text-amber-500 text-lg">Edit Sheet</h3>
+                  <h3 class="font-bold text-amber-500 text-lg">Editar Ficha</h3>
                   <div class="flex gap-2">
-                    <button class="bg-stone-700 hover:bg-stone-600 text-stone-300 px-2 py-1 rounded text-xs transition-colors" (click)="cancelEditSheet()">Cancel</button>
-                    <button class="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold px-2 py-1 rounded text-xs transition-colors" (click)="saveSheet()">Save</button>
+                    <button class="bg-stone-700 hover:bg-stone-600 text-stone-300 px-2 py-1 rounded text-xs transition-colors" (click)="cancelEditSheet()">Cancelar</button>
+                    <button class="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold px-2 py-1 rounded text-xs transition-colors" (click)="saveSheet()">Salvar</button>
                   </div>
                 </div>
                 <form [formGroup]="sheetForm" class="space-y-3">
                   <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">Class & Level</label>
-                      <input formControlName="classLevel" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="classLevel" class="text-[10px] text-stone-500 uppercase">Classe & Nível</label>
+                      <input id="classLevel" formControlName="classLevel" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">Background</label>
-                      <input formControlName="background" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="background" class="text-[10px] text-stone-500 uppercase">Antecedente</label>
+                      <input id="background" formControlName="background" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">Player Name</label>
-                      <input formControlName="playerName" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="playerName" class="text-[10px] text-stone-500 uppercase">Nome do Jogador</label>
+                      <input id="playerName" formControlName="playerName" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">Race</label>
-                      <input formControlName="race" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="race" class="text-[10px] text-stone-500 uppercase">Raça</label>
+                      <input id="race" formControlName="race" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">Alignment</label>
-                      <input formControlName="alignment" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="alignment" class="text-[10px] text-stone-500 uppercase">Tendência</label>
+                      <input id="alignment" formControlName="alignment" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">XP</label>
-                      <input formControlName="xp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
-                    </div>
-                  </div>
-
-                  <div class="grid grid-cols-3 gap-2">
-                    <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">AC</label>
-                      <input type="number" formControlName="ac" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">Initiative</label>
-                      <input type="number" formControlName="initiative" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">Speed (m)</label>
-                      <input type="number" formControlName="speed" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                      <label for="xp" class="text-[10px] text-stone-500 uppercase">XP</label>
+                      <input id="xp" formControlName="xp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
                   <div class="grid grid-cols-3 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">STR</label>
-                      <input type="number" formControlName="str" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                      <label for="ac" class="text-[10px] text-stone-500 uppercase text-center">CA</label>
+                      <input id="ac" type="number" formControlName="ac" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">DEX</label>
-                      <input type="number" formControlName="dex" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                      <label for="initiative" class="text-[10px] text-stone-500 uppercase text-center">Iniciativa</label>
+                      <input id="initiative" type="number" formControlName="initiative" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">CON</label>
-                      <input type="number" formControlName="con" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                      <label for="speed" class="text-[10px] text-stone-500 uppercase text-center">Deslocamento (m)</label>
+                      <input id="speed" type="number" formControlName="speed" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-2">
+                    <div class="flex flex-col gap-1">
+                      <label for="str" class="text-[10px] text-stone-500 uppercase text-center">FOR</label>
+                      <input id="str" type="number" formControlName="str" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">INT</label>
-                      <input type="number" formControlName="int" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                      <label for="dex" class="text-[10px] text-stone-500 uppercase text-center">DES</label>
+                      <input id="dex" type="number" formControlName="dex" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">WIS</label>
-                      <input type="number" formControlName="wis" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                      <label for="con" class="text-[10px] text-stone-500 uppercase text-center">CON</label>
+                      <input id="con" type="number" formControlName="con" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase text-center">CHA</label>
-                      <input type="number" formControlName="cha" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                      <label for="int" class="text-[10px] text-stone-500 uppercase text-center">INT</label>
+                      <input id="int" type="number" formControlName="int" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <label for="wis" class="text-[10px] text-stone-500 uppercase text-center">SAB</label>
+                      <input id="wis" type="number" formControlName="wis" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <label for="cha" class="text-[10px] text-stone-500 uppercase text-center">CAR</label>
+                      <input id="cha" type="number" formControlName="cha" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">Proficiency Bonus</label>
-                      <input type="number" formControlName="proficiencyBonus" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="proficiencyBonus" class="text-[10px] text-stone-500 uppercase">Bônus de Proficiência</label>
+                      <input id="proficiencyBonus" type="number" formControlName="proficiencyBonus" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label class="text-[10px] text-stone-500 uppercase">Passive Perception</label>
-                      <input type="number" formControlName="passivePerception" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="passivePerception" class="text-[10px] text-stone-500 uppercase">Percepção Passiva</label>
+                      <input id="passivePerception" type="number" formControlName="passivePerception" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] text-stone-500 uppercase">Inventory</label>
-                    <textarea formControlName="inventory" rows="3" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 resize-none"></textarea>
+                    <label for="inventory" class="text-[10px] text-stone-500 uppercase">Inventário</label>
+                    <textarea id="inventory" formControlName="inventory" rows="3" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 resize-none"></textarea>
                   </div>
                 </form>
               </div>
@@ -240,17 +244,17 @@ import { CommonModule } from '@angular/common';
                   <div class="flex justify-between items-start">
                     <h3 class="font-bold text-amber-500 text-lg">{{ selectedToken()?.name }}</h3>
                     @if (auth.currentUser()?.role === 'GM' || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="editSheet()" title="Edit Sheet">
+                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="editSheet()" title="Editar Ficha">
                         <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
                       </button>
                     }
                   </div>
                   <div class="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 text-stone-400">
-                    <div><span class="text-stone-500">Class & Level:</span> {{ sheet.classLevel }}</div>
-                    <div><span class="text-stone-500">Background:</span> {{ sheet.background }}</div>
-                    <div><span class="text-stone-500">Player:</span> {{ sheet.playerName }}</div>
-                    <div><span class="text-stone-500">Race:</span> {{ sheet.race }}</div>
-                    <div><span class="text-stone-500">Alignment:</span> {{ sheet.alignment }}</div>
+                    <div><span class="text-stone-500">Classe & Nível:</span> {{ sheet.classLevel }}</div>
+                    <div><span class="text-stone-500">Antecedente:</span> {{ sheet.background }}</div>
+                    <div><span class="text-stone-500">Jogador:</span> {{ sheet.playerName }}</div>
+                    <div><span class="text-stone-500">Raça:</span> {{ sheet.race }}</div>
+                    <div><span class="text-stone-500">Tendência:</span> {{ sheet.alignment }}</div>
                     <div><span class="text-stone-500">XP:</span> {{ sheet.xp }}</div>
                   </div>
                 </div>
@@ -258,15 +262,15 @@ import { CommonModule } from '@angular/common';
                 <!-- Combat Stats -->
                 <div class="flex justify-between items-center bg-stone-900 p-2 rounded border border-stone-700">
                   <div class="text-center">
-                    <div class="text-[10px] text-stone-500 uppercase">AC</div>
+                    <div class="text-[10px] text-stone-500 uppercase">CA</div>
                     <div class="font-bold text-lg text-amber-500">{{ sheet.ac }}</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-[10px] text-stone-500 uppercase">Initiative</div>
+                    <div class="text-[10px] text-stone-500 uppercase">Iniciativa</div>
                     <div class="font-bold text-lg text-amber-500">{{ sheet.initiative >= 0 ? '+' : '' }}{{ sheet.initiative }}</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-[10px] text-stone-500 uppercase">Speed</div>
+                    <div class="text-[10px] text-stone-500 uppercase">Deslocamento</div>
                     <div class="font-bold text-lg text-amber-500">{{ sheet.speed }}m</div>
                   </div>
                 </div>
@@ -274,12 +278,12 @@ import { CommonModule } from '@angular/common';
                 <!-- Attributes -->
                 <div class="grid grid-cols-3 gap-2">
                   <div class="bg-stone-900 border border-stone-700 rounded p-2 text-center">
-                    <div class="text-[10px] text-stone-500 uppercase font-bold">STR</div>
+                    <div class="text-[10px] text-stone-500 uppercase font-bold">FOR</div>
                     <div class="font-bold text-lg">{{ sheet.str }}</div>
                     <div class="text-[10px] text-stone-400">{{ mathService.calculateModifier(sheet.str) >= 0 ? '+' : '' }}{{ mathService.calculateModifier(sheet.str) }}</div>
                   </div>
                   <div class="bg-stone-900 border border-stone-700 rounded p-2 text-center">
-                    <div class="text-[10px] text-stone-500 uppercase font-bold">DEX</div>
+                    <div class="text-[10px] text-stone-500 uppercase font-bold">DES</div>
                     <div class="font-bold text-lg">{{ sheet.dex }}</div>
                     <div class="text-[10px] text-stone-400">{{ mathService.calculateModifier(sheet.dex) >= 0 ? '+' : '' }}{{ mathService.calculateModifier(sheet.dex) }}</div>
                   </div>
@@ -294,12 +298,12 @@ import { CommonModule } from '@angular/common';
                     <div class="text-[10px] text-stone-400">{{ mathService.calculateModifier(sheet.int) >= 0 ? '+' : '' }}{{ mathService.calculateModifier(sheet.int) }}</div>
                   </div>
                   <div class="bg-stone-900 border border-stone-700 rounded p-2 text-center">
-                    <div class="text-[10px] text-stone-500 uppercase font-bold">WIS</div>
+                    <div class="text-[10px] text-stone-500 uppercase font-bold">SAB</div>
                     <div class="font-bold text-lg">{{ sheet.wis }}</div>
                     <div class="text-[10px] text-stone-400">{{ mathService.calculateModifier(sheet.wis) >= 0 ? '+' : '' }}{{ mathService.calculateModifier(sheet.wis) }}</div>
                   </div>
                   <div class="bg-stone-900 border border-stone-700 rounded p-2 text-center">
-                    <div class="text-[10px] text-stone-500 uppercase font-bold">CHA</div>
+                    <div class="text-[10px] text-stone-500 uppercase font-bold">CAR</div>
                     <div class="font-bold text-lg">{{ sheet.cha }}</div>
                     <div class="text-[10px] text-stone-400">{{ mathService.calculateModifier(sheet.cha) >= 0 ? '+' : '' }}{{ mathService.calculateModifier(sheet.cha) }}</div>
                   </div>
@@ -308,11 +312,11 @@ import { CommonModule } from '@angular/common';
                 <!-- Other Stats -->
                 <div class="space-y-2">
                   <div class="flex justify-between items-center bg-stone-900 px-2 py-1 rounded border border-stone-700">
-                    <span class="text-stone-500 font-bold">Proficiency Bonus</span>
+                    <span class="text-stone-500 font-bold">Bônus de Proficiência</span>
                     <span class="font-bold text-amber-500">+{{ sheet.proficiencyBonus }}</span>
                   </div>
                   <div class="flex justify-between items-center bg-stone-900 px-2 py-1 rounded border border-stone-700">
-                    <span class="text-stone-500 font-bold">Passive Wisdom (Perception)</span>
+                    <span class="text-stone-500 font-bold">Sabedoria Passiva (Percepção)</span>
                     <span class="font-bold text-amber-500">{{ sheet.passivePerception }}</span>
                   </div>
                 </div>
@@ -320,7 +324,7 @@ import { CommonModule } from '@angular/common';
                 <!-- Inventory -->
                 @if (sheet.inventory) {
                   <div class="bg-stone-900 p-2 rounded border border-stone-700">
-                    <div class="text-[10px] text-stone-500 uppercase font-bold mb-1">Inventory</div>
+                    <div class="text-[10px] text-stone-500 uppercase font-bold mb-1">Inventário</div>
                     <div class="text-stone-300 whitespace-pre-wrap">{{ sheet.inventory }}</div>
                   </div>
                 }
@@ -328,17 +332,21 @@ import { CommonModule } from '@angular/common';
             } @else {
               <div class="bg-stone-800 rounded border border-stone-700 p-4 text-center space-y-3">
                 <mat-icon class="text-stone-500 text-4xl mb-2">assignment_late</mat-icon>
-                <p class="text-sm text-stone-400">This token does not have a character sheet filled out.</p>
-                <p class="text-xs text-stone-500">Abilities requiring attack rolls or saving throws may not function correctly without AC and attributes.</p>
+                <p class="text-sm text-stone-400">Este token não possui uma ficha de personagem preenchida.</p>
+                <p class="text-xs text-stone-500">Habilidades que requerem rolagens de ataque ou salvaguardas podem não funcionar corretamente sem CA e atributos.</p>
                 @if (auth.currentUser()?.role === 'GM' || selectedToken()?.controlledBy === auth.currentUser()?.id) {
                   <button class="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold px-4 py-2 rounded text-xs transition-colors mt-2" (click)="editSheet()">
-                    Create Sheet
+                    Criar Ficha
                   </button>
                 }
               </div>
             }
           }
         </div>
+      }
+      <!-- Actions Tab -->
+      @if (combat.rightPanelTab() === 'actions') {
+        <app-action-menu class="flex-1 overflow-hidden"></app-action-menu>
       }
     </div>
   `

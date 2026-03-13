@@ -18,7 +18,7 @@ export class AuthService {
   currentUser = signal<User | null>({
     id: 'user_gm_1',
     email: 'gm@blooddragons.com',
-    displayName: 'Dungeon Master',
+    displayName: 'Mestre',
     role: 'GM',
     campaigns: ['camp_1']
   });
@@ -28,7 +28,7 @@ export class AuthService {
       this.currentUser.set({
         id: 'user_gm_1',
         email: 'gm@blooddragons.com',
-        displayName: 'Dungeon Master',
+        displayName: 'Mestre',
         role: 'GM',
         campaigns: ['camp_1']
       });
@@ -36,7 +36,7 @@ export class AuthService {
       this.currentUser.set({
         id: 'user_player_1',
         email: 'player@blooddragons.com',
-        displayName: 'Fighter Bob',
+        displayName: 'Guerreiro Bob',
         role: 'PLAYER',
         campaigns: ['camp_1']
       });

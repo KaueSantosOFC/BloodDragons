@@ -30,7 +30,7 @@ import { MatIconModule } from '@angular/material/icon';
         @if (showDiceTray()) {
           <div class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-stone-900 border border-stone-700 rounded-lg shadow-xl p-3 w-64 z-50">
             <div class="flex justify-between items-center mb-2">
-              <div class="text-[10px] font-mono text-stone-500 uppercase">Dice Tray</div>
+              <div class="text-[10px] font-mono text-stone-500 uppercase">Bandeja de Dados</div>
               <button class="text-stone-500 hover:text-stone-300" (click)="showDiceTray.set(false)">
                 <mat-icon style="font-size: 14px; width: 14px; height: 14px;">close</mat-icon>
               </button>
@@ -46,7 +46,7 @@ import { MatIconModule } from '@angular/material/icon';
             </div>
             @if (lastRollResult() !== null) {
               <div class="mt-3 bg-stone-800 rounded p-2 text-center border border-stone-700">
-                <div class="text-[10px] text-stone-400 uppercase">Result (d{{ lastRollSides() }})</div>
+                <div class="text-[10px] text-stone-400 uppercase">Resultado (d{{ lastRollSides() }})</div>
                 <div class="font-mono font-bold text-amber-500 text-2xl">{{ lastRollResult() }}</div>
               </div>
             }
@@ -57,7 +57,7 @@ import { MatIconModule } from '@angular/material/icon';
         @if (showSheetList()) {
           <div class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-stone-900 border border-stone-700 rounded-lg shadow-xl p-3 w-64 z-50 max-h-96 flex flex-col">
             <div class="flex justify-between items-center mb-2 shrink-0">
-              <div class="text-[10px] font-mono text-stone-500 uppercase">Character Sheets</div>
+              <div class="text-[10px] font-mono text-stone-500 uppercase">Fichas de Personagem</div>
               <button class="text-stone-500 hover:text-stone-300" (click)="showSheetList.set(false)">
                 <mat-icon style="font-size: 14px; width: 14px; height: 14px;">close</mat-icon>
               </button>
@@ -69,18 +69,18 @@ import { MatIconModule } from '@angular/material/icon';
               <input type="text" 
                      [value]="searchQuery()" 
                      (input)="updateSearchQuery($event)"
-                     placeholder="Search tokens..." 
+                     placeholder="Buscar tokens..." 
                      class="w-full bg-stone-800 border border-stone-700 rounded pl-8 pr-2 py-1.5 text-xs text-stone-300 focus:outline-none focus:border-amber-500 transition-colors">
             </div>
             
             <div class="space-y-4 overflow-y-auto pr-1">
               @if (groupedTokens().player.length) {
                 <div>
-                  <div class="text-[10px] font-bold text-amber-500 uppercase border-b border-stone-800 pb-1 mb-2">Players</div>
+                  <div class="text-[10px] font-bold text-amber-500 uppercase border-b border-stone-800 pb-1 mb-2">Jogadores</div>
                   <div class="flex flex-col gap-1">
                     @for (token of groupedTokens().player; track token.id) {
                       <button class="text-left px-2 py-1.5 text-xs text-stone-300 hover:bg-stone-800 hover:text-amber-500 rounded transition-colors" (click)="openSheet(token.id)">
-                        {{ token.name }} <span class="text-stone-500 text-[10px]">(Player)</span>
+                        {{ token.name }} <span class="text-stone-500 text-[10px]">(Jogador)</span>
                       </button>
                     }
                   </div>
@@ -89,11 +89,11 @@ import { MatIconModule } from '@angular/material/icon';
               
               @if (groupedTokens().boss.length) {
                 <div>
-                  <div class="text-[10px] font-bold text-amber-500 uppercase border-b border-stone-800 pb-1 mb-2">Bosses</div>
+                  <div class="text-[10px] font-bold text-amber-500 uppercase border-b border-stone-800 pb-1 mb-2">Chefes</div>
                   <div class="flex flex-col gap-1">
                     @for (token of groupedTokens().boss; track token.id) {
                       <button class="text-left px-2 py-1.5 text-xs text-stone-300 hover:bg-stone-800 hover:text-amber-500 rounded transition-colors" (click)="openSheet(token.id)">
-                        {{ token.name }} <span class="text-stone-500 text-[10px]">(Boss)</span>
+                        {{ token.name }} <span class="text-stone-500 text-[10px]">(Chefe)</span>
                       </button>
                     }
                   </div>
@@ -102,11 +102,11 @@ import { MatIconModule } from '@angular/material/icon';
 
               @if (groupedTokens().enemy.length) {
                 <div>
-                  <div class="text-[10px] font-bold text-amber-500 uppercase border-b border-stone-800 pb-1 mb-2">Enemies</div>
+                  <div class="text-[10px] font-bold text-amber-500 uppercase border-b border-stone-800 pb-1 mb-2">Inimigos</div>
                   <div class="flex flex-col gap-1">
                     @for (token of groupedTokens().enemy; track token.id) {
                       <button class="text-left px-2 py-1.5 text-xs text-stone-300 hover:bg-stone-800 hover:text-amber-500 rounded transition-colors" (click)="openSheet(token.id)">
-                        {{ token.name }} <span class="text-stone-500 text-[10px]">(Enemy)</span>
+                        {{ token.name }} <span class="text-stone-500 text-[10px]">(Inimigo)</span>
                       </button>
                     }
                   </div>
@@ -133,14 +133,14 @@ import { MatIconModule } from '@angular/material/icon';
                 [class.text-amber-500]="showDiceTray()"
                 [class.border-amber-500]="showDiceTray()"
                 (click)="toggleDiceTray()"
-                title="Roll Dice">
+                title="Rolar Dados">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">casino</mat-icon>
         </button>
         <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
                 [class.text-amber-500]="showSheetList()"
                 [class.border-amber-500]="showSheetList()"
                 (click)="toggleSheetList()"
-                title="Character Sheets">
+                title="Fichas de Personagem">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">assignment_ind</mat-icon>
         </button>
         <div class="w-px h-6 bg-stone-700 mx-1 self-center"></div>
@@ -152,7 +152,7 @@ import { MatIconModule } from '@angular/material/icon';
                   [class.bg-amber-500/10]="combat.showStorySlides()"
                   [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.showStorySlides()"
                   (click)="combat.showStorySlides.set(!combat.showStorySlides())"
-                  title="Toggle Story Slides">
+                  title="Alternar Slides da História">
             <mat-icon style="font-size: 20px; width: 20px; height: 20px;">photo_library</mat-icon>
             @if (combat.showStorySlides()) {
               <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
@@ -164,7 +164,7 @@ import { MatIconModule } from '@angular/material/icon';
                 [class.text-amber-500]="combat.showGrid()"
                 [class.border-amber-500]="combat.showGrid()"
                 (click)="combat.showGrid.set(!combat.showGrid())"
-                title="Toggle Grid">
+                title="Alternar Grade">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">grid_on</mat-icon>
         </button>
         <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
@@ -173,7 +173,7 @@ import { MatIconModule } from '@angular/material/icon';
                 [class.bg-amber-500/10]="combat.isMeasuring()"
                 [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.isMeasuring()"
                 (click)="toggleMeasure()"
-                title="Measure Distance">
+                title="Medir Distância">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">straighten</mat-icon>
           @if (combat.isMeasuring()) {
             <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
@@ -187,7 +187,7 @@ import { MatIconModule } from '@angular/material/icon';
                 [class.text-amber-500]="!combat.uiVisible()"
                 [class.border-amber-500]="!combat.uiVisible()"
                 (click)="combat.uiVisible.set(!combat.uiVisible())"
-                title="Toggle UI Panels">
+                title="Alternar Painéis da UI">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">
             {{ combat.uiVisible() ? 'fullscreen' : 'fullscreen_exit' }}
           </mat-icon>
