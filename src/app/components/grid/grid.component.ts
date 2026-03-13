@@ -21,9 +21,6 @@ import { Ability } from '../../models/ability';
          (mouseup)="onMouseUp()"
          (contextmenu)="$event.preventDefault()">
       <div class="absolute top-4 left-4 z-30 flex flex-col gap-2">
-        <div class="text-sm font-mono bg-stone-900/80 text-amber-500 p-2 rounded border border-amber-900/50 backdrop-blur-sm shadow-lg">
-          Distance to origin: {{ distanceToOrigin() }} m
-        </div>
         <div class="flex items-center gap-2">
           <div class="text-[10px] font-mono bg-stone-900/80 text-stone-400 p-1 px-2 rounded border border-stone-800 backdrop-blur-sm">
             Zoom: {{ (combat.zoom() * 100).toFixed(0) }}% | Pan: {{ combat.pan().x.toFixed(0) }}, {{ combat.pan().y.toFixed(0) }}
@@ -191,12 +188,6 @@ export class GridComponent {
     const distMeters = (distPixels / this.gridSize) * 1.5;
     
     return Math.round(distMeters * 10) / 10;
-  });
-
-  distanceToOrigin = computed(() => {
-    const t1 = this.tokens().find(t => t.id === 't1');
-    if (!t1) return 0;
-    return this.mathService.calculateDistanceMeters(0, 0, t1.x, t1.y);
   });
 
   affectedTokens = computed(() => {
