@@ -133,6 +133,63 @@ import { MatIconModule } from '@angular/material/icon';
                 title="Rolar Dados">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">casino</mat-icon>
         </button>
+
+        <!-- Rest Menu Popover -->
+        @if (showRestMenu()) {
+          <div class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-stone-900 border border-stone-700 rounded-lg shadow-xl p-3 w-64 z-50">
+            <div class="flex justify-between items-center mb-3">
+              <div class="text-[10px] font-mono text-stone-500 uppercase">Gestão de Recursos</div>
+              <button class="text-stone-500 hover:text-stone-300" (click)="showRestMenu.set(false)">
+                <mat-icon style="font-size: 14px; width: 14px; height: 14px;">close</mat-icon>
+              </button>
+            </div>
+            
+            <div class="max-h-40 overflow-y-auto custom-scrollbar mb-3 space-y-1 bg-stone-950/50 p-1.5 rounded border border-stone-800">
+              <div class="flex justify-between items-center mb-1 px-1">
+                <span class="text-[10px] text-stone-500 font-bold uppercase">Alvos</span>
+                <button class="text-[10px] text-amber-500 hover:text-amber-400 transition-colors" (click)="selectAllPlayersForRest()">Todos Jogadores</button>
+              </div>
+              @for (token of combat.tokens(); track token.id) {
+                @if (token.type === 'player' || token.type === 'npc') {
+                  <label class="flex items-center gap-2 px-2 py-1.5 hover:bg-stone-800 rounded cursor-pointer transition-colors border border-transparent hover:border-stone-700"
+                         [class.bg-stone-800]="selectedTokensForRest().has(token.id)"
+                         [class.border-stone-700]="selectedTokensForRest().has(token.id)">
+                    <input type="checkbox" 
+                           [checked]="selectedTokensForRest().has(token.id)"
+                           (change)="toggleTokenForRest(token.id)"
+                           class="rounded border-stone-600 bg-stone-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-stone-900 w-3 h-3">
+                    <span class="text-xs text-stone-300 flex-1 truncate">{{ token.name }}</span>
+                    <span class="text-[9px] text-stone-500 uppercase">{{ token.type === 'player' ? 'Jog' : 'NPC' }}</span>
+                  </label>
+                }
+              }
+            </div>
+
+            <div class="space-y-2">
+              <button class="w-full bg-stone-800 hover:bg-amber-600 hover:text-stone-900 border border-stone-700 rounded py-2 text-xs font-bold transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-stone-800 disabled:hover:text-stone-400"
+                      [disabled]="selectedTokensForRest().size === 0"
+                      (click)="shortRest()">
+                <mat-icon class="text-amber-500 group-hover:text-stone-900" style="font-size: 16px; width: 16px; height: 16px;">local_cafe</mat-icon>
+                Descanso Curto
+              </button>
+              <button class="w-full bg-stone-800 hover:bg-amber-600 hover:text-stone-900 border border-stone-700 rounded py-2 text-xs font-bold transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-stone-800 disabled:hover:text-stone-400"
+                      [disabled]="selectedTokensForRest().size === 0"
+                      (click)="longRest()">
+                <mat-icon class="text-amber-500 group-hover:text-stone-900" style="font-size: 16px; width: 16px; height: 16px;">hotel</mat-icon>
+                Descanso Longo
+              </button>
+            </div>
+          </div>
+        }
+
+        <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                [class.text-amber-500]="showRestMenu()"
+                [class.border-amber-500]="showRestMenu()"
+                (click)="toggleRestMenu()"
+                title="Descanso">
+          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">hotel</mat-icon>
+        </button>
+
         <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
                 [class.text-amber-500]="showSheetList()"
                 [class.border-amber-500]="showSheetList()"
@@ -164,6 +221,64 @@ import { MatIconModule } from '@angular/material/icon';
                 title="Alternar Grade">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">grid_on</mat-icon>
         </button>
+
+        @if (currentUser()?.role === 'GM') {
+          <div class="flex items-center gap-1 mr-1">
+            @if (combat.isFogMode()) {
+              <div class="flex items-center gap-1 bg-stone-800 rounded-full px-2 py-1 border border-stone-700 mr-2">
+                <button class="text-stone-400 hover:text-amber-500 transition-colors" 
+                        [class.text-amber-500]="combat.fogBrushMode() === 'reveal'"
+                        (click)="combat.fogBrushMode.set('reveal')"
+                        title="Revelar Mapa">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">visibility</mat-icon>
+                </button>
+                <div class="w-px h-4 bg-stone-700 mx-1"></div>
+                <button class="text-stone-400 hover:text-amber-500 transition-colors" 
+                        [class.text-amber-500]="combat.fogBrushMode() === 'hide'"
+                        (click)="combat.fogBrushMode.set('hide')"
+                        title="Esconder Mapa">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">visibility_off</mat-icon>
+                </button>
+                <div class="w-px h-4 bg-stone-700 mx-1"></div>
+                
+                <div class="flex items-center gap-1">
+                  <button class="text-stone-400 hover:text-amber-500 transition-colors" 
+                          (click)="combat.fogBrushSize.set(Math.max(1, combat.fogBrushSize() - 1))"
+                          title="Diminuir Pincel">
+                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">remove</mat-icon>
+                  </button>
+                  <span class="text-[10px] font-mono text-stone-300 w-4 text-center">{{ combat.fogBrushSize() }}</span>
+                  <button class="text-stone-400 hover:text-amber-500 transition-colors" 
+                          (click)="combat.fogBrushSize.set(Math.min(10, combat.fogBrushSize() + 1))"
+                          title="Aumentar Pincel">
+                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon>
+                  </button>
+                </div>
+                
+                <div class="w-px h-4 bg-stone-700 mx-1"></div>
+                <button class="text-stone-400 hover:text-red-500 transition-colors" 
+                        (click)="clearFog()"
+                        title="Esconder Tudo">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">delete_sweep</mat-icon>
+                </button>
+              </div>
+            }
+
+            <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                    [class.text-amber-500]="combat.isFogMode()"
+                    [class.border-amber-500]="combat.isFogMode()"
+                    [class.bg-amber-500/10]="combat.isFogMode()"
+                    [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.isFogMode()"
+                    (click)="toggleFogMode()"
+                    title="Névoa de Guerra (Fog of War)">
+              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">cloud</mat-icon>
+              @if (combat.isFogMode()) {
+                <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
+              }
+            </button>
+          </div>
+        }
+
         <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
                 [class.text-amber-500]="combat.isMeasuring()"
                 [class.border-amber-500]="combat.isMeasuring()"
@@ -202,9 +317,17 @@ export class BottomBarComponent {
 
   showDiceTray = signal<boolean>(false);
   showSheetList = signal<boolean>(false);
+  showRestMenu = signal<boolean>(false);
+  selectedTokensForRest = signal<Set<string>>(new Set());
   searchQuery = signal<string>('');
   lastRollResult = signal<number | null>(null);
   lastRollSides = signal<number | null>(null);
+  Math = Math;
+
+  selectedToken = computed(() => {
+    const id = this.combat.selectedTokenId();
+    return this.combat.tokens().find(t => t.id === id) || null;
+  });
 
   groupedTokens = computed(() => {
     const query = this.searchQuery().toLowerCase();
@@ -224,15 +347,50 @@ export class BottomBarComponent {
 
   toggleDiceTray() {
     this.showDiceTray.set(!this.showDiceTray());
-    if (this.showDiceTray()) this.showSheetList.set(false);
+    if (this.showDiceTray()) {
+      this.showSheetList.set(false);
+      this.showRestMenu.set(false);
+    }
   }
 
   toggleSheetList() {
     this.showSheetList.set(!this.showSheetList());
     if (this.showSheetList()) {
       this.showDiceTray.set(false);
+      this.showRestMenu.set(false);
       this.searchQuery.set(''); // Reset search when opening
     }
+  }
+
+  toggleRestMenu() {
+    this.showRestMenu.set(!this.showRestMenu());
+    if (this.showRestMenu()) {
+      this.showDiceTray.set(false);
+      this.showSheetList.set(false);
+      
+      // Pre-select currently selected token if any
+      const selectedId = this.combat.selectedTokenId();
+      if (selectedId) {
+        this.selectedTokensForRest.set(new Set([selectedId]));
+      } else {
+        this.selectedTokensForRest.set(new Set());
+      }
+    }
+  }
+
+  toggleTokenForRest(tokenId: string) {
+    const current = new Set(this.selectedTokensForRest());
+    if (current.has(tokenId)) {
+      current.delete(tokenId);
+    } else {
+      current.add(tokenId);
+    }
+    this.selectedTokensForRest.set(current);
+  }
+
+  selectAllPlayersForRest() {
+    const playerIds = this.combat.tokens().filter(t => t.type === 'player').map(t => t.id);
+    this.selectedTokensForRest.set(new Set(playerIds));
   }
 
   toggleMeasure() {
@@ -241,6 +399,22 @@ export class BottomBarComponent {
       this.combat.measureStart.set(null);
       this.combat.measureCurrent.set(null);
     }
+    if (this.combat.isMeasuring()) {
+      this.combat.isFogMode.set(false);
+    }
+  }
+
+  toggleFogMode() {
+    this.combat.isFogMode.set(!this.combat.isFogMode());
+    if (this.combat.isFogMode()) {
+      this.combat.isMeasuring.set(false);
+      this.combat.measureStart.set(null);
+      this.combat.measureCurrent.set(null);
+    }
+  }
+
+  clearFog() {
+    this.combat.fogOfWar.set(new Set());
   }
 
   openSheet(tokenId: string) {
@@ -254,5 +428,49 @@ export class BottomBarComponent {
     const result = this.mathService.rollDice(sides);
     this.lastRollResult.set(result);
     this.lastRollSides.set(sides);
+  }
+
+  shortRest() {
+    const selectedIds = Array.from(this.selectedTokensForRest());
+    if (selectedIds.length === 0) return;
+    
+    // Placeholder for short rest logic
+    this.showRestMenu.set(false);
+  }
+
+  longRest() {
+    const selectedIds = Array.from(this.selectedTokensForRest());
+    if (selectedIds.length === 0) return;
+
+    for (const id of selectedIds) {
+      const token = this.combat.tokens().find(t => t.id === id);
+      if (!token) continue;
+
+      const updates: any = {
+        hp: token.maxHp,
+        mp: token.maxMp
+      };
+
+      if (token.sheet) {
+        updates.sheet = {
+          ...token.sheet,
+          hp: token.sheet.maxHp,
+          mp: token.sheet.maxMp
+        };
+      }
+
+      if (token.abilities) {
+        updates.abilities = token.abilities.map(ability => {
+          if (ability.maxUses !== undefined) {
+            return { ...ability, uses: ability.maxUses };
+          }
+          return ability;
+        });
+      }
+
+      this.combat.updateToken(token.id, updates);
+    }
+    
+    this.showRestMenu.set(false);
   }
 }

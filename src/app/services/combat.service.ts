@@ -6,38 +6,9 @@ import { DndCoreEngineService, ActionResult } from './dnd-core-engine.service';
 export interface CombatNotification {
   id: string;
   message: string;
-  type: 'xp' | 'level-up' | 'info' | 'damage';
+  type: 'xp' | 'level-up' | 'info';
   timestamp: number;
 }
-
-export const AVAILABLE_CONDITIONS = [
-  // Elementais
-  { id: 'fire', name: 'Fogo', icon: 'local_fire_department', color: '#ef4444' },
-  { id: 'cold', name: 'Frio', icon: 'ac_unit', color: '#3b82f6' },
-  { id: 'lightning', name: 'Relâmpago', icon: 'bolt', color: '#eab308' },
-  { id: 'acid', name: 'Ácido', icon: 'science', color: '#22c55e' },
-  { id: 'poison', name: 'Veneno', icon: 'skull', color: '#8b5cf6' },
-  { id: 'thunder', name: 'Trovão', icon: 'surround_sound', color: '#64748b' },
-  { id: 'necrotic', name: 'Necrótico', icon: 'church', color: '#1e1b4b' },
-  { id: 'radiant', name: 'Radiante', icon: 'wb_sunny', color: '#fde047' },
-  { id: 'force', name: 'Força', icon: 'fitness_center', color: '#94a3b8' },
-  { id: 'psychic', name: 'Psíquico', icon: 'psychology', color: '#ec4899' },
-  // Status D&D
-  { id: 'blinded', name: 'Cego', icon: 'visibility_off', color: '#475569' },
-  { id: 'charmed', name: 'Enfeitiçado', icon: 'favorite', color: '#f43f5e' },
-  { id: 'deafened', name: 'Surdo', icon: 'hearing_off', color: '#64748b' },
-  { id: 'frightened', name: 'Amedrontado', icon: 'sentiment_very_dissatisfied', color: '#7c3aed' },
-  { id: 'grappled', name: 'Agarrado', icon: 'pan_tool', color: '#b45309' },
-  { id: 'incapacitated', name: 'Incapacitado', icon: 'block', color: '#991b1b' },
-  { id: 'invisible', name: 'Invisível', icon: 'visibility', color: '#94a3b8' },
-  { id: 'paralyzed', name: 'Paralisado', icon: 'timer_off', color: '#1e293b' },
-  { id: 'petrified', name: 'Petrificado', icon: 'diamond', color: '#57534e' },
-  { id: 'prone', name: 'Caído', icon: 'south', color: '#44403c' },
-  { id: 'restrained', name: 'Impedido', icon: 'link', color: '#78350f' },
-  { id: 'stunned', name: 'Atordoado', icon: 'error', color: '#ea580c' },
-  { id: 'unconscious', name: 'Inconsciente', icon: 'bedtime', color: '#0f172a' },
-  { id: 'exhaustion', name: 'Exaustão', icon: 'battery_alert', color: '#b91c1c' },
-];
 
 const XP_TABLE: Record<number, { xp: number, pb: number }> = {
   1: { xp: 0, pb: 2 },
@@ -90,6 +61,12 @@ export class CombatService {
   measureStart = signal<{x: number, y: number} | null>(null);
   measureCurrent = signal<{x: number, y: number} | null>(null);
   
+  // Fog of War State
+  fogOfWar = signal<Set<string>>(new Set()); // Set of "x,y" strings representing revealed grid cells
+  isFogMode = signal<boolean>(false); // Is the GM currently drawing/erasing fog?
+  fogBrushMode = signal<'reveal' | 'hide'>('reveal');
+  fogBrushSize = signal<number>(1); // 1x1, 2x2, 3x3 etc.
+
   // Session Notes State
   storyContent = signal<string>('O grupo se aproxima do templo em ruínas de <span style="color: #991b1b; font-weight: bold;">BloodDragons</span>. <br>Uma névoa espessa obscurece a entrada, e o cheiro de enxofre paira pesado no ar.');
   gmSecretContent = signal<string>('<strong>Segredo do Mestre:</strong> As estátuas perto da porta são na verdade Gárgulas esperando para emboscar.');
@@ -124,7 +101,7 @@ export class CombatService {
       ]
     },
     { 
-      id: 't2', name: 'Maga Alice', x: 4, y: 5, hp: 22, maxHp: 22, mp: 30, maxMp: 30, conditions: [], controlledBy: 'user_player_2', color: '#3b82f6', type: 'player',
+      id: 't2', name: 'Maga Alice', x: 4, y: 5, hp: 22, maxHp: 22, mp: 30, maxMp: 30, conditions: ['Armadura Arcana'], controlledBy: 'user_player_2', color: '#3b82f6', type: 'player',
       sheet: { class: 'Mago', level: 3, background: 'Sábio', playerName: 'Jogador 2', race: 'Elfo', alignment: 'Caótico e Bom', xp: 900, hitDie: 6, str: 8, dex: 14, con: 12, int: 16, wis: 13, cha: 10, ac: 12, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 11, hp: 22, maxHp: 22, mp: 30, maxMp: 30 },
       abilities: [
         { id: 'a2', name: 'Bola de Fogo', type: 'action', range: 45, areaShape: 'circle', radius: 6, damage: '8d6', damageType: 'fire', description: 'Um raio brilhante lampeja do seu dedo apontado para um ponto que você escolher dentro do alcance e então floresce com um rugido baixo em uma explosão de chamas.' },
@@ -132,7 +109,7 @@ export class CombatService {
       ]
     },
     { 
-      id: 't3', name: 'Chefe Goblin', x: 8, y: 3, hp: 15, maxHp: 25, mp: 0, maxMp: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', imageUrl: 'https://picsum.photos/seed/goblin/128/128', type: 'boss',
+      id: 't3', name: 'Chefe Goblin', x: 8, y: 3, hp: 15, maxHp: 25, mp: 0, maxMp: 0, conditions: ['Envenenado'], controlledBy: 'user_gm_1', color: '#22c55e', imageUrl: 'https://picsum.photos/seed/goblin/128/128', type: 'boss',
       sheet: { class: 'Chefe', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 200, hitDie: 8, str: 14, dex: 14, con: 14, int: 10, wis: 10, cha: 10, ac: 15, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 10, hp: 15, maxHp: 25, mp: 0, maxMp: 0 },
       abilities: [
         { id: 'a4', name: 'Fenda Goblin', type: 'action', range: 1.5, areaShape: 'circle', radius: 1.5, damage: '2d6+2', damageType: 'slashing', description: 'Um ataque giratório selvagem atingindo todos por perto.', attackBonus: 4 }
@@ -172,27 +149,6 @@ export class CombatService {
     if (xpToDistribute > 0) {
       this.distributeXP(xpToDistribute, enemyName);
     }
-  }
-
-  processTurnDamage() {
-    this.tokens.update(ts => ts.map(t => {
-      if (t.conditions.length === 0) return t;
-      
-      let totalDamage = 0;
-      t.conditions.forEach(c => {
-        if (c.damagePerTurn) totalDamage += c.damagePerTurn;
-      });
-
-      if (totalDamage > 0) {
-        const newHp = Math.max(0, t.hp - totalDamage);
-        this.addNotification(`${t.name} sofreu ${totalDamage} de dano por condições!`, 'damage');
-        
-        // Sync to sheet
-        const updatedSheet = t.sheet ? { ...t.sheet, hp: newHp } : undefined;
-        return { ...t, hp: newHp, sheet: updatedSheet };
-      }
-      return t;
-    }));
   }
 
   private distributeXP(amount: number, sourceName: string) {
@@ -261,7 +217,7 @@ export class CombatService {
     return { sheet, leveledUp };
   }
 
-  private addNotification(message: string, type: 'xp' | 'level-up' | 'info' | 'damage') {
+  private addNotification(message: string, type: 'xp' | 'level-up' | 'info') {
     const id = Math.random().toString(36).substr(2, 9);
     this.notifications.update(n => [...n, { id, message, type, timestamp: Date.now() }]);
     
@@ -339,17 +295,28 @@ export class CombatService {
     // 2. Extrair dados do alvo
     const targetAC = target.sheet?.ac || 10;
     
-    // 3. Rolar o Ataque
-    const attackRoll = this.engine.calculateAttackRoll(strMod, profBonus, magicBonus, mode);
+    // 3. Verificar Condições do Alvo para Vantagem Automática
+    let finalMode = mode;
+    const advantageConditions = ['Atordoado', 'Cego', 'Incapacitado', 'Inconsciente', 'Paralisado', 'Petrificado', 'Impedido'];
+    if (target.conditions.some(c => advantageConditions.includes(c))) {
+      finalMode = 'advantage';
+    }
+
+    // 4. Rolar o Ataque
+    const attackRoll = this.engine.calculateAttackRoll(strMod, profBonus, magicBonus, finalMode);
     
-    // 4. Validar Sucesso (Acerto)
+    // 5. Validar Sucesso (Acerto)
     const hitCheck = this.engine.validateSuccess(attackRoll.total, targetAC);
     const isHit = hitCheck.success || attackRoll.isCritical; // Crítico sempre acerta
     
     let log = `Ataque contra ${target.name} (CA ${targetAC}): ${attackRoll.log}`;
+    if (finalMode === 'advantage' && mode !== 'advantage') {
+      log += `\n(Vantagem automática devido à condição do alvo)`;
+    }
+    
     let damageRoll: ActionResult | undefined;
 
-    // 5. Rolar Dano se acertou
+    // 6. Rolar Dano se acertou
     if (isHit && !attackRoll.isCriticalFail) {
       log += `\n🎯 ACERTOU!`;
       
