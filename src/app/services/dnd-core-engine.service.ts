@@ -136,6 +136,30 @@ export class DndCoreEngineService {
   }
 
   /**
+   * Calcula a cura (Dados + Modificador + Bônus)
+   */
+  calculateHealing(
+    diceString: string, 
+    modifier: number, 
+    bonus = 0
+  ): ActionResult {
+    const parsed = this.parseAndRoll(diceString);
+    const total = parsed.total + modifier + bonus;
+    
+    let log = `Dados: ${parsed.log} + Mod: ${modifier}`;
+    if (bonus) log += ` + Bônus: ${bonus}`;
+    log += ` = ${total}`;
+
+    return {
+      total,
+      naturalRoll: parsed.total,
+      modifiers: modifier + bonus,
+      isCritical: false,
+      log
+    };
+  }
+
+  /**
    * Lógica inteligente de Armadura
    */
   calculateAC(armorType: 'heavy' | 'medium' | 'light' | 'none', baseAC: number, dexModifier: number, shieldBonus = 0): number {

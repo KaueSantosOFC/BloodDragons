@@ -12,13 +12,14 @@ export interface Ability {
   radius?: number; // for circle
   damage: string; // e.g., "8d6"
   damageType: string;
+  healing?: string; // e.g., "2d4+2"
   description: string;
   
-  requiresAttackRoll?: boolean; // true if it targets AC
   attackBonus?: number; // e.g., +5 to hit
   
   category?: 'weapon' | 'spell' | 'feature';
   spellLevel?: number;
   uses?: number;
   maxUses?: number;
+  manaCost?: number;
 }

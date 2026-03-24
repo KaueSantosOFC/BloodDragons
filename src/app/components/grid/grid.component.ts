@@ -123,9 +123,18 @@ import { Ability } from '../../models/ability';
                 <span class="font-bold text-white text-shadow pointer-events-none">{{ token.name | slice:0:2 }}</span>
               }
 
-              <!-- HP Bar -->
-              <div class="absolute -bottom-3 left-0 right-0 h-2 bg-red-900 rounded-full overflow-hidden border border-stone-900 pointer-events-none">
-                <div class="h-full bg-green-500 transition-all duration-300" [style.width.%]="(token.hp / token.maxHp) * 100"></div>
+              <!-- Status Bars -->
+              <div class="absolute -bottom-5 left-0 right-0 flex flex-col gap-0.5 pointer-events-none">
+                <!-- HP Bar -->
+                <div class="h-1.5 bg-red-900 rounded-full overflow-hidden border border-stone-900">
+                  <div class="h-full bg-green-500 transition-all duration-300" [style.width.%]="(token.hp / token.maxHp) * 100"></div>
+                </div>
+                <!-- Mana Bar -->
+                @if (token.maxMp > 0) {
+                  <div class="h-1.5 bg-blue-900 rounded-full overflow-hidden border border-stone-900">
+                    <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="(token.mp / token.maxMp) * 100"></div>
+                  </div>
+                }
               </div>
 
               <!-- Conditions -->
@@ -141,7 +150,7 @@ import { Ability } from '../../models/ability';
 
               <!-- Tooltip -->
               <div class="absolute -top-8 bg-stone-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-stone-700">
-                {{ token.name }} ({{ token.hp }}/{{ token.maxHp }})
+                {{ token.name }} | PV: {{ token.hp }}/{{ token.maxHp }} @if (token.maxMp > 0) { | Mana: {{ token.mp }}/{{ token.maxMp }} }
               </div>
             </div>
           }
@@ -446,42 +455,43 @@ export class GridComponent {
       // Find the token that is using the ability (the origin)
       const originToken = this.tokens().find(t => t.x === originPos.x && t.y === originPos.y);
       
+      // Mana check
+      if (originToken && ability.manaCost && originToken.mp < ability.manaCost) {
+        console.warn('Mana insuficiente para usar esta habilidade!');
+        this.combat.cancelPreview();
+        return;
+      }
+
+      // Deduct mana
+      if (originToken && ability.manaCost) {
+        this.combat.updateToken(originToken.id, { mp: originToken.mp - ability.manaCost });
+      }
+
       // Filter out the origin token from the affected tokens
       const affected = this.affectedTokens().filter(t => t.id !== originToken?.id);
       
-      console.log(`Confirmed attack: ${ability.name}`);
+      console.log(`Confirmed ability: ${ability.name}`);
       console.log(`Affected tokens:`, affected.map(t => t.name));
       
-      // Parse damage string (e.g., "1d8+3" or "8d6")
-      let damageRoll = 0;
-      const damageMatch = ability.damage.match(/(\d+)d(\d+)(?:\+(\d+))?/);
-      if (damageMatch) {
-        const count = parseInt(damageMatch[1], 10);
-        const sides = parseInt(damageMatch[2], 10);
-        const bonus = damageMatch[3] ? parseInt(damageMatch[3], 10) : 0;
-        damageRoll = this.mathService.rollDice(sides, count) + bonus;
-      } else {
-        damageRoll = parseInt(ability.damage, 10) || 0; // Fallback to flat damage
-      }
-      
-      console.log(`Rolled ${damageRoll} ${ability.damageType} damage!`);
-      
       affected.forEach(t => {
-        let hit = true;
-        
-        if (ability.requiresAttackRoll && t.sheet) {
-          const attackRoll = this.mathService.rollDice(20) + (ability.attackBonus || 0);
-          console.log(`Attack roll against ${t.name}: ${attackRoll} vs AC ${t.sheet.ac}`);
-          if (attackRoll < t.sheet.ac) {
-            hit = false;
-            console.log(`Missed ${t.name}!`);
-          } else {
-            console.log(`Hit ${t.name}!`);
-          }
+        // Se a habilidade tem cura, aplica cura
+        if (ability.healing) {
+          const result = this.combat.resolveHealing(t, ability);
+          console.log(result.log);
         }
         
-        if (hit) {
-          this.combat.updateToken(t.id, { hp: Math.max(0, t.hp - damageRoll) });
+        // Se a habilidade tem dano, aplica dano
+        if (ability.damage) {
+          // Para simplificar, usamos o resolveAttack se houver dano
+          // O originToken é quem está usando a habilidade
+          if (originToken) {
+            const result = this.combat.resolveAttack(originToken, t, ability);
+            console.log(result.log);
+            
+            if (result.hit && result.damage) {
+              this.combat.updateToken(t.id, { hp: Math.max(0, t.hp - result.damage.total) });
+            }
+          }
         }
       });
       

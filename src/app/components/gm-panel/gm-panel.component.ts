@@ -80,23 +80,6 @@ import { MatIconModule } from '@angular/material/icon';
                            class="bg-stone-800 border border-stone-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-amber-500">
                   </div>
                   
-                  <div class="flex gap-2">
-                    <div class="flex flex-col gap-1 flex-1">
-                      <label for="tokenHpInput" class="text-xs text-stone-400">PV</label>
-                      <input id="tokenHpInput" type="number" 
-                             [value]="selectedToken()?.hp" 
-                             (change)="updateTokenField('hp', $event)"
-                             class="bg-stone-800 border border-stone-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-amber-500">
-                    </div>
-                    <div class="flex flex-col gap-1 flex-1">
-                      <label for="tokenMaxHpInput" class="text-xs text-stone-400">PV Máx</label>
-                      <input id="tokenMaxHpInput" type="number" 
-                             [value]="selectedToken()?.maxHp" 
-                             (change)="updateTokenField('maxHp', $event)"
-                             class="bg-stone-800 border border-stone-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-amber-500">
-                    </div>
-                  </div>
-
                   <div class="flex flex-col gap-2">
                     <div class="flex flex-col gap-1">
                       <label for="tokenImgInput" class="text-xs text-stone-400">URL da Imagem</label>
@@ -111,17 +94,6 @@ import { MatIconModule } from '@angular/material/icon';
                       <input id="tokenImgUpload" type="file" accept="image/*"
                              (change)="uploadTokenImage($event)"
                              class="text-xs text-stone-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-stone-700 file:text-amber-500 hover:file:bg-stone-600 cursor-pointer">
-                    </div>
-                  </div>
-
-                  <div class="flex flex-col gap-1">
-                    <label for="tokenColorInput" class="text-xs text-stone-400">Cor</label>
-                    <div class="flex gap-2 items-center">
-                      <input id="tokenColorInput" type="color" 
-                             [value]="selectedToken()?.color" 
-                             (change)="updateTokenField('color', $event)"
-                             class="w-8 h-8 rounded cursor-pointer bg-stone-800 border border-stone-700">
-                      <span class="text-xs font-mono">{{ selectedToken()?.color }}</span>
                     </div>
                   </div>
 
@@ -184,6 +156,8 @@ export class GmPanelComponent {
       y: 0,
       hp: 10,
       maxHp: 10,
+      mp: 0,
+      maxMp: 0,
       conditions: [],
       controlledBy: type === 'player' ? 'user_player_1' : 'user_gm_1',
       color,

@@ -22,6 +22,11 @@ export interface CharacterSheet {
   proficiencyBonus: number;
   passivePerception: number;
   
+  hp: number;
+  maxHp: number;
+  mp: number;
+  maxMp: number;
+  
   cp?: number;
   sp?: number;
   ep?: number;
@@ -38,6 +43,8 @@ export interface Token {
   y: number;
   hp: number;
   maxHp: number;
+  mp: number;
+  maxMp: number;
   conditions: string[];
   controlledBy: string;
   color: string;

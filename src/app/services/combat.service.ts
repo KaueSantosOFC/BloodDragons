@@ -55,33 +55,47 @@ export class CombatService {
   // Tokens State
   tokens = signal<Token[]>([
     { 
-      id: 't1', name: 'Guerreiro Bob', x: 2, y: 2, hp: 45, maxHp: 45, conditions: [], controlledBy: 'user_player_1', color: '#ef4444', type: 'player',
-      sheet: { classLevel: 'Guerreiro 3', background: 'Soldado', playerName: 'Jogador 1', race: 'Humano', alignment: 'Neutro e Bom', xp: '900', str: 16, dex: 14, con: 15, int: 10, wis: 12, cha: 8, ac: 16, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 11 },
+      id: 't1', name: 'Guerreiro Bob', x: 2, y: 2, hp: 45, maxHp: 45, mp: 10, maxMp: 10, conditions: [], controlledBy: 'user_player_1', color: '#ef4444', type: 'player',
+      sheet: { classLevel: 'Guerreiro 3', background: 'Soldado', playerName: 'Jogador 1', race: 'Humano', alignment: 'Neutro e Bom', xp: '900', str: 16, dex: 14, con: 15, int: 10, wis: 12, cha: 8, ac: 16, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 11, hp: 45, maxHp: 45, mp: 10, maxMp: 10 },
       abilities: [
-        { id: 'a1', name: 'Varredura com Espada Longa', type: 'action', range: 1.5, areaShape: 'cone', angle: 90, damage: '1d8+3', damageType: 'slashing', description: 'Uma ampla varredura com uma espada longa.', requiresAttackRoll: true, attackBonus: 5 }
+        { id: 'a1', name: 'Varredura com Espada Longa', type: 'action', range: 1.5, areaShape: 'cone', angle: 90, damage: '1d8+3', damageType: 'slashing', description: 'Uma ampla varredura com uma espada longa.', attackBonus: 5 }
       ]
     },
     { 
-      id: 't2', name: 'Maga Alice', x: 4, y: 5, hp: 22, maxHp: 22, conditions: ['Armadura Arcana'], controlledBy: 'user_player_2', color: '#3b82f6', type: 'player',
-      sheet: { classLevel: 'Mago 3', background: 'Sábio', playerName: 'Jogador 2', race: 'Elfo', alignment: 'Caótico e Bom', xp: '900', str: 8, dex: 14, con: 12, int: 16, wis: 13, cha: 10, ac: 12, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 11 },
+      id: 't2', name: 'Maga Alice', x: 4, y: 5, hp: 22, maxHp: 22, mp: 30, maxMp: 30, conditions: ['Armadura Arcana'], controlledBy: 'user_player_2', color: '#3b82f6', type: 'player',
+      sheet: { classLevel: 'Mago 3', background: 'Sábio', playerName: 'Jogador 2', race: 'Elfo', alignment: 'Caótico e Bom', xp: '900', str: 8, dex: 14, con: 12, int: 16, wis: 13, cha: 10, ac: 12, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 11, hp: 22, maxHp: 22, mp: 30, maxMp: 30 },
       abilities: [
         { id: 'a2', name: 'Bola de Fogo', type: 'action', range: 45, areaShape: 'circle', radius: 6, damage: '8d6', damageType: 'fire', description: 'Um raio brilhante lampeja do seu dedo apontado para um ponto que você escolher dentro do alcance e então floresce com um rugido baixo em uma explosão de chamas.' },
         { id: 'a3', name: 'Relâmpago', type: 'action', range: 30, areaShape: 'line', width: 1.5, length: 30, damage: '8d6', damageType: 'lightning', description: 'Um raio formando uma linha de 30m de comprimento e 1.5m de largura.' }
       ]
     },
     { 
-      id: 't3', name: 'Chefe Goblin', x: 8, y: 3, hp: 15, maxHp: 25, conditions: ['Envenenado'], controlledBy: 'user_gm_1', color: '#22c55e', imageUrl: 'https://picsum.photos/seed/goblin/128/128', type: 'boss',
-      sheet: { classLevel: 'Chefe 1', background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: '200', str: 14, dex: 14, con: 14, int: 10, wis: 10, cha: 10, ac: 15, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 10 },
+      id: 't3', name: 'Chefe Goblin', x: 8, y: 3, hp: 15, maxHp: 25, mp: 0, maxMp: 0, conditions: ['Envenenado'], controlledBy: 'user_gm_1', color: '#22c55e', imageUrl: 'https://picsum.photos/seed/goblin/128/128', type: 'boss',
+      sheet: { classLevel: 'Chefe 1', background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: '200', str: 14, dex: 14, con: 14, int: 10, wis: 10, cha: 10, ac: 15, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 10, hp: 15, maxHp: 25, mp: 0, maxMp: 0 },
       abilities: [
-        { id: 'a4', name: 'Fenda Goblin', type: 'action', range: 1.5, areaShape: 'circle', radius: 1.5, damage: '2d6+2', damageType: 'slashing', description: 'Um ataque giratório selvagem atingindo todos por perto.', requiresAttackRoll: true, attackBonus: 4 }
+        { id: 'a4', name: 'Fenda Goblin', type: 'action', range: 1.5, areaShape: 'circle', radius: 1.5, damage: '2d6+2', damageType: 'slashing', description: 'Um ataque giratório selvagem atingindo todos por perto.', attackBonus: 4 }
       ]
     },
-    { id: 't4', name: 'Lacaio Goblin', x: 9, y: 4, hp: 7, maxHp: 7, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [], sheet: { classLevel: 'Lacaio', background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: '50', str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9 } },
-    { id: 't5', name: 'Lacaio Goblin', x: 7, y: 4, hp: 7, maxHp: 7, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [], sheet: { classLevel: 'Lacaio', background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: '50', str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9 } },
+    { id: 't4', name: 'Lacaio Goblin', x: 9, y: 4, hp: 7, maxHp: 7, mp: 0, maxMp: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [], sheet: { classLevel: 'Lacaio', background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: '50', str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, mp: 0, maxMp: 0 } },
+    { id: 't5', name: 'Lacaio Goblin', x: 7, y: 4, hp: 7, maxHp: 7, mp: 0, maxMp: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [], sheet: { classLevel: 'Lacaio', background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: '50', str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, mp: 0, maxMp: 0 } },
   ]);
 
   updateToken(id: string, updates: Partial<Token>) {
-    this.tokens.update(ts => ts.map(t => t.id === id ? { ...t, ...updates } : t));
+    this.tokens.update(ts => ts.map(t => {
+      if (t.id !== id) return t;
+      
+      const updatedToken = { ...t, ...updates };
+      
+      // Sync HP/MP to sheet if they were updated
+      if (updatedToken.sheet) {
+        if ('hp' in updates) updatedToken.sheet.hp = updates.hp!;
+        if ('maxHp' in updates) updatedToken.sheet.maxHp = updates.maxHp!;
+        if ('mp' in updates) updatedToken.sheet.mp = updates.mp!;
+        if ('maxMp' in updates) updatedToken.sheet.maxMp = updates.maxMp!;
+      }
+      
+      return updatedToken;
+    }));
   }
 
   addToken(token: Token) {
@@ -188,6 +202,26 @@ export class CombatService {
       attack: attackRoll,
       damage: damageRoll,
       hit: isHit && !attackRoll.isCriticalFail,
+      log
+    };
+  }
+
+  /**
+   * Resolve a cura de uma habilidade
+   */
+  resolveHealing(target: Token, ability: Ability): { healing: ActionResult, log: string } {
+    const healingDice = ability.healing || '1d8';
+    const modifier = 0; // Pode ser expandido para usar modificadores de atributo (ex: Sabedoria para clérigos)
+    
+    const healingRoll = this.engine.calculateHealing(healingDice, modifier);
+    
+    const log = `Cura em ${target.name}: ${healingRoll.log}`;
+    
+    const newHp = Math.min(target.maxHp, target.hp + healingRoll.total);
+    this.updateToken(target.id, { hp: newHp });
+    
+    return {
+      healing: healingRoll,
       log
     };
   }
