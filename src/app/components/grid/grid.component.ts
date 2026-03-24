@@ -109,8 +109,10 @@ import { Ability } from '../../models/ability';
             }
 
             @for (token of tokens(); track token.id) {
-              <div class="absolute top-0 left-0 rounded-full shadow-lg border-2 flex flex-col items-center justify-center transition-shadow hover:shadow-amber-500/50 z-30 group"
+              <div class="absolute top-0 left-0 shadow-lg border-2 flex flex-col items-center justify-center transition-shadow hover:shadow-amber-500/50 z-30 group"
                    tabindex="0"
+                   [class.rounded-full]="token.type !== 'item'"
+                   [class.rounded-md]="token.type === 'item'"
                    [class.cursor-grab]="canMove(token)"
                    [class.active:cursor-grabbing]="canMove(token)"
                    [class.cursor-not-allowed]="!canMove(token)"
@@ -118,6 +120,7 @@ import { Ability } from '../../models/ability';
                    [class.border-red-500]="token.type === 'enemy' && !isAffected(token) && selectedTokenId() !== token.id"
                    [class.border-blue-500]="token.type === 'npc' && !isAffected(token) && selectedTokenId() !== token.id"
                    [class.border-black]="token.type === 'boss' && !isAffected(token) && selectedTokenId() !== token.id"
+                   [class.border-purple-500]="token.type === 'item' && !isAffected(token) && selectedTokenId() !== token.id"
                    [class.border-stone-400]="!token.type && !isAffected(token) && selectedTokenId() !== token.id"
                    [class.!border-red-500]="isAffected(token)"
                    [class.!border-white]="selectedTokenId() === token.id && !isAffected(token)"
@@ -136,24 +139,26 @@ import { Ability } from '../../models/ability';
               
               <!-- Token Image or Initials -->
               @if (token.imageUrl) {
-                <img [src]="token.imageUrl" class="w-full h-full rounded-full object-cover pointer-events-none" alt="Token" referrerpolicy="no-referrer" />
+                <img [src]="token.imageUrl" class="w-full h-full object-cover pointer-events-none" [class.rounded-full]="token.type !== 'item'" [class.rounded-md]="token.type === 'item'" alt="Token" referrerpolicy="no-referrer" />
               } @else {
                 <span class="font-bold text-white text-shadow pointer-events-none">{{ token.name | slice:0:2 }}</span>
               }
 
               <!-- Status Bars -->
-              <div class="absolute -bottom-5 left-0 right-0 flex flex-col gap-0.5 pointer-events-none">
-                <!-- HP Bar -->
-                <div class="h-1.5 bg-red-900 rounded-full overflow-hidden border border-stone-900">
-                  <div class="h-full bg-green-500 transition-all duration-300" [style.width.%]="(token.hp / token.maxHp) * 100"></div>
-                </div>
-                <!-- Mana Bar -->
-                @if (token.maxMp > 0) {
-                  <div class="h-1.5 bg-blue-900 rounded-full overflow-hidden border border-stone-900">
-                    <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="(token.mp / token.maxMp) * 100"></div>
+              @if (token.type !== 'item') {
+                <div class="absolute -bottom-5 left-0 right-0 flex flex-col gap-0.5 pointer-events-none">
+                  <!-- HP Bar -->
+                  <div class="h-1.5 bg-red-900 rounded-full overflow-hidden border border-stone-900">
+                    <div class="h-full bg-green-500 transition-all duration-300" [style.width.%]="(token.hp / token.maxHp) * 100"></div>
                   </div>
-                }
-              </div>
+                  <!-- Mana Bar -->
+                  @if (token.maxMp > 0) {
+                    <div class="h-1.5 bg-blue-900 rounded-full overflow-hidden border border-stone-900">
+                      <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="(token.mp / token.maxMp) * 100"></div>
+                    </div>
+                  }
+                </div>
+              }
 
               <!-- Conditions -->
               @if (token.conditions.length > 0) {
@@ -168,7 +173,7 @@ import { Ability } from '../../models/ability';
 
               <!-- Tooltip -->
               <div class="absolute -top-8 bg-stone-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-stone-700">
-                {{ token.name }} | PV: {{ token.hp }}/{{ token.maxHp }} @if (token.maxMp > 0) { | Mana: {{ token.mp }}/{{ token.maxMp }} }
+                {{ token.name }} @if (token.type !== 'item') { | PV: {{ token.hp }}/{{ token.maxHp }} @if (token.maxMp > 0) { | Mana: {{ token.mp }}/{{ token.maxMp }} } }
               </div>
             </div>
           }

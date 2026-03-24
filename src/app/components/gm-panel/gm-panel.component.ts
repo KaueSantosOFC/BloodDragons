@@ -129,6 +129,7 @@ import { MatIconModule } from '@angular/material/icon';
                   <option value="enemy">Inimigo (Borda Vermelha)</option>
                   <option value="npc">NPC (Borda Azul)</option>
                   <option value="boss">Chefe (Borda Preta)</option>
+                  <option value="item">Item (Borda Roxa, Quadrado)</option>
                 </select>
                 <button class="w-full py-1 bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold rounded text-xs transition-colors mt-1"
                         (click)="addToken(newTokenType.value)">
@@ -275,6 +276,7 @@ export class GmPanelComponent {
     if (type === 'enemy') { name = 'Novo Inimigo'; color = '#ef4444'; }
     if (type === 'npc') { name = 'Novo NPC'; color = '#22c55e'; }
     if (type === 'boss') { name = 'Novo Chefe'; color = '#000000'; }
+    if (type === 'item') { name = 'Novo Item'; color = '#a855f7'; }
 
     this.combat.addToken({
       id,
@@ -288,7 +290,7 @@ export class GmPanelComponent {
       conditions: [],
       controlledBy: type === 'player' ? 'user_player_1' : 'user_gm_1',
       color,
-      type: type as 'player' | 'enemy' | 'npc' | 'boss'
+      type: type as 'player' | 'enemy' | 'npc' | 'boss' | 'item'
     });
 
     // Automatically select the new token and open the sheet editor

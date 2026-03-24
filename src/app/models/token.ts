@@ -59,7 +59,7 @@ export interface Token {
   controlledBy: string;
   color: string;
   imageUrl?: string;
-  type?: 'player' | 'enemy' | 'npc' | 'boss';
+  type?: 'player' | 'enemy' | 'npc' | 'boss' | 'item';
   abilities?: Ability[];
   sheet?: CharacterSheet;
 }

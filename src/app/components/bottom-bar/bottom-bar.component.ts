@@ -4,7 +4,6 @@ import { CombatService } from '../../services/combat.service';
 import { DndMathService } from '../../services/dnd-math.service';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { Token } from '../../models/token';
 
 @Component({
   selector: 'app-bottom-bar',
@@ -123,6 +122,19 @@ import { Token } from '../../models/token';
                   </div>
                 </div>
               }
+
+              @if (groupedTokens().item.length) {
+                <div>
+                  <div class="text-[10px] font-bold text-amber-500 uppercase border-b border-stone-800 pb-1 mb-2">Itens</div>
+                  <div class="flex flex-col gap-1">
+                    @for (token of groupedTokens().item; track token.id) {
+                      <button class="text-left px-2 py-1.5 text-xs text-stone-300 hover:bg-stone-800 hover:text-amber-500 rounded transition-colors" (click)="openSheet(token.id)">
+                        {{ token.name }} <span class="text-stone-500 text-[10px]">(Item)</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
             </div>
           </div>
         }
@@ -222,64 +234,6 @@ import { Token } from '../../models/token';
                 title="Alternar Grade">
           <mat-icon style="font-size: 20px; width: 20px; height: 20px;">grid_on</mat-icon>
         </button>
-
-        @if (currentUser()?.role === 'GM') {
-          <div class="flex items-center gap-1 mr-1">
-            @if (combat.isFogMode()) {
-              <div class="flex items-center gap-1 bg-stone-800 rounded-full px-2 py-1 border border-stone-700 mr-2">
-                <button class="text-stone-400 hover:text-amber-500 transition-colors" 
-                        [class.text-amber-500]="combat.fogBrushMode() === 'reveal'"
-                        (click)="combat.fogBrushMode.set('reveal')"
-                        title="Revelar Mapa">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">visibility</mat-icon>
-                </button>
-                <div class="w-px h-4 bg-stone-700 mx-1"></div>
-                <button class="text-stone-400 hover:text-amber-500 transition-colors" 
-                        [class.text-amber-500]="combat.fogBrushMode() === 'hide'"
-                        (click)="combat.fogBrushMode.set('hide')"
-                        title="Esconder Mapa">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">visibility_off</mat-icon>
-                </button>
-                <div class="w-px h-4 bg-stone-700 mx-1"></div>
-                
-                <div class="flex items-center gap-1">
-                  <button class="text-stone-400 hover:text-amber-500 transition-colors" 
-                          (click)="combat.fogBrushSize.set(Math.max(1, combat.fogBrushSize() - 1))"
-                          title="Diminuir Pincel">
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">remove</mat-icon>
-                  </button>
-                  <span class="text-[10px] font-mono text-stone-300 w-4 text-center">{{ combat.fogBrushSize() }}</span>
-                  <button class="text-stone-400 hover:text-amber-500 transition-colors" 
-                          (click)="combat.fogBrushSize.set(Math.min(10, combat.fogBrushSize() + 1))"
-                          title="Aumentar Pincel">
-                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon>
-                  </button>
-                </div>
-                
-                <div class="w-px h-4 bg-stone-700 mx-1"></div>
-                <button class="text-stone-400 hover:text-red-500 transition-colors" 
-                        (click)="clearFog()"
-                        title="Esconder Tudo">
-                  <mat-icon style="font-size: 16px; width: 16px; height: 16px;">delete_sweep</mat-icon>
-                </button>
-              </div>
-            }
-
-            <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                    [class.text-amber-500]="combat.isFogMode()"
-                    [class.border-amber-500]="combat.isFogMode()"
-                    [class.bg-amber-500/10]="combat.isFogMode()"
-                    [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.isFogMode()"
-                    (click)="toggleFogMode()"
-                    title="Névoa de Guerra (Fog of War)">
-              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">cloud</mat-icon>
-              @if (combat.isFogMode()) {
-                <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
-              }
-            </button>
-          </div>
-        }
-
         <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
                 [class.text-amber-500]="combat.isMeasuring()"
                 [class.border-amber-500]="combat.isMeasuring()"
@@ -323,7 +277,6 @@ export class BottomBarComponent {
   searchQuery = signal<string>('');
   lastRollResult = signal<number | null>(null);
   lastRollSides = signal<number | null>(null);
-  Math = Math;
 
   selectedToken = computed(() => {
     const id = this.combat.selectedTokenId();
@@ -338,6 +291,7 @@ export class BottomBarComponent {
       boss: tokens.filter(t => t.type === 'boss'),
       enemy: tokens.filter(t => t.type === 'enemy'),
       npc: tokens.filter(t => t.type === 'npc'),
+      item: tokens.filter(t => t.type === 'item'),
     };
   });
 
@@ -400,22 +354,6 @@ export class BottomBarComponent {
       this.combat.measureStart.set(null);
       this.combat.measureCurrent.set(null);
     }
-    if (this.combat.isMeasuring()) {
-      this.combat.isFogMode.set(false);
-    }
-  }
-
-  toggleFogMode() {
-    this.combat.isFogMode.set(!this.combat.isFogMode());
-    if (this.combat.isFogMode()) {
-      this.combat.isMeasuring.set(false);
-      this.combat.measureStart.set(null);
-      this.combat.measureCurrent.set(null);
-    }
-  }
-
-  clearFog() {
-    this.combat.fogOfWar.set(new Set());
   }
 
   openSheet(tokenId: string) {
@@ -447,7 +385,7 @@ export class BottomBarComponent {
       const token = this.combat.tokens().find(t => t.id === id);
       if (!token) continue;
 
-      const updates: Partial<Token> = {
+      const updates: any = {
         hp: token.maxHp,
         mp: token.maxMp
       };
