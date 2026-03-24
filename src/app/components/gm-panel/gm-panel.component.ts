@@ -42,6 +42,77 @@ import { MatIconModule } from '@angular/material/icon';
                   </div>
                 </div>
               </div>
+
+              <!-- Fog of War Settings -->
+              <div class="space-y-3 pt-4 border-t border-stone-800">
+                <h3 class="font-bold text-amber-500 flex items-center gap-2">
+                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">cloud</mat-icon>
+                  Névoa de Guerra
+                </h3>
+                
+                <div class="flex flex-col gap-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-stone-400">Ativar Névoa</span>
+                    <button (click)="combat.isFogEnabled.set(!combat.isFogEnabled())" 
+                            class="w-10 h-5 rounded-full transition-colors relative"
+                            [class.bg-amber-600]="combat.isFogEnabled()"
+                            [class.bg-stone-700]="!combat.isFogEnabled()">
+                      <div class="absolute top-1 w-3 h-3 bg-white rounded-full transition-all"
+                           [style.left.px]="combat.isFogEnabled() ? 22 : 4"></div>
+                    </button>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-stone-400">Modo Edição</span>
+                    <button (click)="combat.isFogEditMode.set(!combat.isFogEditMode())" 
+                            class="w-10 h-5 rounded-full transition-colors relative"
+                            [class.bg-amber-600]="combat.isFogEditMode()"
+                            [class.bg-stone-700]="!combat.isFogEditMode()">
+                      <div class="absolute top-1 w-3 h-3 bg-white rounded-full transition-all"
+                           [style.left.px]="combat.isFogEditMode() ? 22 : 4"></div>
+                    </button>
+                  </div>
+
+                  @if (combat.isFogEditMode()) {
+                    <div class="p-2 bg-stone-800/50 rounded border border-stone-700 space-y-2">
+                      <div class="flex gap-2">
+                        <button (click)="combat.fogBrushType.set('reveal')" 
+                                class="flex-1 py-1.5 rounded text-[10px] font-bold border transition-colors flex items-center justify-center gap-1"
+                                [class.bg-amber-600]="combat.fogBrushType() === 'reveal'"
+                                [class.text-stone-900]="combat.fogBrushType() === 'reveal'"
+                                [class.border-amber-500]="combat.fogBrushType() === 'reveal'"
+                                [class.bg-stone-800]="combat.fogBrushType() !== 'reveal'"
+                                [class.text-stone-400]="combat.fogBrushType() !== 'reveal'"
+                                [class.border-stone-700]="combat.fogBrushType() !== 'reveal'">
+                          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">visibility</mat-icon> REVELAR
+                        </button>
+                        <button (click)="combat.fogBrushType.set('hide')" 
+                                class="flex-1 py-1.5 rounded text-[10px] font-bold border transition-colors flex items-center justify-center gap-1"
+                                [class.bg-stone-600]="combat.fogBrushType() === 'hide'"
+                                [class.text-stone-100]="combat.fogBrushType() === 'hide'"
+                                [class.border-stone-500]="combat.fogBrushType() === 'hide'"
+                                [class.bg-stone-800]="combat.fogBrushType() !== 'hide'"
+                                [class.text-stone-400]="combat.fogBrushType() !== 'hide'"
+                                [class.border-stone-700]="combat.fogBrushType() !== 'hide'">
+                          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">visibility_off</mat-icon> ESCONDER
+                        </button>
+                      </div>
+                      <p class="text-[10px] text-stone-500 italic text-center">Clique e arraste no mapa para editar a névoa.</p>
+                    </div>
+                  }
+
+                  <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button (click)="combat.clearFog()" 
+                            class="py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-[10px] font-bold rounded border border-stone-700 transition-colors">
+                      REVELAR TUDO
+                    </button>
+                    <button (click)="hideAllFog()" 
+                            class="py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-[10px] font-bold rounded border border-stone-700 transition-colors">
+                      ESCONDER TUDO
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         }
@@ -273,6 +344,10 @@ export class GmPanelComponent {
     }
     
     this.combat.updateToken(id, { [field]: value });
+  }
+
+  hideAllFog() {
+    this.combat.hideAllFog(this.combat.mapWidth(), this.combat.mapHeight(), 64);
   }
 
   async uploadTokenImage(event: Event) {

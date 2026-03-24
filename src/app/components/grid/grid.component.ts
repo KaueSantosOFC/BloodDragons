@@ -55,23 +55,27 @@ import { Ability } from '../../models/ability';
             }
 
             <!-- Fog of War Layer -->
-            <div class="absolute inset-0 pointer-events-none z-25" [style.opacity]="currentUser()?.role === 'GM' ? 0.5 : 1">
-              @for (cell of fogCells(); track cell.id) {
-                <div class="absolute bg-black transition-opacity duration-500"
-                     [style.left.px]="cell.x * gridSize"
-                     [style.top.px]="cell.y * gridSize"
-                     [style.width.px]="gridSize"
-                     [style.height.px]="gridSize"
-                     [class.opacity-0]="cell.revealed"
-                     [class.opacity-100]="!cell.revealed">
-                </div>
-              }
-            </div>
+            @if (combat.isFogEnabled()) {
+              <div class="absolute inset-0 pointer-events-none z-25 overflow-hidden">
+                @for (cell of combat.fogOfWar(); track cell) {
+                  @let coords = getCoords(cell);
+                  <div class="absolute bg-stone-950 transition-opacity duration-300"
+                       [class.opacity-100]="currentUser()?.role !== 'GM'"
+                       [class.opacity-60]="currentUser()?.role === 'GM'"
+                       [style.left.px]="coords.x * gridSize"
+                       [style.top.px]="coords.y * gridSize"
+                       [style.width.px]="gridSize"
+                       [style.height.px]="gridSize">
+                  </div>
+                }
+              </div>
+            }
 
             <!-- Interaction Layer -->
             <div class="absolute inset-0 z-20 cursor-crosshair"
                  tabindex="0"
                  (mousemove)="onMouseMove($event)"
+                 (mousedown)="onGridMouseDown($event)"
                  (click)="onClick($event)"
                  (keydown.enter)="onClick()">
             </div>
@@ -105,72 +109,69 @@ import { Ability } from '../../models/ability';
             }
 
             @for (token of tokens(); track token.id) {
-              @if (isTokenVisible(token)) {
-                <div class="absolute top-0 left-0 rounded-full shadow-lg border-2 flex flex-col items-center justify-center transition-shadow hover:shadow-amber-500/50 z-30 group"
-                     tabindex="0"
-                     [class.cursor-grab]="canMove(token)"
-                     [class.active:cursor-grabbing]="canMove(token)"
-                     [class.cursor-not-allowed]="!canMove(token)"
-                     [class.border-yellow-400]="token.type === 'player' && !isAffected(token) && selectedTokenId() !== token.id"
-                     [class.border-red-500]="token.type === 'enemy' && !isAffected(token) && selectedTokenId() !== token.id"
-                     [class.border-blue-500]="token.type === 'npc' && !isAffected(token) && selectedTokenId() !== token.id"
-                     [class.border-black]="token.type === 'boss' && !isAffected(token) && selectedTokenId() !== token.id"
-                     [class.border-stone-400]="!token.type && !isAffected(token) && selectedTokenId() !== token.id"
-                     [class.!border-red-500]="isAffected(token)"
-                     [class.!border-white]="selectedTokenId() === token.id && !isAffected(token)"
-                     [class.shadow-[0_0_15px_rgba(255,255,255,0.8)]]="selectedTokenId() === token.id && !isAffected(token)"
-                     [class.shadow-[0_0_15px_rgba(239,68,68,0.8)]]="isAffected(token)"
-                     [style.backgroundColor]="token.color"
-                     [style.width.px]="gridSize"
-                     [style.height.px]="gridSize"
-                     [cdkDragFreeDragPosition]="{x: token.x * gridSize, y: token.y * gridSize}"
-                     cdkDrag
-                     [cdkDragBoundary]="boundary"
-                     [cdkDragDisabled]="!canMove(token)"
-                     (cdkDragEnded)="onDragEnded($event, token)"
-                     (click)="onTokenClick(token, $event)"
-                     (keydown.enter)="onTokenClick(token, $event)">
-                
-                <!-- Token Image or Initials -->
-                @if (token.imageUrl) {
-                  <img [src]="token.imageUrl" class="w-full h-full rounded-full object-cover pointer-events-none" alt="Token" referrerpolicy="no-referrer" />
-                } @else {
-                  <span class="font-bold text-white text-shadow pointer-events-none">{{ token.name | slice:0:2 }}</span>
-                }
+              <div class="absolute top-0 left-0 rounded-full shadow-lg border-2 flex flex-col items-center justify-center transition-shadow hover:shadow-amber-500/50 z-30 group"
+                   tabindex="0"
+                   [class.cursor-grab]="canMove(token)"
+                   [class.active:cursor-grabbing]="canMove(token)"
+                   [class.cursor-not-allowed]="!canMove(token)"
+                   [class.border-yellow-400]="token.type === 'player' && !isAffected(token) && selectedTokenId() !== token.id"
+                   [class.border-red-500]="token.type === 'enemy' && !isAffected(token) && selectedTokenId() !== token.id"
+                   [class.border-blue-500]="token.type === 'npc' && !isAffected(token) && selectedTokenId() !== token.id"
+                   [class.border-black]="token.type === 'boss' && !isAffected(token) && selectedTokenId() !== token.id"
+                   [class.border-stone-400]="!token.type && !isAffected(token) && selectedTokenId() !== token.id"
+                   [class.!border-red-500]="isAffected(token)"
+                   [class.!border-white]="selectedTokenId() === token.id && !isAffected(token)"
+                   [class.shadow-[0_0_15px_rgba(255,255,255,0.8)]]="selectedTokenId() === token.id && !isAffected(token)"
+                   [class.shadow-[0_0_15px_rgba(239,68,68,0.8)]]="isAffected(token)"
+                   [style.backgroundColor]="token.color"
+                   [style.width.px]="gridSize"
+                   [style.height.px]="gridSize"
+                   [cdkDragFreeDragPosition]="{x: token.x * gridSize, y: token.y * gridSize}"
+                   cdkDrag
+                   [cdkDragBoundary]="boundary"
+                   [cdkDragDisabled]="!canMove(token)"
+                   (cdkDragEnded)="onDragEnded($event, token)"
+                   (click)="onTokenClick(token, $event)"
+                   (keydown.enter)="onTokenClick(token, $event)">
+              
+              <!-- Token Image or Initials -->
+              @if (token.imageUrl) {
+                <img [src]="token.imageUrl" class="w-full h-full rounded-full object-cover pointer-events-none" alt="Token" referrerpolicy="no-referrer" />
+              } @else {
+                <span class="font-bold text-white text-shadow pointer-events-none">{{ token.name | slice:0:2 }}</span>
+              }
 
-                <!-- Status Bars -->
-                <div class="absolute -bottom-5 left-0 right-0 flex flex-col gap-0.5 pointer-events-none">
-                  <!-- HP Bar -->
-                  <div class="h-1.5 bg-red-900 rounded-full overflow-hidden border border-stone-900">
-                    <div class="h-full bg-green-500 transition-all duration-300" [style.width.%]="(token.hp / token.maxHp) * 100"></div>
+              <!-- Status Bars -->
+              <div class="absolute -bottom-5 left-0 right-0 flex flex-col gap-0.5 pointer-events-none">
+                <!-- HP Bar -->
+                <div class="h-1.5 bg-red-900 rounded-full overflow-hidden border border-stone-900">
+                  <div class="h-full bg-green-500 transition-all duration-300" [style.width.%]="(token.hp / token.maxHp) * 100"></div>
+                </div>
+                <!-- Mana Bar -->
+                @if (token.maxMp > 0) {
+                  <div class="h-1.5 bg-blue-900 rounded-full overflow-hidden border border-stone-900">
+                    <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="(token.mp / token.maxMp) * 100"></div>
                   </div>
-                  <!-- Mana Bar -->
-                  @if (token.maxMp > 0) {
-                    <div class="h-1.5 bg-blue-900 rounded-full overflow-hidden border border-stone-900">
-                      <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="(token.mp / token.maxMp) * 100"></div>
+                }
+              </div>
+
+              <!-- Conditions -->
+              @if (token.conditions.length > 0) {
+                <div class="absolute -top-4 -right-4 flex flex-wrap-reverse justify-end gap-1 pointer-events-none w-20">
+                  @for (cond of token.conditions; track cond) {
+                    <div class="w-5 h-5 bg-stone-900 rounded-full border border-stone-600 text-amber-500 flex items-center justify-center shadow-sm" title="{{cond}}">
+                      <mat-icon style="font-size: 12px; width: 12px; height: 12px;">{{ getConditionIcon(cond) }}</mat-icon>
                     </div>
                   }
                 </div>
-
-                <!-- Conditions -->
-                @if (token.conditions.length > 0) {
-                  <div class="absolute -top-4 -right-4 flex flex-wrap-reverse justify-end gap-1 pointer-events-none w-20">
-                    @for (cond of token.conditions; track cond) {
-                      <div class="w-5 h-5 bg-stone-900 rounded-full border border-stone-600 text-amber-500 flex items-center justify-center shadow-sm" title="{{cond}}">
-                        <mat-icon style="font-size: 12px; width: 12px; height: 12px;">{{ getConditionIcon(cond) }}</mat-icon>
-                      </div>
-                    }
-                  </div>
-                }
-
-                <!-- Tooltip -->
-                <div class="absolute -top-8 bg-stone-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-stone-700">
-                  {{ token.name }} | PV: {{ token.hp }}/{{ token.maxHp }} @if (token.maxMp > 0) { | Mana: {{ token.mp }}/{{ token.maxMp }} }
-                </div>
-              </div>
               }
-            }
-          </div>
+
+              <!-- Tooltip -->
+              <div class="absolute -top-8 bg-stone-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-stone-700">
+                {{ token.name }} | PV: {{ token.hp }}/{{ token.maxHp }} @if (token.maxMp > 0) { | Mana: {{ token.mp }}/{{ token.maxMp }} }
+              </div>
+            </div>
+          }
         </div>
       </div>
     </div>
@@ -197,11 +198,10 @@ export class GridComponent {
 
   // State
   tokens = this.combat.tokens;
-  mapWidth = signal<number>(2000); // Default large size
-  mapHeight = signal<number>(2000);
+  mapWidth = this.combat.mapWidth;
+  mapHeight = this.combat.mapHeight;
   
   private isPanning = false;
-  private isDrawingFog = false;
   private lastPanPos = { x: 0, y: 0 };
 
   measureDistance = computed(() => {
@@ -224,26 +224,6 @@ export class GridComponent {
     if (!ability || !origin || !target) return [];
 
     return this.tokens().filter(t => this.isTokenInArea(t, ability, origin, target));
-  });
-
-  fogCells = computed(() => {
-    const cells = [];
-    const width = Math.ceil(this.mapWidth() / this.gridSize);
-    const height = Math.ceil(this.mapHeight() / this.gridSize);
-    const revealedSet = this.combat.fogOfWar();
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const id = `${x},${y}`;
-        cells.push({
-          id,
-          x,
-          y,
-          revealed: revealedSet.has(id)
-        });
-      }
-    }
-    return cells;
   });
 
   getConditionIcon(cond: string): string {
@@ -368,17 +348,13 @@ export class GridComponent {
     return token.controlledBy === user.id;
   }
 
-  isTokenVisible(token: Token): boolean {
-    const user = this.currentUser();
-    if (user?.role === 'GM') return true;
-    
-    // For players, check if the token's cell is revealed
-    const cellId = `${token.x},${token.y}`;
-    return this.combat.fogOfWar().has(cellId);
-  }
-
   isAffected(token: Token): boolean {
     return this.affectedTokens().some(t => t.id === token.id);
+  }
+
+  getCoords(cell: string): {x: number, y: number} {
+    const [x, y] = cell.split(',').map(Number);
+    return { x, y };
   }
 
   isTokenInArea(token: Token, ability: Ability, origin: {x: number, y: number}, target: {x: number, y: number}): boolean {
@@ -474,11 +450,30 @@ export class GridComponent {
       this.isPanning = true;
       this.lastPanPos = { x: event.clientX, y: event.clientY };
       event.preventDefault();
-    } else if (event.button === 0 && this.combat.isFogMode()) {
-      this.isDrawingFog = true;
-      this.applyFogBrush(event);
-      event.preventDefault();
     }
+  }
+
+  private isFogPainting = false;
+
+  onGridMouseDown(event: MouseEvent) {
+    if (this.currentUser()?.role === 'GM' && this.combat.isFogEditMode() && event.button === 0 && !event.altKey) {
+      this.isFogPainting = true;
+      this.paintFog(event);
+      event.stopPropagation();
+    }
+  }
+
+  private paintFog(event: MouseEvent) {
+    if (!this.gridContainer) return;
+    const rect = this.gridContainer.nativeElement.getBoundingClientRect();
+    const x = (event.clientX - rect.left - this.combat.pan().x) / this.combat.zoom();
+    const y = (event.clientY - rect.top - this.combat.pan().y) / this.combat.zoom();
+    
+    const gridX = Math.floor(x / this.gridSize);
+    const gridY = Math.floor(y / this.gridSize);
+    
+    const hide = this.combat.fogBrushType() === 'hide';
+    this.combat.toggleFogCell(gridX, gridY, hide);
   }
 
   onGlobalMouseMove(event: MouseEvent) {
@@ -488,50 +483,16 @@ export class GridComponent {
       
       this.combat.pan.update(p => ({ x: p.x + dx, y: p.y + dy }));
       this.lastPanPos = { x: event.clientX, y: event.clientY };
-    } else if (this.isDrawingFog && this.combat.isFogMode()) {
-      this.applyFogBrush(event);
+    }
+
+    if (this.isFogPainting) {
+      this.paintFog(event);
     }
   }
 
   onMouseUp() {
     this.isPanning = false;
-    this.isDrawingFog = false;
-  }
-
-  private applyFogBrush(event: MouseEvent) {
-    if (!this.gridContainer) return;
-    
-    const rect = this.gridContainer.nativeElement.getBoundingClientRect();
-    const x = (event.clientX - rect.left - this.combat.pan().x) / this.combat.zoom();
-    const y = (event.clientY - rect.top - this.combat.pan().y) / this.combat.zoom();
-    
-    const gridX = Math.floor(x / this.gridSize);
-    const gridY = Math.floor(y / this.gridSize);
-    
-    const brushSize = this.combat.fogBrushSize();
-    const mode = this.combat.fogBrushMode();
-    const currentFog = new Set(this.combat.fogOfWar());
-    
-    const offset = Math.floor(brushSize / 2);
-    
-    for (let by = 0; by < brushSize; by++) {
-      for (let bx = 0; bx < brushSize; bx++) {
-        const targetX = gridX - offset + bx;
-        const targetY = gridY - offset + by;
-        
-        // Basic bounds check
-        if (targetX >= 0 && targetY >= 0) {
-          const cellId = `${targetX},${targetY}`;
-          if (mode === 'reveal') {
-            currentFog.add(cellId);
-          } else {
-            currentFog.delete(cellId);
-          }
-        }
-      }
-    }
-    
-    this.combat.fogOfWar.set(currentFog);
+    this.isFogPainting = false;
   }
 
   resetView() {
@@ -558,7 +519,7 @@ export class GridComponent {
   }
 
   onClick(event?: Event) {
-    if (this.isPanning || this.isDrawingFog) return;
+    if (this.isPanning || (this.combat.isFogEditMode() && this.currentUser()?.role === 'GM')) return;
     
     const mouseEvent = event as MouseEvent;
     
@@ -633,6 +594,8 @@ export class GridComponent {
   }
 
   onTokenClick(token: Token, event: Event) {
+    if (this.combat.isFogEditMode() && this.currentUser()?.role === 'GM') return;
+    
     if (this.combat.isMeasuring()) {
       const x = (token.x + 0.5) * this.gridSize;
       const y = (token.y + 0.5) * this.gridSize;

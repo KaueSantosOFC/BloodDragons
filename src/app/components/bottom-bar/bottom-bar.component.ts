@@ -4,6 +4,7 @@ import { CombatService } from '../../services/combat.service';
 import { DndMathService } from '../../services/dnd-math.service';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { Token } from '../../models/token';
 
 @Component({
   selector: 'app-bottom-bar',
@@ -446,7 +447,7 @@ export class BottomBarComponent {
       const token = this.combat.tokens().find(t => t.id === id);
       if (!token) continue;
 
-      const updates: any = {
+      const updates: Partial<Token> = {
         hp: token.maxHp,
         mp: token.maxMp
       };

@@ -49,6 +49,12 @@ export class CombatService {
   rightPanelTab = signal<'sheet' | 'inventory' | 'actions'>('sheet'); // Control right panel tab
   triggerEditSheet = signal<number>(0); // Trigger to open sheet edit mode
   
+  // Fog of War State
+  isFogEnabled = signal<boolean>(true);
+  isFogEditMode = signal<boolean>(false);
+  fogBrushType = signal<'reveal' | 'hide'>('reveal');
+  fogOfWar = signal<string[]>([]); // Array of "x,y" hidden cells
+  
   // Notifications
   notifications = signal<CombatNotification[]>([]);
 
@@ -61,12 +67,6 @@ export class CombatService {
   measureStart = signal<{x: number, y: number} | null>(null);
   measureCurrent = signal<{x: number, y: number} | null>(null);
   
-  // Fog of War State
-  fogOfWar = signal<Set<string>>(new Set()); // Set of "x,y" strings representing revealed grid cells
-  isFogMode = signal<boolean>(false); // Is the GM currently drawing/erasing fog?
-  fogBrushMode = signal<'reveal' | 'hide'>('reveal');
-  fogBrushSize = signal<number>(1); // 1x1, 2x2, 3x3 etc.
-
   // Session Notes State
   storyContent = signal<string>('O grupo se aproxima do templo em ruínas de <span style="color: #991b1b; font-weight: bold;">BloodDragons</span>. <br>Uma névoa espessa obscurece a entrada, e o cheiro de enxofre paira pesado no ar.');
   gmSecretContent = signal<string>('<strong>Segredo do Mestre:</strong> As estátuas perto da porta são na verdade Gárgulas esperando para emboscar.');
@@ -92,7 +92,13 @@ export class CombatService {
   ]);
 
   // Tokens State
-  tokens = signal<Token[]>([
+  tokens = signal<Token[]>([]);
+  mapWidth = signal<number>(2000); // Default large size
+  mapHeight = signal<number>(2000);
+  
+  constructor() {
+    // Initialize with some default tokens if needed, or just leave empty
+    this.tokens.set([
     { 
       id: 't1', name: 'Guerreiro Bob', x: 2, y: 2, hp: 45, maxHp: 45, mp: 10, maxMp: 10, conditions: [], controlledBy: 'user_player_1', color: '#ef4444', type: 'player',
       sheet: { class: 'Guerreiro', level: 3, background: 'Soldado', playerName: 'Jogador 1', race: 'Humano', alignment: 'Neutro e Bom', xp: 900, hitDie: 10, str: 16, dex: 14, con: 15, int: 10, wis: 12, cha: 8, ac: 16, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 11, hp: 45, maxHp: 45, mp: 10, maxMp: 10 },
@@ -117,7 +123,8 @@ export class CombatService {
     },
     { id: 't4', name: 'Lacaio Goblin', x: 9, y: 4, hp: 7, maxHp: 7, mp: 0, maxMp: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [], sheet: { class: 'Lacaio', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 50, hitDie: 6, str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, mp: 0, maxMp: 0 } },
     { id: 't5', name: 'Lacaio Goblin', x: 7, y: 4, hp: 7, maxHp: 7, mp: 0, maxMp: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [], sheet: { class: 'Lacaio', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 50, hitDie: 6, str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, mp: 0, maxMp: 0 } },
-  ]);
+    ]);
+  }
 
   updateToken(id: string, updates: Partial<Token>) {
     let xpToDistribute = 0;
@@ -266,6 +273,35 @@ export class CombatService {
 
   addStorySlide(slide: {url: string, title: string, description: string}) {
     this.storySlides.update(slides => [...slides, slide]);
+  }
+
+  toggleFogCell(x: number, y: number, hide: boolean) {
+    const key = `${x},${y}`;
+    this.fogOfWar.update(fog => {
+      const isHidden = fog.includes(key);
+      if (hide && !isHidden) {
+        return [...fog, key];
+      } else if (!hide && isHidden) {
+        return fog.filter(k => k !== key);
+      }
+      return fog;
+    });
+  }
+
+  clearFog() {
+    this.fogOfWar.set([]);
+  }
+
+  hideAllFog(width: number, height: number, gridSize: number) {
+    const cols = Math.ceil(width / gridSize);
+    const rows = Math.ceil(height / gridSize);
+    const newFog: string[] = [];
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        newFog.push(`${x},${y}`);
+      }
+    }
+    this.fogOfWar.set(newFog);
   }
 
   updateStorySlide(index: number, updates: Partial<{url: string, title: string, description: string}>) {

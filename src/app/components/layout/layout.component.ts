@@ -8,11 +8,12 @@ import { AuthService } from '../../services/auth.service';
 import { CombatService } from '../../services/combat.service';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { ItemInteractionModalComponent } from '../item-interaction-modal/item-interaction-modal.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [GridComponent, GmPanelComponent, RightPanelComponent, BottomBarComponent, StorySlidesComponent, MatIconModule, CommonModule],
+  imports: [GridComponent, GmPanelComponent, RightPanelComponent, BottomBarComponent, StorySlidesComponent, MatIconModule, CommonModule, ItemInteractionModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col h-screen w-screen overflow-hidden bg-black text-stone-200 font-sans">
@@ -43,6 +44,9 @@ import { CommonModule } from '@angular/common';
 
       <!-- Bottom Bar -->
       <app-bottom-bar></app-bottom-bar>
+      
+      <!-- Modals -->
+      <app-item-interaction-modal></app-item-interaction-modal>
     </div>
   `
 })
