@@ -135,6 +135,7 @@ import { Ability } from '../../models/ability';
                    [cdkDragDisabled]="!canMove(token)"
                    (cdkDragEnded)="onDragEnded($event, token)"
                    (click)="onTokenClick(token, $event)"
+                   (dblclick)="onTokenDoubleClick(token, $event)"
                    (keydown.enter)="onTokenClick(token, $event)">
               
               <!-- Token Image or Initials -->
@@ -585,6 +586,16 @@ export class GridComponent {
     }
     event.stopPropagation();
     this.combat.selectToken(token.id);
+  }
+
+  onTokenDoubleClick(token: Token, event: Event) {
+    if (this.combat.isFogEditMode() && this.currentUser()?.role === 'GM') return;
+    if (this.combat.isMeasuring() || this.combat.previewAbility()) return;
+    
+    event.stopPropagation();
+    this.combat.selectToken(token.id);
+    this.combat.uiVisible.set(true);
+    this.combat.rightPanelTab.set('sheet');
   }
 
   onDragEnded(event: CdkDragEnd, token: Token) {
