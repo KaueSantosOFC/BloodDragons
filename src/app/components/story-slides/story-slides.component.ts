@@ -20,7 +20,7 @@ export interface Slide {
     <div class="relative w-full h-full flex bg-stone-950 border-2 border-[#b8860b] rounded-sm overflow-hidden shadow-2xl group" #slideContainer>
       
       <!-- Filmstrip Sidebar (Rolo de Filme) -->
-      @if (showFilmstrip() && slides().length > 0) {
+      @if (showFilmstrip() && !isMinimized() && slides().length > 0) {
         <div class="w-48 h-full bg-stone-900/90 border-r border-[#b8860b]/30 flex flex-col z-40 backdrop-blur-md animate-in slide-in-from-left duration-300">
           <div class="p-3 border-b border-[#b8860b]/20 flex items-center justify-between">
             <span class="text-[#b8860b] font-serif text-sm uppercase tracking-wider">Rolo de Filme</span>
@@ -94,40 +94,51 @@ export interface Slide {
 
       <div class="flex-1 relative flex flex-col overflow-hidden">
         <!-- Progress Bar -->
-        <div class="absolute top-0 left-0 right-0 h-1 bg-stone-900 z-30">
-          <div class="h-full bg-[#b8860b] transition-all duration-500 ease-out" [style.width.%]="progressPercentage()"></div>
-        </div>
+        @if (!isMinimized()) {
+          <div class="absolute top-0 left-0 right-0 h-1 bg-stone-900 z-30">
+            <div class="h-full bg-[#b8860b] transition-all duration-500 ease-out" [style.width.%]="progressPercentage()"></div>
+          </div>
+        }
 
         <!-- Top Controls -->
         <div class="absolute top-4 right-4 z-30 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button (click)="toggleFilmstrip()" class="bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors" title="Ver Rolo de Filme">
-            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">movie</mat-icon>
-            Rolo de Filme
+          <button (click)="toggleMinimize()" class="w-8 h-8 flex items-center justify-center bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 rounded border border-[#b8860b]/50 backdrop-blur-sm transition-colors" [title]="isMinimized() ? 'Mostrar Recursos' : 'Ocultar Recursos'">
+            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">{{ isMinimized() ? 'visibility' : 'visibility_off' }}</mat-icon>
           </button>
 
-          @if (auth.currentUser()?.role === 'GM') {
-            <label class="cursor-pointer bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors" title="Adicionar uma única imagem">
-              <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add_photo_alternate</mat-icon>
-              Nova Cena
-              <input type="file" accept="image/*" class="hidden" (change)="uploadNewSlide($event)">
-            </label>
-            <label class="cursor-pointer bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors" title="Adicionar pasta ou múltiplas imagens (Pack de Atos)">
-              <mat-icon style="font-size: 16px; width: 16px; height: 16px;">folder_open</mat-icon>
-              Upload Pack
-              <input type="file" accept="image/*" multiple webkitdirectory directory class="hidden" (change)="uploadPack($event)">
-            </label>
-            <button (click)="deleteCurrentSlide()" class="w-8 h-8 flex items-center justify-center bg-stone-900/80 text-red-500 hover:text-red-400 hover:bg-stone-800 rounded border border-red-900/50 backdrop-blur-sm transition-colors" title="Excluir Cena Atual">
-              <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
+          @if (!isMinimized()) {
+            @if (auth.currentUser()?.role === 'GM') {
+              <button (click)="deleteCurrentSlide()" class="w-8 h-8 flex items-center justify-center bg-stone-900/80 text-red-500 hover:text-red-400 hover:bg-stone-800 rounded border border-red-900/50 backdrop-blur-sm transition-colors" title="Excluir Cena Atual">
+                <mat-icon style="font-size: 18px; width: 18px; height: 18px;">delete</mat-icon>
+              </button>
+            }
+
+            <button (click)="toggleFilmstrip()" class="bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors" title="Ver Rolo de Filme">
+              <mat-icon style="font-size: 16px; width: 16px; height: 16px;">movie</mat-icon>
+              Rolo de Filme
             </button>
-            <label class="cursor-pointer bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors">
-              <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
-              Alterar Imagem
-              <input type="file" accept="image/*" class="hidden" (change)="updateCurrentSlideImage($event)">
-            </label>
+
+            @if (auth.currentUser()?.role === 'GM') {
+              <label class="cursor-pointer bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors" title="Adicionar uma única imagem">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add_photo_alternate</mat-icon>
+                Nova Cena
+                <input type="file" accept="image/*" class="hidden" (change)="uploadNewSlide($event)">
+              </label>
+              <label class="cursor-pointer bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors" title="Adicionar pasta ou múltiplas imagens (Pack de Atos)">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">folder_open</mat-icon>
+                Upload Pack
+                <input type="file" accept="image/*" multiple webkitdirectory directory class="hidden" (change)="uploadPack($event)">
+              </label>
+              <label class="cursor-pointer bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center gap-2 transition-colors">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                Alterar Imagem
+                <input type="file" accept="image/*" class="hidden" (change)="updateCurrentSlideImage($event)">
+              </label>
+            }
+            <div class="bg-stone-900/80 text-[#b8860b] px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center">
+              Cena {{ currentIndex() + 1 }} de {{ slides().length || 1 }}
+            </div>
           }
-          <div class="bg-stone-900/80 text-[#b8860b] px-3 py-1 rounded text-xs font-serif border border-[#b8860b]/50 backdrop-blur-sm flex items-center">
-            Cena {{ currentIndex() + 1 }} de {{ slides().length || 1 }}
-          </div>
           <button (click)="toggleFullscreen()" class="w-8 h-8 flex items-center justify-center bg-stone-900/80 text-[#b8860b] hover:text-amber-400 hover:bg-stone-800 rounded border border-[#b8860b]/50 backdrop-blur-sm transition-colors">
             <mat-icon style="font-size: 18px; width: 18px; height: 18px;">{{ isFullscreen() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
           </button>
@@ -143,17 +154,19 @@ export interface Slide {
               <img [src]="slide.url" [alt]="slide.title" class="max-w-full max-h-full object-contain m-auto shadow-2xl" referrerpolicy="no-referrer" />
               
               <!-- Overlay -->
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-24 pb-8 px-12 flex justify-start">
-                @if (auth.currentUser()?.role === 'GM') {
-                  <input type="text"
-                         [value]="slide.title"
-                         (change)="updateSlideTitle(i, $event)"
-                         class="text-4xl font-serif text-[#b8860b] drop-shadow-md bg-transparent border-b border-transparent hover:border-[#b8860b]/50 focus:border-[#b8860b] focus:outline-none w-full max-w-4xl text-left placeholder-[#b8860b]/50 transition-colors"
-                         placeholder="Título da Cena">
-                } @else {
-                  <h2 class="text-4xl font-serif text-[#b8860b] drop-shadow-md text-left">{{ slide.title }}</h2>
-                }
-              </div>
+              @if (!isMinimized()) {
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-24 pb-8 px-12 flex justify-start">
+                  @if (auth.currentUser()?.role === 'GM') {
+                    <input type="text"
+                           [value]="slide.title"
+                           (change)="updateSlideTitle(i, $event)"
+                           class="text-4xl font-serif text-[#b8860b] drop-shadow-md bg-transparent border-b border-transparent hover:border-[#b8860b]/50 focus:border-[#b8860b] focus:outline-none w-full max-w-4xl text-left placeholder-[#b8860b]/50 transition-colors"
+                           placeholder="Título da Cena">
+                  } @else {
+                    <h2 class="text-4xl font-serif text-[#b8860b] drop-shadow-md text-left">{{ slide.title }}</h2>
+                  }
+                </div>
+              }
             </div>
           }
           
@@ -216,6 +229,7 @@ export class StorySlidesComponent {
   currentIndex = signal<number>(0);
   isFullscreen = signal<boolean>(false);
   showFilmstrip = signal<boolean>(false);
+  isMinimized = signal<boolean>(false);
 
   @ViewChild('slideContainer') slideContainer!: ElementRef<HTMLDivElement>;
 
@@ -257,6 +271,10 @@ export class StorySlidesComponent {
 
   toggleFilmstrip() {
     this.showFilmstrip.update(v => !v);
+  }
+
+  toggleMinimize() {
+    this.isMinimized.update(v => !v);
   }
 
   moveSlide(index: number, direction: number) {
