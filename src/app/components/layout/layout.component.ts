@@ -22,7 +22,7 @@ import { ItemInteractionModalComponent } from '../item-interaction-modal/item-in
       <div class="flex flex-1 overflow-hidden relative">
         
         <!-- Left Panel (GM Only) -->
-        @if (auth.currentUser()?.role === 'GM' && combat.uiVisible()) {
+        @if (auth.currentUser()?.role === 'GM' && combat.gmPanelVisible()) {
           <app-gm-panel class="z-20 shadow-2xl"></app-gm-panel>
         }
 

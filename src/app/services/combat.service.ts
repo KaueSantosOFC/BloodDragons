@@ -78,6 +78,7 @@ export class CombatService {
   mapBackgroundImage = signal<string | null>(null); // URL da imagem de fundo
   showGrid = signal<boolean>(false); // Toggle grid visibility
   uiVisible = signal<boolean>(true); // Toggle all UI panels
+  gmPanelVisible = signal<boolean>(false); // Toggle GM panel
   rightPanelTab = signal<'sheet' | 'inventory' | 'actions'>('sheet'); // Control right panel tab
   triggerEditSheet = signal<number>(0); // Trigger to open sheet edit mode
   

@@ -227,6 +227,14 @@ import { Token } from '../../models/token';
               <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
             }
           </button>
+
+          <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                  [class.text-amber-500]="combat.gmPanelVisible()"
+                  [class.border-amber-500]="combat.gmPanelVisible()"
+                  (click)="combat.gmPanelVisible.set(!combat.gmPanelVisible())"
+                  title="Alternar Painel do Mestre (Mapa/Tokens)">
+            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">edit</mat-icon>
+          </button>
         }
 
         <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
