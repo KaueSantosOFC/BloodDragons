@@ -354,6 +354,18 @@ export class CombatService {
     });
   }
 
+  reorderStorySlide(fromIndex: number, toIndex: number) {
+    this.storySlides.update(slides => {
+      if (fromIndex < 0 || fromIndex >= slides.length || toIndex < 0 || toIndex >= slides.length) {
+        return slides;
+      }
+      const newSlides = [...slides];
+      const [movedSlide] = newSlides.splice(fromIndex, 1);
+      newSlides.splice(toIndex, 0, movedSlide);
+      return newSlides;
+    });
+  }
+
   // ==========================================
   // Exemplo de Integração com o DndCoreEngineService
   // ==========================================
