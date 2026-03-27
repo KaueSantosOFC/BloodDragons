@@ -61,7 +61,7 @@ import { Ability } from '../../models/ability';
                   @let coords = getCoords(cell);
                   <div class="absolute bg-black transition-opacity duration-300"
                        [class.opacity-100]="currentUser()?.role !== 'GM' || combat.isPlayMode()"
-                       [class.opacity-60]="currentUser()?.role === 'GM' && !combat.isPlayMode()"
+                       [class.opacity-80]="currentUser()?.role === 'GM' && !combat.isPlayMode()"
                        [style.left.px]="coords.x * gridSize"
                        [style.top.px]="coords.y * gridSize"
                        [style.width.px]="gridSize"
