@@ -31,7 +31,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+const angularApp = new AngularNodeAppEngine({
+  allowedHosts: ['localhost', '127.0.0.1', '0.0.0.0', '*.run.app']
+});
 
 /**
  * Example Express Rest API endpoints can be defined here.

@@ -1779,7 +1779,7 @@ export class RightPanelComponent {
     const backpack = this.inventoryForm.value;
     
     // Create a default sheet if it doesn't exist to satisfy the type
-    const currentSheet = token.sheet || {
+    const currentSheet: CharacterSheet = token.sheet || {
       class: '', level: 1, background: '', playerName: '', race: '', alignment: '', xp: 0, hitDie: 10,
       str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
       ac: 10, initiative: 0, speed: 9, proficiencyBonus: 2, passivePerception: 10,
@@ -1787,7 +1787,7 @@ export class RightPanelComponent {
     };
 
     this.combat.updateToken(token.id, { 
-      sheet: { ...currentSheet, backpack } as CharacterSheet
+      sheet: { ...currentSheet, backpack }
     });
     this.isEditingInventory.set(false);
   }
@@ -1800,7 +1800,7 @@ export class RightPanelComponent {
     const gp = this.itemValueControl.value;
     
     // Create a default sheet if it doesn't exist to satisfy the type
-    const currentSheet = token.sheet || {
+    const currentSheet: CharacterSheet = token.sheet || {
       class: '', level: 1, background: '', playerName: '', race: '', alignment: '', xp: 0, hitDie: 10,
       str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
       ac: 10, initiative: 0, speed: 9, proficiencyBonus: 2, passivePerception: 10,
@@ -1808,7 +1808,7 @@ export class RightPanelComponent {
     };
 
     this.combat.updateToken(token.id, { 
-      sheet: { ...currentSheet, backpack, gp } as CharacterSheet
+      sheet: { ...currentSheet, backpack, gp }
     });
     this.isEditingInventory.set(false);
   }
