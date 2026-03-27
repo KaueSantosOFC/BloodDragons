@@ -187,7 +187,7 @@ import { Ability } from '../../models/ability';
       </div>
 
       <!-- Horizontal Scrollbar -->
-      <div class="absolute bottom-0 left-0 right-0 h-4 bg-stone-900/90 border-t border-stone-800 z-40 flex items-center px-1">
+      <div class="absolute bottom-0 left-0 right-4 h-4 bg-stone-900/90 border-t border-stone-800 z-40 flex items-center px-1">
         <input type="range" 
                class="w-full h-2 bg-stone-800 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:bg-stone-700 transition-colors"
                [min]="-mapWidth() * combat.zoom()" 
@@ -195,6 +195,17 @@ import { Ability } from '../../models/ability';
                [ngModel]="-combat.pan().x" 
                (ngModelChange)="onHorizontalScroll($event)"
                title="Mover mapa horizontalmente">
+      </div>
+
+      <!-- Vertical Scrollbar -->
+      <div class="absolute top-0 bottom-4 right-0 w-4 bg-stone-900/90 border-l border-stone-800 z-40 flex justify-center py-1">
+        <input type="range" 
+               class="h-full w-2 bg-stone-800 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:bg-stone-700 transition-colors vertical-slider"
+               [min]="-mapHeight() * combat.zoom()" 
+               [max]="mapHeight() * combat.zoom()" 
+               [ngModel]="-combat.pan().y" 
+               (ngModelChange)="onVerticalScroll($event)"
+               title="Mover mapa verticalmente">
       </div>
     </div>
   `,
@@ -217,6 +228,20 @@ import { Ability } from '../../models/ability';
       border-radius: 6px;
       cursor: pointer;
       border: none;
+    }
+
+    /* Vertical Slider */
+    input[type=range].vertical-slider {
+      -webkit-appearance: slider-vertical;
+      writing-mode: bt-lr;
+    }
+    input[type=range].vertical-slider::-webkit-slider-thumb {
+      width: 12px;
+      height: 40px;
+    }
+    input[type=range].vertical-slider::-moz-range-thumb {
+      width: 12px;
+      height: 40px;
     }
   `]
 })
@@ -246,6 +271,10 @@ export class GridComponent {
 
   onHorizontalScroll(value: number) {
     this.combat.pan.update(p => ({ x: -value, y: p.y }));
+  }
+
+  onVerticalScroll(value: number) {
+    this.combat.pan.update(p => ({ x: p.x, y: -value }));
   }
 
   measureDistance = computed(() => {
