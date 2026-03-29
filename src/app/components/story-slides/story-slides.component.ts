@@ -195,6 +195,29 @@ export interface Slide {
             <mat-icon>chevron_right</mat-icon>
           </button>
         }
+
+        <!-- Delete Confirmation Modal -->
+        @if (showDeleteConfirm()) {
+          <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div class="bg-stone-900 border border-red-900/50 p-6 rounded-lg shadow-2xl max-w-md w-full mx-4 animate-in fade-in zoom-in-95 duration-200">
+              <h3 class="text-xl font-serif text-red-500 mb-2 flex items-center gap-2">
+                <mat-icon>warning</mat-icon>
+                Excluir Cena
+              </h3>
+              <p class="text-stone-300 mb-6">
+                Deseja realmente excluir a cena "{{ slides()[currentIndex()]?.title || 'Sem título' }}"? Esta ação não pode ser desfeita.
+              </p>
+              <div class="flex justify-end gap-3">
+                <button (click)="showDeleteConfirm.set(false)" class="px-4 py-2 rounded bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors">
+                  Cancelar
+                </button>
+                <button (click)="confirmDelete()" class="px-4 py-2 rounded bg-red-600 hover:bg-red-500 text-white font-bold transition-colors">
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        }
       </div>
     </div>
   `,
@@ -230,6 +253,7 @@ export class StorySlidesComponent {
   isFullscreen = signal<boolean>(false);
   showFilmstrip = signal<boolean>(false);
   isMinimized = signal<boolean>(false);
+  showDeleteConfirm = signal<boolean>(false);
 
   @ViewChild('slideContainer') slideContainer!: ElementRef<HTMLDivElement>;
 
@@ -363,9 +387,6 @@ export class StorySlidesComponent {
     const files = Array.from(input.files).filter(f => f.type.startsWith('image/'));
     if (files.length === 0) return;
 
-    // Optional: Ask for a pack title
-    const packTitle = prompt('Título do Pack (opcional):', 'Novo Pack');
-    
     const newSlides: Slide[] = [];
     
     for (const file of files) {
@@ -377,12 +398,12 @@ export class StorySlidesComponent {
       
       // Use filename as title if no pack title, or combine them
       const fileName = file.name.split('.').slice(0, -1).join('.');
-      const title = packTitle ? `${packTitle} - ${fileName}` : fileName;
+      const title = fileName;
       
       newSlides.push({
         url: result,
         title: title,
-        description: `Imagem do pack ${packTitle || 'sem título'}`
+        description: `Imagem do pack`
       });
     }
 
@@ -398,18 +419,20 @@ export class StorySlidesComponent {
 
   deleteCurrentSlide() {
     if (this.slides().length === 0) return;
-    
+    this.showDeleteConfirm.set(true);
+  }
+
+  confirmDelete() {
     const index = this.currentIndex();
-    if (confirm(`Deseja realmente excluir a cena "${this.slides()[index].title}"?`)) {
-      this.combat.deleteStorySlide(index);
-      
-      // Adjust index if we deleted the last slide
-      if (this.currentIndex() >= this.slides().length && this.slides().length > 0) {
-        this.currentIndex.set(this.slides().length - 1);
-      } else if (this.slides().length === 0) {
-        this.currentIndex.set(0);
-      }
+    this.combat.deleteStorySlide(index);
+    
+    // Adjust index if we deleted the last slide
+    if (this.currentIndex() >= this.slides().length && this.slides().length > 0) {
+      this.currentIndex.set(this.slides().length - 1);
+    } else if (this.slides().length === 0) {
+      this.currentIndex.set(0);
     }
+    this.showDeleteConfirm.set(false);
   }
 
   updateCurrentSlideImage(event: Event) {
