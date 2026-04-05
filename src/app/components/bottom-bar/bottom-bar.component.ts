@@ -492,14 +492,14 @@ export class BottomBarComponent {
 
       const updates: Partial<Token> = {
         hp: token.maxHp,
-        mp: token.maxMp
+        spellUses: token.maxSpellUses
       };
 
       if (token.sheet) {
         updates.sheet = {
           ...token.sheet,
           hp: token.sheet.maxHp,
-          mp: token.sheet.maxMp
+          spellUses: token.sheet.maxSpellUses
         };
       }
 

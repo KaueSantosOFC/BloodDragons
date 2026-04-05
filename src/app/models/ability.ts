@@ -21,5 +21,4 @@ export interface Ability {
   spellLevel?: number;
   uses?: number;
   maxUses?: number;
-  manaCost?: number;
 }

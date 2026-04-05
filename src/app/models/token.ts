@@ -26,8 +26,8 @@ export interface CharacterSheet {
   
   hp: number;
   maxHp: number;
-  mp: number;
-  maxMp: number;
+  spellUses?: number;
+  maxSpellUses?: number;
   
   cp?: number;
   sp?: number;
@@ -53,8 +53,8 @@ export interface Token {
   y: number;
   hp: number;
   maxHp: number;
-  mp: number;
-  maxMp: number;
+  spellUses?: number;
+  maxSpellUses?: number;
   conditions: TokenCondition[];
   controlledBy: string;
   color: string;

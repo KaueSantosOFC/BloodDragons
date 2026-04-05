@@ -272,10 +272,6 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                           <input id="spellLevel" type="number" formControlName="spellLevel" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                         </div>
                       }
-                      <div class="flex flex-col gap-1">
-                        <label for="manaCost" class="text-[10px] text-stone-500 uppercase">Custo de Mana</label>
-                        <input id="manaCost" type="number" formControlName="manaCost" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
-                      </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                       <div class="flex flex-col gap-1">
@@ -362,9 +358,6 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                                 <span class="bg-stone-900 px-2 py-1 rounded border border-green-700 text-green-500">Recup. PV: {{ ability.healing }}</span>
                               }
                               <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700">Alcance: {{ ability.range }}m</span>
-                              @if (ability.manaCost) {
-                                <span class="bg-stone-900 px-2 py-1 rounded border border-blue-700 text-blue-400">Custo: {{ ability.manaCost }} MP</span>
-                              }
                             </div>
                             @if (ability.description) {
                               <p class="text-stone-400">{{ ability.description }}</p>
@@ -503,8 +496,13 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                               }
                               <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700">Alcance: {{ ability.range }}m</span>
                               @if (ability.maxUses) {
-                                <div class="w-full h-1 bg-stone-900 rounded-full overflow-hidden border border-stone-700 mt-1">
-                                  <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="((ability.uses || 0) / ability.maxUses) * 100"></div>
+                                <div class="flex gap-[1px] w-full h-1 bg-stone-900 rounded-full overflow-hidden border border-stone-700 mt-1">
+                                  @for (i of [].constructor(ability.maxUses); track $index) {
+                                    <div class="flex-1 h-full transition-colors duration-300" 
+                                         [class.bg-blue-500]="(ability.uses || 0) > $index"
+                                         [class.bg-stone-800]="(ability.uses || 0) <= $index">
+                                    </div>
+                                  }
                                 </div>
                                 <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700 text-amber-500">Usos: {{ ability.uses || 0 }}/{{ ability.maxUses }}</span>
                               }
@@ -642,9 +640,6 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                               @if (ability.damage) {
                                 <span class="bg-stone-900 px-2 py-1 rounded border border-red-700 text-red-500">Dano: {{ ability.damage }}</span>
                               }
-                              @if (ability.manaCost) {
-                                <span class="bg-stone-900 px-2 py-1 rounded border border-blue-700 text-blue-400">Custo: {{ ability.manaCost }} MP</span>
-                              }
                             </div>
                             @if (ability.description) {
                               <p class="text-stone-400">{{ ability.description }}</p>
@@ -776,9 +771,6 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                             <div class="flex gap-2 font-mono flex-wrap mb-2">
                               @if (ability.healing) {
                                 <span class="bg-stone-900 px-2 py-1 rounded border border-green-700 text-green-500">Recup. PV: {{ ability.healing }}</span>
-                              }
-                              @if (ability.manaCost) {
-                                <span class="bg-stone-900 px-2 py-1 rounded border border-blue-700 text-blue-400">Custo: {{ ability.manaCost }} MP</span>
                               }
                             </div>
                             @if (ability.description) {
@@ -928,12 +920,12 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
 
                   <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label for="mp" class="text-[10px] text-stone-500 uppercase">Mana Atual</label>
-                      <input id="mp" type="number" formControlName="mp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="spellUses" class="text-[10px] text-stone-500 uppercase">Magias Atuais</label>
+                      <input id="spellUses" type="number" formControlName="spellUses" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="maxMp" class="text-[10px] text-stone-500 uppercase">Mana Máximo</label>
-                      <input id="maxMp" type="number" formControlName="maxMp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                      <label for="maxSpellUses" class="text-[10px] text-stone-500 uppercase">Magias Máximo</label>
+                      <input id="maxSpellUses" type="number" formControlName="maxSpellUses" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
@@ -1063,7 +1055,7 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                   </div>
                   <div class="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 text-stone-400">
                     <div class="flex items-center gap-1"><mat-icon class="text-[10px] text-stone-500" style="font-size: 10px; width: 10px; height: 10px;">favorite</mat-icon> <span class="text-stone-500">PV:</span> {{ sheet.hp }}/{{ sheet.maxHp }}</div>
-                    <div class="flex items-center gap-1"><mat-icon class="text-[10px] text-stone-500" style="font-size: 10px; width: 10px; height: 10px;">bolt</mat-icon> <span class="text-stone-500">Mana:</span> {{ sheet.mp }}/{{ sheet.maxMp }}</div>
+                    <div class="flex items-center gap-1"><mat-icon class="text-[10px] text-stone-500" style="font-size: 10px; width: 10px; height: 10px;">auto_awesome</mat-icon> <span class="text-stone-500">Magias:</span> {{ sheet.spellUses }}/{{ sheet.maxSpellUses }}</div>
                     <div class="flex items-center gap-1"><mat-icon class="text-[10px] text-stone-500" style="font-size: 10px; width: 10px; height: 10px;">school</mat-icon> <span class="text-stone-500">Classe:</span> {{ sheet.class }}</div>
                     <div class="flex items-center gap-1"><mat-icon class="text-[10px] text-stone-500" style="font-size: 10px; width: 10px; height: 10px;">military_tech</mat-icon> <span class="text-stone-500">Nível:</span> {{ sheet.level }}</div>
                     <div class="flex items-center gap-1"><mat-icon class="text-[10px] text-stone-500" style="font-size: 10px; width: 10px; height: 10px;">history</mat-icon> <span class="text-stone-500">Antecedente:</span> {{ sheet.background }}</div>
@@ -1263,9 +1255,6 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                                   <span class="text-green-500">Recup. PV: {{ ability.healing }}</span>
                                 }
                                 <span>Alcance: {{ ability.range }}m</span>
-                                @if (ability.manaCost) {
-                                  <span class="text-blue-400">Custo: {{ ability.manaCost }} MP</span>
-                                }
                               </div>
                               @if (ability.description) {
                                 <p class="text-stone-500 mt-1 text-[10px]">{{ ability.description }}</p>
@@ -1297,12 +1286,14 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                                   <span class="text-green-500">Recup. PV: {{ ability.healing }}</span>
                                 }
                                 <span>Alcance: {{ ability.range }}m</span>
-                                @if (ability.manaCost) {
-                                  <span class="text-blue-400">Custo: {{ ability.manaCost }} MP</span>
-                                }
                                 @if (ability.maxUses) {
-                                  <div class="w-full h-1 bg-stone-900 rounded-full overflow-hidden border border-stone-700 mt-1">
-                                    <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="((ability.uses || 0) / ability.maxUses) * 100"></div>
+                                  <div class="flex gap-[1px] w-full h-1 bg-stone-900 rounded-full overflow-hidden border border-stone-700 mt-1">
+                                    @for (i of [].constructor(ability.maxUses); track $index) {
+                                      <div class="flex-1 h-full transition-colors duration-300" 
+                                           [class.bg-blue-500]="(ability.uses || 0) > $index"
+                                           [class.bg-stone-800]="(ability.uses || 0) <= $index">
+                                      </div>
+                                    }
                                   </div>
                                   <span class="text-amber-500">Usos: {{ ability.uses || 0 }}/{{ ability.maxUses }}</span>
                                 }
@@ -1331,9 +1322,6 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                               <div class="flex gap-2 font-mono text-[10px] mb-1">
                                 @if (ability.healing) {
                                   <span class="text-green-500">Recup. PV: {{ ability.healing }}</span>
-                                }
-                                @if (ability.manaCost) {
-                                  <span class="text-blue-400">Custo: {{ ability.manaCost }} MP</span>
                                 }
                               </div>
                               @if (ability.description) {
@@ -1485,8 +1473,8 @@ export class RightPanelComponent {
     passivePerception: new FormControl(10, { nonNullable: true }),
     hp: new FormControl(10, { nonNullable: true }),
     maxHp: new FormControl(10, { nonNullable: true }),
-    mp: new FormControl(0, { nonNullable: true }),
-    maxMp: new FormControl(0, { nonNullable: true }),
+    spellUses: new FormControl(0, { nonNullable: true }),
+    maxSpellUses: new FormControl(0, { nonNullable: true }),
     cp: new FormControl(0, { nonNullable: true }),
     sp: new FormControl(0, { nonNullable: true }),
     ep: new FormControl(0, { nonNullable: true }),
@@ -1507,8 +1495,7 @@ export class RightPanelComponent {
     category: new FormControl<'weapon' | 'spell' | 'feature' | 'item_effect'>('feature', { nonNullable: true }),
     spellLevel: new FormControl(0, { nonNullable: true }),
     uses: new FormControl(0, { nonNullable: true }),
-    maxUses: new FormControl(0, { nonNullable: true }),
-    manaCost: new FormControl(0, { nonNullable: true })
+    maxUses: new FormControl(0, { nonNullable: true })
   });
 
   selectedToken = computed(() => {
@@ -1581,8 +1568,7 @@ export class RightPanelComponent {
       category: token.type === 'item' ? 'item_effect' : 'feature',
       spellLevel: 0,
       uses: 0,
-      maxUses: 0,
-      manaCost: 0
+      maxUses: 0
     });
   }
 
@@ -1723,8 +1709,8 @@ export class RightPanelComponent {
         ...token.sheet,
         hp: token.hp,
         maxHp: token.maxHp,
-        mp: token.mp,
-        maxMp: token.maxMp
+        spellUses: token.spellUses || 0,
+        maxSpellUses: token.maxSpellUses || 0
       });
     } else {
       this.sheetForm.reset({
@@ -1749,8 +1735,8 @@ export class RightPanelComponent {
         passivePerception: 10,
         hp: token.hp,
         maxHp: token.maxHp,
-        mp: token.mp,
-        maxMp: token.maxMp,
+        spellUses: token.spellUses || 0,
+        maxSpellUses: token.maxSpellUses || 0,
         cp: 0,
         sp: 0,
         ep: 0,
@@ -1770,8 +1756,8 @@ export class RightPanelComponent {
       sheet: sheetData,
       hp: sheetData.hp,
       maxHp: sheetData.maxHp,
-      mp: sheetData.mp,
-      maxMp: sheetData.maxMp
+      spellUses: sheetData.spellUses,
+      maxSpellUses: sheetData.maxSpellUses
     });
     this.isEditingSheet.set(false);
   }
@@ -1787,7 +1773,7 @@ export class RightPanelComponent {
       class: '', level: 1, background: '', playerName: '', race: '', alignment: '', xp: 0, hitDie: 10,
       str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
       ac: 10, initiative: 0, speed: 9, proficiencyBonus: 2, passivePerception: 10,
-      hp: token.hp, maxHp: token.maxHp, mp: token.mp, maxMp: token.maxMp
+      hp: token.hp, maxHp: token.maxHp, spellUses: token.spellUses || 0, maxSpellUses: token.maxSpellUses || 0
     };
 
     this.combat.updateToken(token.id, { 
@@ -1808,7 +1794,7 @@ export class RightPanelComponent {
       class: '', level: 1, background: '', playerName: '', race: '', alignment: '', xp: 0, hitDie: 10,
       str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
       ac: 10, initiative: 0, speed: 9, proficiencyBonus: 2, passivePerception: 10,
-      hp: token.hp, maxHp: token.maxHp, mp: token.mp, maxMp: token.maxMp
+      hp: token.hp, maxHp: token.maxHp, spellUses: token.spellUses || 0, maxSpellUses: token.maxSpellUses || 0
     };
 
     this.combat.updateToken(token.id, { 

@@ -155,10 +155,15 @@ import { Ability } from '../../models/ability';
                   <div class="h-1.5 bg-red-900 rounded-full overflow-hidden border border-stone-900">
                     <div class="h-full bg-green-500 transition-all duration-300" [style.width.%]="(token.hp / token.maxHp) * 100"></div>
                   </div>
-                  <!-- Mana Bar -->
-                  @if (token.maxMp > 0) {
-                    <div class="h-1.5 bg-blue-900 rounded-full overflow-hidden border border-stone-900">
-                      <div class="h-full bg-blue-500 transition-all duration-300" [style.width.%]="(token.mp / token.maxMp) * 100"></div>
+                  <!-- Spell Uses Bar -->
+                  @if (token.maxSpellUses && token.maxSpellUses > 0) {
+                    <div class="flex gap-[1px] h-1.5 w-full bg-stone-900 rounded-full overflow-hidden border border-stone-900">
+                      @for (i of [].constructor(token.maxSpellUses); track $index) {
+                        <div class="flex-1 h-full transition-colors duration-300" 
+                             [class.bg-blue-500]="(token.spellUses || 0) > $index"
+                             [class.bg-stone-800]="(token.spellUses || 0) <= $index">
+                        </div>
+                      }
                     </div>
                   }
                 </div>
@@ -177,7 +182,7 @@ import { Ability } from '../../models/ability';
 
               <!-- Tooltip -->
               <div class="absolute -top-8 bg-stone-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap border border-stone-700">
-                {{ token.name }} @if (token.type !== 'item') { | PV: {{ token.hp }}/{{ token.maxHp }} @if (token.maxMp > 0) { | Mana: {{ token.mp }}/{{ token.maxMp }} } }
+                {{ token.name }} @if (token.type !== 'item') { | PV: {{ token.hp }}/{{ token.maxHp }} @if (token.maxSpellUses && token.maxSpellUses > 0) { | Magias: {{ token.spellUses }}/{{ token.maxSpellUses }} } }
               </div>
             </div>
             }
@@ -594,16 +599,33 @@ export class GridComponent {
       // Find the token that is using the ability (the origin)
       const originToken = this.tokens().find(t => t.x === originPos.x && t.y === originPos.y);
       
-      // Mana check
-      if (originToken && ability.manaCost && originToken.mp < ability.manaCost) {
-        console.warn('Mana insuficiente para usar esta habilidade!');
+      // Spell uses check
+      if (originToken && ability.category === 'spell' && originToken.spellUses && originToken.spellUses <= 0) {
+        console.warn('Usos de magia insuficientes para usar esta habilidade!');
         this.combat.cancelPreview();
         return;
       }
 
-      // Deduct mana
-      if (originToken && ability.manaCost) {
-        this.combat.updateToken(originToken.id, { mp: originToken.mp - ability.manaCost });
+      // Ability specific uses check
+      if (originToken && ability.maxUses && (!ability.uses || ability.uses <= 0)) {
+        console.warn('Usos insuficientes para usar esta habilidade!');
+        this.combat.cancelPreview();
+        return;
+      }
+
+      // Deduct spell use
+      if (originToken && ability.category === 'spell' && originToken.spellUses) {
+        this.combat.updateToken(originToken.id, { spellUses: originToken.spellUses - 1 });
+      }
+
+      // Deduct ability specific uses
+      if (originToken && ability.maxUses && ability.uses && ability.uses > 0) {
+        const updatedAbilities = originToken.abilities?.map(a => 
+          a.id === ability.id ? { ...a, uses: a.uses! - 1 } : a
+        );
+        if (updatedAbilities) {
+          this.combat.updateToken(originToken.id, { abilities: updatedAbilities });
+        }
       }
 
       // Filter out the origin token from the affected tokens
