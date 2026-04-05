@@ -102,7 +102,7 @@ export class CombatService {
   measureCurrent = signal<{x: number, y: number} | null>(null);
   
   // Session Notes State
-  storyContent = signal<string>('O grupo se aproxima do templo em ruínas de <span style="color: #991b1b; font-weight: bold;">BloodDragons</span>. <br>Uma névoa espessa obscurece a entrada, e o cheiro de enxofre paira pesado no ar.');
+  storyContent = signal<string>('O grupo se aproxima do templo em ruínas de The <span style="color: #3b82f6; font-weight: bold;">Elden</span> <span style="color: #dc2626; font-weight: bold;">Blood</span><span style="color: #eab308; font-weight: bold;">Moon</span>. <br>Uma névoa espessa obscurece a entrada, e o cheiro de enxofre paira pesado no ar.');
   gmSecretContent = signal<string>('<strong>Segredo do Mestre:</strong> As estátuas perto da porta são na verdade Gárgulas esperando para emboscar.');
   
   // Story Slides State

@@ -17,7 +17,7 @@ export class AuthService {
   // Mock current user for demonstration
   currentUser = signal<User | null>({
     id: 'user_gm_1',
-    email: 'gm@blooddragons.com',
+    email: 'gm@eldenbloodmoon.com',
     displayName: 'Mestre',
     role: 'GM',
     campaigns: ['camp_1']
@@ -27,7 +27,7 @@ export class AuthService {
     if (role === 'GM') {
       this.currentUser.set({
         id: 'user_gm_1',
-        email: 'gm@blooddragons.com',
+        email: 'gm@eldenbloodmoon.com',
         displayName: 'Mestre',
         role: 'GM',
         campaigns: ['camp_1']
@@ -35,7 +35,7 @@ export class AuthService {
     } else {
       this.currentUser.set({
         id: 'user_player_1',
-        email: 'player@blooddragons.com',
+        email: 'player@eldenbloodmoon.com',
         displayName: 'Guerreiro Bob',
         role: 'PLAYER',
         campaigns: ['camp_1']
