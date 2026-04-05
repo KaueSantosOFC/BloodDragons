@@ -1442,6 +1442,22 @@ export class RightPanelComponent {
         });
       }
     });
+
+    effect(() => {
+      const isPlayMode = this.combat.isPlayMode();
+      const token = this.selectedToken();
+      const user = this.auth.currentUser();
+      
+      const canEdit = (user?.role === 'GM' && !isPlayMode) || token?.controlledBy === user?.id;
+      
+      if (!canEdit) {
+        untracked(() => {
+          this.isEditingSheet.set(false);
+          this.isEditingConditions.set(false);
+          this.isEditingInventory.set(false);
+        });
+      }
+    });
   }
 
   showDamageField = signal<boolean>(true);
