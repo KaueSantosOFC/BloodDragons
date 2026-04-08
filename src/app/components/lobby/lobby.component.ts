@@ -66,8 +66,8 @@ import { MatIconModule } from '@angular/material/icon';
             </h3>
             
             <div class="mb-6">
-              <label class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Nome da Campanha</label>
-              <input type="text" [(ngModel)]="newCampaignName" placeholder="Ex: A Maldição de Strahd" 
+              <label for="campaignName" class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">Nome da Campanha</label>
+              <input id="campaignName" type="text" [(ngModel)]="newCampaignName" placeholder="Ex: A Maldição de Strahd" 
                      class="w-full bg-stone-950 border border-stone-700 rounded-lg px-4 py-3 text-stone-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                      (keyup.enter)="createCampaign()">
             </div>
@@ -99,22 +99,33 @@ import { MatIconModule } from '@angular/material/icon';
             
             <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
               @for (campaign of campaignService.campaigns(); track campaign.id) {
-                <button (click)="loadCampaign(campaign.id)" class="w-full text-left bg-stone-950 border border-stone-800 rounded-lg p-4 hover:border-green-500/50 hover:bg-stone-800/50 transition-all group flex items-center justify-between">
-                  <div>
-                    <h4 class="text-lg font-bold text-stone-200 group-hover:text-green-400 transition-colors">{{ campaign.name }}</h4>
-                    <div class="flex items-center gap-4 mt-2 text-xs text-stone-500">
-                      <span class="flex items-center gap-1" title="Última vez jogado">
-                        <mat-icon style="font-size: 14px; width: 14px; height: 14px;">schedule</mat-icon>
-                        {{ campaign.lastPlayedAt | date:'dd/MM/yyyy HH:mm' }}
-                      </span>
-                      <span class="flex items-center gap-1" title="Data de criação">
-                        <mat-icon style="font-size: 14px; width: 14px; height: 14px;">calendar_today</mat-icon>
-                        {{ campaign.createdAt | date:'dd/MM/yyyy' }}
-                      </span>
+                <div class="group relative">
+                  <button (click)="loadCampaign(campaign.id)" class="w-full text-left bg-stone-950 border border-stone-800 rounded-lg p-4 hover:border-green-500/50 hover:bg-stone-800/50 transition-all flex items-center justify-between pr-16">
+                    <div>
+                      <h4 class="text-lg font-bold text-stone-200 group-hover:text-green-400 transition-colors">{{ campaign.name }}</h4>
+                      <div class="flex items-center gap-4 mt-2 text-xs text-stone-500">
+                        <span class="flex items-center gap-1" title="Última vez jogado">
+                          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">schedule</mat-icon>
+                          {{ campaign.lastPlayedAt | date:'dd/MM/yyyy HH:mm' }}
+                        </span>
+                        <span class="flex items-center gap-1" title="Data de criação">
+                          <mat-icon style="font-size: 14px; width: 14px; height: 14px;">calendar_today</mat-icon>
+                          {{ campaign.createdAt | date:'dd/MM/yyyy' }}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <mat-icon class="text-stone-600 group-hover:text-green-500 transition-colors">play_circle_filled</mat-icon>
-                </button>
+                    <mat-icon class="text-stone-600 group-hover:text-green-500 transition-colors">play_circle_filled</mat-icon>
+                  </button>
+                  
+                  <!-- Delete Button -->
+                  @if (campaign.id !== 'test-campaign') {
+                    <button (click)="openDeleteConfirm(campaign.id, $event)" 
+                            class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-stone-600 hover:text-red-500 transition-colors z-20"
+                            title="Excluir Campanha">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  }
+                </div>
               }
               @if (campaignService.campaigns().length === 0) {
                 <div class="text-center py-8 text-stone-500">
@@ -126,6 +137,32 @@ import { MatIconModule } from '@angular/material/icon';
         }
 
       </div>
+
+      <!-- Delete Confirmation Popup -->
+      @if (campaignToDelete()) {
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div class="bg-stone-900 border border-red-900/50 rounded-xl p-8 max-w-md w-full shadow-2xl animate-fade-in-up">
+            <div class="flex items-center gap-4 text-red-500 mb-6">
+              <mat-icon style="font-size: 48px; width: 48px; height: 48px;">warning</mat-icon>
+              <h3 class="text-2xl font-bold font-serif">Excluir Campanha?</h3>
+            </div>
+            
+            <p class="text-stone-300 mb-8">
+              Você está prestes a excluir permanentemente a campanha <span class="text-white font-bold">"{{ getCampaignName(campaignToDelete()!) }}"</span>. 
+              Esta ação não pode ser desfeita.
+            </p>
+
+            <div class="flex gap-4">
+              <button (click)="cancelDelete()" class="flex-1 px-4 py-3 rounded-lg border border-stone-700 text-stone-400 hover:bg-stone-800 hover:text-stone-200 transition-colors font-bold">
+                Cancelar
+              </button>
+              <button (click)="confirmDelete()" class="flex-1 px-4 py-3 rounded-lg bg-red-900/80 text-red-100 hover:bg-red-800 border border-red-700 transition-colors font-bold">
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -196,6 +233,7 @@ export class LobbyComponent {
   
   view = signal<'menu' | 'create' | 'load'>('menu');
   newCampaignName = '';
+  campaignToDelete = signal<string | null>(null);
 
   createCampaign() {
     if (this.newCampaignName.trim()) {
@@ -205,5 +243,26 @@ export class LobbyComponent {
 
   loadCampaign(id: string) {
     this.campaignService.loadCampaign(id);
+  }
+
+  openDeleteConfirm(id: string, event: Event) {
+    event.stopPropagation();
+    this.campaignToDelete.set(id);
+  }
+
+  confirmDelete() {
+    const id = this.campaignToDelete();
+    if (id) {
+      this.campaignService.deleteCampaign(id);
+      this.campaignToDelete.set(null);
+    }
+  }
+
+  cancelDelete() {
+    this.campaignToDelete.set(null);
+  }
+
+  getCampaignName(id: string): string {
+    return this.campaignService.campaigns().find(c => c.id === id)?.name || '';
   }
 }

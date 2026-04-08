@@ -1,6 +1,5 @@
 import { Injectable, signal } from '@angular/core';
 import { Campaign } from '../models/campaign';
-import { Token } from '../models/token';
 
 @Injectable({
   providedIn: 'root'
@@ -90,5 +89,17 @@ export class CampaignService {
     const all = this.campaigns().map(c => c.id === updated.id ? updated : c);
     this.campaigns.set(all);
     this.saveCampaigns(all);
+  }
+
+  deleteCampaign(id: string) {
+    if (id === 'test-campaign') return; // Don't delete tutorial
+    
+    const updated = this.campaigns().filter(c => c.id !== id);
+    this.campaigns.set(updated);
+    this.saveCampaigns(updated);
+    
+    if (this.activeCampaign()?.id === id) {
+      this.activeCampaign.set(null);
+    }
   }
 }
