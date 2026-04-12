@@ -18,31 +18,33 @@ import { Token } from '../../models/token';
       
       <!-- Left: App Info -->
       <div class="flex items-center gap-4">
-        <button (click)="campaignService.exitCampaign()" class="text-stone-400 hover:text-red-500 transition-colors" title="Sair da Campanha">
-          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">exit_to_app</mat-icon>
-        </button>
-        <div class="flex flex-col">
-          <span class="text-sm font-bold text-stone-200">The <span class="text-blue-500">Elden</span> <span class="text-red-600">Blood</span><span class="text-yellow-500">Moon</span> 1.2</span>
-        </div>
-
-        <!-- GM / Play Toggle -->
-        @if (currentUser()?.role === 'GM') {
-          <div class="flex bg-stone-950 rounded-full p-0.5 border border-stone-800 shadow-inner">
-            <button class="px-3 py-1 rounded-full text-[10px] font-bold transition-all"
-                    [class.bg-amber-600]="!combat.isPlayMode()"
-                    [class.text-stone-900]="!combat.isPlayMode()"
-                    [class.text-stone-500]="combat.isPlayMode()"
-                    (click)="combat.isPlayMode.set(false)">
-              GM
-            </button>
-            <button class="px-3 py-1 rounded-full text-[10px] font-bold transition-all"
-                    [class.bg-amber-600]="combat.isPlayMode()"
-                    [class.text-stone-900]="combat.isPlayMode()"
-                    [class.text-stone-500]="!combat.isPlayMode()"
-                    (click)="combat.isPlayMode.set(true)">
-              PLAY
-            </button>
+        @if (combat.uiVisible()) {
+          <button (click)="campaignService.exitCampaign()" class="text-stone-400 hover:text-red-500 transition-colors" title="Sair da Campanha">
+            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">exit_to_app</mat-icon>
+          </button>
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-stone-200">The <span class="text-blue-500">Elden</span> <span class="text-red-600">Blood</span><span class="text-yellow-500">Moon</span> 1.2</span>
           </div>
+
+          <!-- GM / Play Toggle -->
+          @if (currentUser()?.role === 'GM') {
+            <div class="flex bg-stone-950 rounded-full p-0.5 border border-stone-800 shadow-inner">
+              <button class="px-3 py-1 rounded-full text-[10px] font-bold transition-all"
+                      [class.bg-amber-600]="!combat.isPlayMode()"
+                      [class.text-stone-900]="!combat.isPlayMode()"
+                      [class.text-stone-500]="combat.isPlayMode()"
+                      (click)="combat.isPlayMode.set(false)">
+                GM
+              </button>
+              <button class="px-3 py-1 rounded-full text-[10px] font-bold transition-all"
+                      [class.bg-amber-600]="combat.isPlayMode()"
+                      [class.text-stone-900]="combat.isPlayMode()"
+                      [class.text-stone-500]="!combat.isPlayMode()"
+                      (click)="combat.isPlayMode.set(true)">
+                PLAY
+              </button>
+            </div>
+          }
         }
       </div>
 
@@ -196,115 +198,117 @@ import { Token } from '../../models/token';
           </div>
         }
 
-        <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                [class.text-amber-500]="showDiceTray()"
-                [class.border-amber-500]="showDiceTray()"
-                (click)="toggleDiceTray()"
-                title="Rolar Dados">
-          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">casino</mat-icon>
-        </button>
-
-        <!-- Rest Menu Popover -->
-        @if (showRestMenu()) {
-          <div class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-stone-900 border border-stone-700 rounded-lg shadow-xl p-3 w-64 z-50">
-            <div class="flex justify-between items-center mb-3">
-              <div class="text-[10px] font-mono text-stone-500 uppercase">Gestão de Recursos</div>
-              <button class="text-stone-500 hover:text-stone-300" (click)="showRestMenu.set(false)">
-                <mat-icon style="font-size: 14px; width: 14px; height: 14px;">close</mat-icon>
-              </button>
-            </div>
-            
-            <div class="max-h-40 overflow-y-auto custom-scrollbar mb-3 space-y-1 bg-stone-950/50 p-1.5 rounded border border-stone-800">
-              <div class="flex justify-between items-center mb-1 px-1">
-                <span class="text-[10px] text-stone-500 font-bold uppercase">Alvos</span>
-                <button class="text-[10px] text-amber-500 hover:text-amber-400 transition-colors" (click)="selectAllPlayersForRest()">Todos Jogadores</button>
-              </div>
-              @for (token of combat.tokens(); track token.id) {
-                @if (token.type === 'player' || token.type === 'npc') {
-                  <label class="flex items-center gap-2 px-2 py-1.5 hover:bg-stone-800 rounded cursor-pointer transition-colors border border-transparent hover:border-stone-700"
-                         [class.bg-stone-800]="selectedTokensForRest().has(token.id)"
-                         [class.border-stone-700]="selectedTokensForRest().has(token.id)">
-                    <input type="checkbox" 
-                           [checked]="selectedTokensForRest().has(token.id)"
-                           (change)="toggleTokenForRest(token.id)"
-                           class="rounded border-stone-600 bg-stone-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-stone-900 w-3 h-3">
-                    <span class="text-xs text-stone-300 flex-1 truncate">{{ token.name }}</span>
-                    <span class="text-[9px] text-stone-500 uppercase">{{ token.type === 'player' ? 'Jog' : 'NPC' }}</span>
-                  </label>
-                }
-              }
-            </div>
-
-            <div class="space-y-2">
-              <button class="w-full bg-stone-800 hover:bg-amber-600 hover:text-stone-900 border border-stone-700 rounded py-2 text-xs font-bold transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-stone-800 disabled:hover:text-stone-400"
-                      [disabled]="selectedTokensForRest().size === 0"
-                      (click)="shortRest()">
-                <mat-icon class="text-amber-500 group-hover:text-stone-900" style="font-size: 16px; width: 16px; height: 16px;">local_cafe</mat-icon>
-                Descanso Curto
-              </button>
-              <button class="w-full bg-stone-800 hover:bg-amber-600 hover:text-stone-900 border border-stone-700 rounded py-2 text-xs font-bold transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-stone-800 disabled:hover:text-stone-400"
-                      [disabled]="selectedTokensForRest().size === 0"
-                      (click)="longRest()">
-                <mat-icon class="text-amber-500 group-hover:text-stone-900" style="font-size: 16px; width: 16px; height: 16px;">hotel</mat-icon>
-                Descanso Longo
-              </button>
-            </div>
-          </div>
-        }
-
-        <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                [class.text-amber-500]="showRestMenu()"
-                [class.border-amber-500]="showRestMenu()"
-                (click)="toggleRestMenu()"
-                title="Descanso">
-          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">hotel</mat-icon>
-        </button>
-
-        <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                [class.text-amber-500]="showSheetList()"
-                [class.border-amber-500]="showSheetList()"
-                (click)="toggleSheetList()"
-                title="Fichas de Personagem">
-          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">assignment_ind</mat-icon>
-        </button>
-        <div class="w-px h-6 bg-stone-700 mx-1 self-center"></div>
-        
-        @if (currentUser()?.role === 'GM' && !combat.isPlayMode()) {
-          <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                  [class.text-amber-500]="combat.showStorySlides()"
-                  [class.border-amber-500]="combat.showStorySlides()"
-                  [class.bg-amber-500/10]="combat.showStorySlides()"
-                  [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.showStorySlides()"
-                  (click)="combat.showStorySlides.set(!combat.showStorySlides())"
-                  title="Alternar Slides da História">
-            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">photo_library</mat-icon>
-            @if (combat.showStorySlides()) {
-              <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
-            }
-          </button>
-
-          <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                  [class.text-amber-500]="combat.gmPanelVisible()"
-                  [class.border-amber-500]="combat.gmPanelVisible()"
-                  [class.bg-amber-500/10]="combat.gmPanelVisible()"
-                  [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.gmPanelVisible()"
-                  (click)="combat.gmPanelVisible.set(!combat.gmPanelVisible())"
-                  title="Mapa & Tokens">
-            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">history_edu</mat-icon>
-            @if (combat.gmPanelVisible()) {
-              <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
-            }
-          </button>
-        }
-
-        @if (!combat.isPlayMode()) {
+        @if (combat.uiVisible()) {
           <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                  [class.text-amber-500]="combat.showGrid()"
-                  [class.border-amber-500]="combat.showGrid()"
-                  (click)="combat.showGrid.set(!combat.showGrid())"
-                  title="Alternar Grade">
-            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">grid_on</mat-icon>
+                  [class.text-amber-500]="showDiceTray()"
+                  [class.border-amber-500]="showDiceTray()"
+                  (click)="toggleDiceTray()"
+                  title="Rolar Dados">
+            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">casino</mat-icon>
           </button>
+
+          <!-- Rest Menu Popover -->
+          @if (showRestMenu()) {
+            <div class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-stone-900 border border-stone-700 rounded-lg shadow-xl p-3 w-64 z-50">
+              <div class="flex justify-between items-center mb-3">
+                <div class="text-[10px] font-mono text-stone-500 uppercase">Gestão de Recursos</div>
+                <button class="text-stone-500 hover:text-stone-300" (click)="showRestMenu.set(false)">
+                  <mat-icon style="font-size: 14px; width: 14px; height: 14px;">close</mat-icon>
+                </button>
+              </div>
+              
+              <div class="max-h-40 overflow-y-auto custom-scrollbar mb-3 space-y-1 bg-stone-950/50 p-1.5 rounded border border-stone-800">
+                <div class="flex justify-between items-center mb-1 px-1">
+                  <span class="text-[10px] text-stone-500 font-bold uppercase">Alvos</span>
+                  <button class="text-[10px] text-amber-500 hover:text-amber-400 transition-colors" (click)="selectAllPlayersForRest()">Todos Jogadores</button>
+                </div>
+                @for (token of combat.tokens(); track token.id) {
+                  @if (token.type === 'player' || token.type === 'npc') {
+                    <label class="flex items-center gap-2 px-2 py-1.5 hover:bg-stone-800 rounded cursor-pointer transition-colors border border-transparent hover:border-stone-700"
+                           [class.bg-stone-800]="selectedTokensForRest().has(token.id)"
+                           [class.border-stone-700]="selectedTokensForRest().has(token.id)">
+                      <input type="checkbox" 
+                             [checked]="selectedTokensForRest().has(token.id)"
+                             (change)="toggleTokenForRest(token.id)"
+                             class="rounded border-stone-600 bg-stone-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-stone-900 w-3 h-3">
+                      <span class="text-xs text-stone-300 flex-1 truncate">{{ token.name }}</span>
+                      <span class="text-[9px] text-stone-500 uppercase">{{ token.type === 'player' ? 'Jog' : 'NPC' }}</span>
+                    </label>
+                  }
+                }
+              </div>
+
+              <div class="space-y-2">
+                <button class="w-full bg-stone-800 hover:bg-amber-600 hover:text-stone-900 border border-stone-700 rounded py-2 text-xs font-bold transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-stone-800 disabled:hover:text-stone-400"
+                        [disabled]="selectedTokensForRest().size === 0"
+                        (click)="shortRest()">
+                  <mat-icon class="text-amber-500 group-hover:text-stone-900" style="font-size: 16px; width: 16px; height: 16px;">local_cafe</mat-icon>
+                  Descanso Curto
+                </button>
+                <button class="w-full bg-stone-800 hover:bg-amber-600 hover:text-stone-900 border border-stone-700 rounded py-2 text-xs font-bold transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-stone-800 disabled:hover:text-stone-400"
+                        [disabled]="selectedTokensForRest().size === 0"
+                        (click)="longRest()">
+                  <mat-icon class="text-amber-500 group-hover:text-stone-900" style="font-size: 16px; width: 16px; height: 16px;">hotel</mat-icon>
+                  Descanso Longo
+                </button>
+              </div>
+            </div>
+          }
+
+          <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                  [class.text-amber-500]="showRestMenu()"
+                  [class.border-amber-500]="showRestMenu()"
+                  (click)="toggleRestMenu()"
+                  title="Descanso">
+            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">hotel</mat-icon>
+          </button>
+
+          <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                  [class.text-amber-500]="showSheetList()"
+                  [class.border-amber-500]="showSheetList()"
+                  (click)="toggleSheetList()"
+                  title="Fichas de Personagem">
+            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">assignment_ind</mat-icon>
+          </button>
+          <div class="w-px h-6 bg-stone-700 mx-1 self-center"></div>
+          
+          @if (currentUser()?.role === 'GM' && !combat.isPlayMode()) {
+            <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                    [class.text-amber-500]="combat.showStorySlides()"
+                    [class.border-amber-500]="combat.showStorySlides()"
+                    [class.bg-amber-500/10]="combat.showStorySlides()"
+                    [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.showStorySlides()"
+                    (click)="combat.showStorySlides.set(!combat.showStorySlides())"
+                    title="Alternar Slides da História">
+              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">photo_library</mat-icon>
+              @if (combat.showStorySlides()) {
+                <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
+              }
+            </button>
+
+            <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                    [class.text-amber-500]="combat.gmPanelVisible()"
+                    [class.border-amber-500]="combat.gmPanelVisible()"
+                    [class.bg-amber-500/10]="combat.gmPanelVisible()"
+                    [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.gmPanelVisible()"
+                    (click)="combat.gmPanelVisible.set(!combat.gmPanelVisible())"
+                    title="Mapa & Tokens">
+              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">history_edu</mat-icon>
+              @if (combat.gmPanelVisible()) {
+                <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
+              }
+            </button>
+          }
+
+          @if (!combat.isPlayMode()) {
+            <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                    [class.text-amber-500]="combat.showGrid()"
+                    [class.border-amber-500]="combat.showGrid()"
+                    (click)="combat.showGrid.set(!combat.showGrid())"
+                    title="Alternar Grade">
+              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">grid_on</mat-icon>
+            </button>
+          }
         }
         <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
                 [class.text-amber-500]="combat.isPanMode()"
@@ -319,18 +323,20 @@ import { Token } from '../../models/token';
           }
         </button>
 
-        <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                [class.text-amber-500]="combat.isMeasuring()"
-                [class.border-amber-500]="combat.isMeasuring()"
-                [class.bg-amber-500/10]="combat.isMeasuring()"
-                [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.isMeasuring()"
-                (click)="toggleMeasure()"
-                title="Medir Distância">
-          <mat-icon style="font-size: 20px; width: 20px; height: 20px;">straighten</mat-icon>
-          @if (combat.isMeasuring()) {
-            <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
-          }
-        </button>
+        @if (combat.uiVisible()) {
+          <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
+                  [class.text-amber-500]="combat.isMeasuring()"
+                  [class.border-amber-500]="combat.isMeasuring()"
+                  [class.bg-amber-500/10]="combat.isMeasuring()"
+                  [class.shadow-[0_0_15px_rgba(245,158,11,0.2)]]="combat.isMeasuring()"
+                  (click)="toggleMeasure()"
+                  title="Medir Distância">
+            <mat-icon style="font-size: 20px; width: 20px; height: 20px;">straighten</mat-icon>
+            @if (combat.isMeasuring()) {
+              <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-stone-900 animate-pulse"></span>
+            }
+          </button>
+        }
       </div>
 
       <!-- Right: UI Toggle -->

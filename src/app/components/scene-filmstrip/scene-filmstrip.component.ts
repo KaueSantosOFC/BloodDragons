@@ -67,35 +67,25 @@ export class SceneFilmstripComponent {
 
   createBlankScene() {
     if (!this.combat.activeSceneId() && (this.combat.tokens().length > 0 || this.combat.mapBackgroundImage())) {
-      if (!confirm('O mapa atual não está salvo como uma cena. Se você criar uma nova cena em branco, perderá o estado atual. Deseja continuar? (Dica: Clique em "Salvar Estado Atual como Cena" primeiro)')) {
-        return;
-      }
+      this.saveCurrentAsScene();
     }
-    const name = prompt('Nome da Nova Cena:', `Cena ${this.combat.scenes().length + 1}`);
-    if (name) {
-      this.combat.createBlankScene(name);
-    }
+    const name = `Cena ${this.combat.scenes().length + 1}`;
+    this.combat.createBlankScene(name);
   }
 
   saveCurrentAsScene() {
-    const name = prompt('Salvar mapa atual como cena:', `Cena ${this.combat.scenes().length + 1}`);
-    if (name) {
-      this.combat.createScene(name);
-    }
+    const name = `Cena ${this.combat.scenes().length + 1}`;
+    this.combat.createScene(name);
   }
 
   loadScene(id: string) {
     if (!this.combat.activeSceneId() && (this.combat.tokens().length > 0 || this.combat.mapBackgroundImage())) {
-      if (!confirm('O mapa atual não está salvo como uma cena. Se você carregar outra cena, perderá o estado atual. Deseja continuar? (Dica: Clique em "Salvar Estado Atual como Cena" primeiro)')) {
-        return;
-      }
+      this.saveCurrentAsScene();
     }
     this.combat.loadScene(id);
   }
 
   deleteScene(id: string) {
-    if (confirm('Tem certeza que deseja excluir esta cena?')) {
-      this.combat.deleteScene(id);
-    }
+    this.combat.deleteScene(id);
   }
 }

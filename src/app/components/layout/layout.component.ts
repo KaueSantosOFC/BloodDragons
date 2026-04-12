@@ -25,13 +25,13 @@ import { AttackModalComponent } from '../attack-modal/attack-modal.component';
       <div class="flex flex-1 overflow-hidden relative">
         
         <!-- Left Panel (GM Only) -->
-        @if (auth.currentUser()?.role === 'GM' && combat.gmPanelVisible()) {
+        @if (auth.currentUser()?.role === 'GM' && combat.gmPanelVisible() && combat.uiVisible()) {
           <app-gm-panel class="z-20 shadow-2xl"></app-gm-panel>
         }
 
         <!-- Center Map or Slides -->
         <div class="flex-1 relative z-10 flex flex-col">
-          @if (!combat.showStorySlides()) {
+          @if (!combat.showStorySlides() && combat.uiVisible()) {
             <app-scene-filmstrip></app-scene-filmstrip>
           }
           
