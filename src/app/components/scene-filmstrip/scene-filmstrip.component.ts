@@ -1,13 +1,14 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { CombatService } from '../../services/combat.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-scene-filmstrip',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, DragDropModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (auth.currentUser()?.role === 'GM' && combat.uiVisible()) {
@@ -23,14 +24,17 @@ import { AuthService } from '../../services/auth.service';
           </button>
         </div>
 
-        <div class="flex gap-2 px-2">
+        <div class="flex gap-2 px-2" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="dropScene($event)">
           @for (scene of combat.scenes(); track scene.id; let i = $index) {
             <div class="relative group flex-shrink-0 cursor-pointer rounded border-2 transition-all duration-200 w-32 h-20 overflow-hidden"
+                 cdkDrag
                  [class.border-amber-500]="combat.activeSceneId() === scene.id"
                  [class.border-stone-700]="combat.activeSceneId() !== scene.id"
                  [class.opacity-60]="combat.activeSceneId() !== scene.id"
                  [class.hover:opacity-100]="combat.activeSceneId() !== scene.id"
                  (click)="loadScene(scene.id)">
+              
+              <div *cdkDragPlaceholder class="w-32 h-20 rounded border-2 border-dashed border-stone-500 bg-stone-800/50"></div>
               
               @if (scene.mapBackgroundImage) {
                 <img [src]="scene.mapBackgroundImage" class="w-full h-full object-cover" referrerpolicy="no-referrer">
@@ -42,6 +46,11 @@ import { AuthService } from '../../services/auth.service';
               
               <div class="absolute bottom-0 left-0 right-0 bg-black/70 p-1 text-[10px] text-stone-300 truncate text-center">
                 {{ scene.name }}
+              </div>
+
+              <!-- Drag Handle -->
+              <div cdkDragHandle class="absolute top-1 left-1 w-6 h-6 bg-black/60 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing hover:bg-black/80" (click)="$event.stopPropagation()">
+                <mat-icon style="font-size: 14px; width: 14px; height: 14px;">drag_indicator</mat-icon>
               </div>
 
               <button (click)="$event.stopPropagation(); deleteScene(scene.id)" 
@@ -64,6 +73,12 @@ import { AuthService } from '../../services/auth.service';
 export class SceneFilmstripComponent {
   combat = inject(CombatService);
   auth = inject(AuthService);
+
+  dropScene(event: CdkDragDrop<any[]>) {
+    if (event.previousIndex !== event.currentIndex) {
+      this.combat.reorderScenes(event.previousIndex, event.currentIndex);
+    }
+  }
 
   createBlankScene() {
     if (!this.combat.activeSceneId() && (this.combat.tokens().length > 0 || this.combat.mapBackgroundImage())) {

@@ -486,6 +486,14 @@ export class CombatService {
     }
   }
 
+  reorderScenes(previousIndex: number, currentIndex: number) {
+    const currentScenes = [...this.scenes()];
+    const item = currentScenes.splice(previousIndex, 1)[0];
+    currentScenes.splice(currentIndex, 0, item);
+    this.scenes.set(currentScenes);
+    this.saveToCampaign();
+  }
+
   addStorySlide(slide: {url: string, title: string, description: string}) {
     this.storySlides.update(slides => [...slides, slide]);
   }
