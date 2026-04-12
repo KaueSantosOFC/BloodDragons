@@ -44,8 +44,12 @@ import { AuthService } from '../../services/auth.service';
                 </div>
               }
               
-              <div class="absolute bottom-0 left-0 right-0 bg-black/70 p-1 text-[10px] text-stone-300 truncate text-center">
-                {{ scene.name }}
+              <div class="absolute bottom-0 left-0 right-0 bg-black/70 p-0.5">
+                <input type="text" 
+                       [value]="scene.name" 
+                       (click)="$event.stopPropagation()"
+                       (change)="updateSceneName(scene.id, $event)"
+                       class="w-full bg-transparent text-[10px] text-stone-300 text-center focus:outline-none focus:bg-stone-800 focus:text-amber-500 rounded px-1 transition-colors">
               </div>
 
               <!-- Drag Handle -->
@@ -89,8 +93,30 @@ export class SceneFilmstripComponent {
   }
 
   saveCurrentAsScene() {
-    const name = `Cena ${this.combat.scenes().length + 1}`;
+    const activeId = this.combat.activeSceneId();
+    let name = `Cena ${this.combat.scenes().length + 1}`;
+    
+    if (activeId) {
+      const activeScene = this.combat.scenes().find(s => s.id === activeId);
+      if (activeScene) {
+        name = `${activeScene.name} (Cópia)`;
+      }
+    }
+    
     this.combat.createScene(name);
+  }
+
+  updateSceneName(id: string, event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.value.trim()) {
+      this.combat.updateSceneName(id, input.value.trim());
+    } else {
+      // Revert to original if empty
+      const scene = this.combat.scenes().find(s => s.id === id);
+      if (scene) {
+        input.value = scene.name;
+      }
+    }
   }
 
   loadScene(id: string) {

@@ -466,6 +466,11 @@ export class CombatService {
     this.saveToCampaign();
   }
 
+  updateSceneName(id: string, newName: string) {
+    this.scenes.update(scenes => scenes.map(s => s.id === id ? { ...s, name: newName } : s));
+    this.saveToCampaign();
+  }
+
   nextScene() {
     const scenes = this.scenes();
     if (scenes.length === 0) return;
