@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, inject, ViewChild, ElementRef } from '@angular/core';
-import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragEnd, CdkDragMove, DragDropModule } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 import { DndMathService } from '../../services/dnd-math.service';
 import { AuthService } from '../../services/auth.service';
@@ -139,6 +139,7 @@ import { Ability } from '../../models/ability';
                      cdkDrag
                      [cdkDragScale]="combat.zoom()"
                      [cdkDragDisabled]="!canMove(token)"
+                     (cdkDragMoved)="onDragMoved($event, token)"
                      (cdkDragEnded)="onDragEnded($event, token)"
                      (click)="onTokenClick(token, $event)"
                      (dblclick)="onTokenDoubleClick(token, $event)"
@@ -329,8 +330,14 @@ export class GridComponent {
     const gridSize = this.gridSize;
     const pixelsPerMeter = gridSize / 1.5;
     
-    const ox = (origin.x + 0.5) * gridSize;
-    const oy = (origin.y + 0.5) * gridSize;
+    let ox = (origin.x + 0.5) * gridSize;
+    let oy = (origin.y + 0.5) * gridSize;
+    
+    const dragged = this.combat.draggedTokenPos();
+    if (dragged && dragged.id === origin.id) {
+      ox = dragged.px;
+      oy = dragged.py;
+    }
     
     const dx = target.x - ox;
     const dy = target.y - oy;
@@ -724,17 +731,48 @@ export class GridComponent {
     this.combat.rightPanelTab.set('sheet');
   }
 
+  private getTokenPositionFromDOM(element: HTMLElement, token: Token): { x: number, y: number } {
+    if (!this.gridContainer) return { x: token.x * this.gridSize, y: token.y * this.gridSize };
+    
+    const rect = element.getBoundingClientRect();
+    const containerRect = this.gridContainer.nativeElement.getBoundingClientRect();
+    
+    const x = (rect.left - containerRect.left - this.combat.pan().x) / this.combat.zoom();
+    const y = (rect.top - containerRect.top - this.combat.pan().y) / this.combat.zoom();
+    
+    return { x, y };
+  }
+
+  onDragMoved(event: CdkDragMove, token: Token) {
+    if (!this.canMove(token)) return;
+    
+    const pos = this.getTokenPositionFromDOM(event.source.element.nativeElement, token);
+    const size = this.getTokenSize(token);
+    
+    // The center of the token in pixels
+    const px = pos.x + size / 2;
+    const py = pos.y + size / 2;
+    
+    this.combat.draggedTokenPos.set({ id: token.id, px, py });
+  }
+
   onDragEnded(event: CdkDragEnd, token: Token) {
+    this.combat.draggedTokenPos.set(null);
+    
     if (!this.canMove(token)) {
       event.source._dragRef.reset();
       return;
     }
 
-    const position = event.source.getFreeDragPosition();
-    const sizeOffset = (this.gridSize - this.getTokenSize(token)) / 2;
+    const pos = this.getTokenPositionFromDOM(event.source.element.nativeElement, token);
+    const size = this.getTokenSize(token);
     
-    let newGridX = Math.round((position.x - sizeOffset) / this.gridSize);
-    let newGridY = Math.round((position.y - sizeOffset) / this.gridSize);
+    // Calculate the center of the token, then find which grid cell that center belongs to
+    const centerX = pos.x + size / 2;
+    const centerY = pos.y + size / 2;
+    
+    let newGridX = Math.floor(centerX / this.gridSize);
+    let newGridY = Math.floor(centerY / this.gridSize);
     
     if (this.boundary) {
       const maxGridX = Math.max(0, Math.floor(this.mapWidth() / this.gridSize) - 1);
@@ -747,15 +785,11 @@ export class GridComponent {
       newGridY = Math.max(0, newGridY);
     }
     
-    // Force the token to snap to the grid by updating its position
-    // The binding [cdkDragFreeDragPosition] will automatically move the element
     this.combat.updateToken(token.id, { x: newGridX, y: newGridY });
     
-    // Explicitly set the free drag position to ensure it snaps even if the grid coordinates didn't change
-    event.source.setFreeDragPosition({
-      x: newGridX * this.gridSize + sizeOffset, 
-      y: newGridY * this.gridSize + sizeOffset
-    });
+    // Reset the drag transform so the [cdkDragFreeDragPosition] binding takes over
+    // This ensures the token snaps perfectly to the grid center
+    event.source._dragRef.reset();
     
     this.syncToFirestore(token.id, newGridX, newGridY);
   }

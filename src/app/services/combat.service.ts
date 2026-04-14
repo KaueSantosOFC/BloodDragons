@@ -80,9 +80,10 @@ export class CombatService {
     if (!id) return null;
     const token = this.tokens().find(t => t.id === id);
     if (!token) return null;
-    return { x: token.x, y: token.y };
+    return { id: token.id, x: token.x, y: token.y };
   });
   previewTarget = signal<{x: number, y: number} | null>(null);
+  draggedTokenPos = signal<{id: string, px: number, py: number} | null>(null);
   
   // Estado de Seleção e Visual (Novos)
   selectedTokenId = signal<string | null>(null);
