@@ -23,7 +23,7 @@ import { DndCoreEngineService, AttackRollResult, ActionResult } from '../../serv
               </div>
               <div>
                 <h2 class="text-lg font-bold text-amber-500 leading-tight">Ataque</h2>
-                <p class="text-xs text-stone-400">{{ state()?.attacker?.name }} ➔ {{ state()?.target?.name }}</p>
+                <p class="text-xs text-stone-400">{{ state()?.attacker?.name }} ➔ {{ targetNames() }}</p>
               </div>
             </div>
             <button (click)="close()" class="text-stone-400 hover:text-white transition-colors">
@@ -144,7 +144,15 @@ export class AttackModalComponent {
 
   targetAC = computed(() => {
     const s = this.state();
-    return s?.target?.sheet?.ac || 10;
+    if (!s || s.targets.length === 0) return 10;
+    return s.targets[0].sheet?.ac || 10;
+  });
+
+  targetNames = computed(() => {
+    const s = this.state();
+    if (!s || s.targets.length === 0) return '';
+    if (s.targets.length === 1) return s.targets[0].name;
+    return `${s.targets[0].name} e mais ${s.targets.length - 1}`;
   });
 
   attributeUsed = computed(() => {
@@ -240,26 +248,34 @@ export class AttackModalComponent {
     const res = this.result();
     if (!s || !res || !this.isHit() || !s.ability.damage) return;
 
-    // Calculate damage
-    const damageDice = s.ability.damage;
-    
-    // For simplicity, we use the engine's calculateDamage
-    // We need the modifier used for the attack to add to damage (unless it's a spell, usually spells don't add modifier to damage unless specified, but we'll add it for simplicity or just use 0)
-    const attackerStats = (s.attacker.sheet as unknown) as Record<string, number>;
-    const mod = this.isSpell() ? 0 : this.engine.calculateModifier(attackerStats[res.attributeUsed] || 10);
-    
-    const damageRoll = this.engine.calculateDamage(damageDice, mod, 0);
-    
-    if (res.isCritical) {
-      const critDamage = this.engine.calculateDamage(damageDice, 0, 0);
-      damageRoll.total += critDamage.total;
-    }
+    if (s.ability.areaShape && s.ability.areaShape !== 'none') {
+      // Use resolveAoEDamage from combat service
+      this.combat.resolveAoEDamage({x: s.attacker.x, y: s.attacker.y}, s.targets, s.ability, res.isCritical);
+    } else {
+      // Calculate damage
+      const damageDice = s.ability.damage;
+      
+      // For simplicity, we use the engine's calculateDamage
+      // We need the modifier used for the attack to add to damage (unless it's a spell, usually spells don't add modifier to damage unless specified, but we'll add it for simplicity or just use 0)
+      const attackerStats = (s.attacker.sheet as unknown) as Record<string, number>;
+      const mod = this.isSpell() ? 0 : this.engine.calculateModifier(attackerStats[res.attributeUsed] || 10);
+      
+      const damageRoll = this.engine.calculateDamage(damageDice, mod, 0);
+      
+      if (res.isCritical) {
+        const critDamage = this.engine.calculateDamage(damageDice, 0, 0);
+        damageRoll.total += critDamage.total;
+      }
 
-    this.combat.updateToken(s.target.id, { hp: Math.max(0, s.target.hp - damageRoll.total) });
-    
-    // Log
-    const log = `Ataque contra ${s.target.name} (CA ${this.targetAC()}): d20 [${res.naturalRoll}] + Mod ${res.modifier} = ${res.total} -> ACERTOU!\nDano: ${damageRoll.total}`;
-    console.log(log);
+      s.targets.forEach(target => {
+        this.combat.updateToken(target.id, { hp: Math.max(0, target.hp - damageRoll.total) });
+        
+        // Log
+        const log = `Ataque contra ${target.name} (CA ${this.targetAC()}): d20 [${res.naturalRoll}] + Mod ${res.modifier} = ${res.total} -> ACERTOU!\nDano: ${damageRoll.total}`;
+        console.log(log);
+        this.combat.addNotification(log, 'info');
+      });
+    }
     
     this.close();
   }

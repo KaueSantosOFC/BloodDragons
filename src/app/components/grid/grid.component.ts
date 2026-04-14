@@ -82,17 +82,16 @@ import { Ability } from '../../models/ability';
                  (click)="onClick($event)"
                  (keydown.enter)="onClick()">
             </div>
-
             <!-- Area Preview SVG -->
             @if (previewAbility()) {
-              <svg class="absolute inset-0 w-full h-full pointer-events-none z-25">
+              <svg class="absolute inset-0 w-full h-full pointer-events-none z-25" [attr.viewBox]="'0 0 ' + mapWidth() + ' ' + mapHeight()">
                 <path [attr.d]="areaPath()" fill="rgba(245, 158, 11, 0.3)" stroke="#f59e0b" stroke-width="2" />
               </svg>
             }
 
             <!-- Measure Line -->
             @if (combat.isMeasuring() && combat.measureStart() && combat.measureCurrent()) {
-              <svg class="absolute inset-0 w-full h-full pointer-events-none z-40">
+              <svg class="absolute inset-0 w-full h-full pointer-events-none z-40" [attr.viewBox]="'0 0 ' + mapWidth() + ' ' + mapHeight()">
                 <line 
                   [attr.x1]="combat.measureStart()!.x" 
                   [attr.y1]="combat.measureStart()!.y" 
@@ -654,38 +653,28 @@ export class GridComponent {
       }
 
       // Filter out the origin token from the affected tokens
-      const affected = this.affectedTokens().filter(t => t.id !== originToken?.id);
+      let affected = this.affectedTokens().filter(t => t.id !== originToken?.id);
       
-      console.log(`Confirmed ability: ${ability.name}`);
-      console.log(`Affected tokens:`, affected.map(t => t.name));
-      
-      if (ability.areaShape && ability.areaShape !== 'none') {
-        // AoE Attack
-        if (ability.damage && affected.length > 0) {
-          this.combat.resolveAoEDamage(originPos, affected, ability);
+      // Remove dead tokens unless it's a healing ability
+      if (!ability.healing) {
+        affected = affected.filter(t => t.hp > 0);
+      }
+
+      if (affected.length === 0) {
+        this.combat.cancelPreview();
+        return;
+      }
+
+      const isAttack = ability.category === 'weapon' || ability.attackBonus !== undefined || ability.damage;
+
+      if (isAttack) {
+        if (originToken) {
+          this.combat.openAttackModal(originToken, affected, ability);
         }
-        if (ability.healing && affected.length > 0) {
-          affected.forEach(t => {
-            const result = this.combat.resolveHealing(t, ability);
-            this.combat.addNotification(result.log, 'info');
-          });
-        }
-      } else {
-        // Single target
+      } else if (ability.healing) {
         affected.forEach(t => {
-          // Se a habilidade é um ataque (arma, magia com bônus de ataque) ou tem dano
-          const isAttack = ability.category === 'weapon' || ability.attackBonus !== undefined || ability.damage;
-          
-          if (isAttack) {
-            // Abre o modal de ataque
-            if (originToken) {
-              this.combat.openAttackModal(originToken, t, ability);
-            }
-          } else if (ability.healing) {
-            // Se for apenas cura (sem ataque/dano), resolve direto
-            const result = this.combat.resolveHealing(t, ability);
-            this.combat.addNotification(result.log, 'info');
-          }
+          const result = this.combat.resolveHealing(t, ability);
+          this.combat.addNotification(result.log, 'info');
         });
       }
       

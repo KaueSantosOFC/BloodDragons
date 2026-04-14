@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, effect, untracked } from '@angular/core';
+import { Injectable, signal, computed, inject, effect, untracked } from '@angular/core';
 import { Ability } from '../models/ability';
 import { Token, CharacterSheet } from '../models/token';
 import { DndCoreEngineService, ActionResult } from './dnd-core-engine.service';
@@ -74,7 +74,14 @@ export class CombatService {
 
   // Estado de Combate / Preview
   previewAbility = signal<Ability | null>(null);
-  previewOrigin = signal<{x: number, y: number} | null>(null);
+  previewOriginId = signal<string | null>(null);
+  previewOrigin = computed(() => {
+    const id = this.previewOriginId();
+    if (!id) return null;
+    const token = this.tokens().find(t => t.id === id);
+    if (!token) return null;
+    return { x: token.x, y: token.y };
+  });
   previewTarget = signal<{x: number, y: number} | null>(null);
   
   // Estado de Seleção e Visual (Novos)
@@ -111,12 +118,13 @@ export class CombatService {
   // Attack Modal State
   attackModalState = signal<{
     attacker: Token;
-    target: Token;
+    targets: Token[];
     ability: Ability;
   } | null>(null);
 
-  openAttackModal(attacker: Token, target: Token, ability: Ability) {
-    this.attackModalState.set({ attacker, target, ability });
+  openAttackModal(attacker: Token, targets: Token | Token[], ability: Ability) {
+    const targetArray = Array.isArray(targets) ? targets : [targets];
+    this.attackModalState.set({ attacker, targets: targetArray, ability });
   }
 
   closeAttackModal() {
@@ -394,7 +402,7 @@ export class CombatService {
   
   startPreview(ability: Ability, originToken: Token) {
     this.previewAbility.set(ability);
-    this.previewOrigin.set({ x: originToken.x, y: originToken.y });
+    this.previewOriginId.set(originToken.id);
     // Default target
     this.previewTarget.set({ x: (originToken.x + 0.5) * 64, y: (originToken.y + 0.5) * 64 });
   }
@@ -405,7 +413,7 @@ export class CombatService {
 
   cancelPreview() {
     this.previewAbility.set(null);
-    this.previewOrigin.set(null);
+    this.previewOriginId.set(null);
     this.previewTarget.set(null);
   }
 
@@ -665,7 +673,7 @@ export class CombatService {
     };
   }
 
-  resolveAoEDamage(origin: {x: number, y: number}, targets: Token[], ability: Ability) {
+  resolveAoEDamage(origin: {x: number, y: number}, targets: Token[], ability: Ability, isCritical: boolean = false) {
     if (!ability.damage) return;
     
     // Sort targets by distance to origin
@@ -676,10 +684,15 @@ export class CombatService {
 
     // Roll damage once
     const damageRoll = this.engine.calculateDamage(ability.damage, 0, 0);
+    let totalDmg = damageRoll.total;
+    if (isCritical) {
+      const critRoll = this.engine.calculateDamage(ability.damage, 0, 0);
+      totalDmg += critRoll.total;
+    }
     
     sortedTargets.forEach((item, index) => {
       // Front token takes full damage, others take half
-      let dmg = damageRoll.total;
+      let dmg = totalDmg;
       if (index > 0) {
         dmg = Math.floor(dmg / 2);
       }
