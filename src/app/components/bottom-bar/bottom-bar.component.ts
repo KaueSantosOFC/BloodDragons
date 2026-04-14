@@ -301,13 +301,7 @@ import { Token } from '../../models/token';
           }
 
           @if (!combat.isPlayMode()) {
-            <button class="w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 
-                    [class.text-amber-500]="combat.showGrid()"
-                    [class.border-amber-500]="combat.showGrid()"
-                    (click)="combat.showGrid.set(!combat.showGrid())"
-                    title="Alternar Grade">
-              <mat-icon style="font-size: 20px; width: 20px; height: 20px;">grid_on</mat-icon>
-            </button>
+            <!-- Grid is now permanently fixed -->
           }
 
           <button class="relative w-10 h-10 rounded-full bg-stone-800 border border-stone-700 text-stone-400 flex items-center justify-center hover:bg-stone-700 hover:text-amber-500 hover:border-amber-500/50 transition-all" 

@@ -50,12 +50,10 @@ import { Ability } from '../../models/ability';
             }
 
             <!-- Grid Background -->
-            @if (showGrid()) {
-              <div class="absolute inset-0 pointer-events-none opacity-20 z-10"
-                   [style.backgroundSize]="gridSize + 'px ' + gridSize + 'px'"
-                   style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px);">
-              </div>
-            }
+            <div class="absolute inset-0 pointer-events-none opacity-20 z-10"
+                 [style.backgroundSize]="gridSize + 'px ' + gridSize + 'px'"
+                 style="background-image: linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px);">
+            </div>
 
             <!-- Fog of War Layer -->
             @if (combat.isFogEnabled()) {
@@ -75,7 +73,7 @@ import { Ability } from '../../models/ability';
             }
 
             <!-- Interaction Layer -->
-            <div class="absolute inset-0 z-20 cursor-crosshair"
+            <div class="absolute inset-0 z-20 cursor-crosshair select-none outline-none caret-transparent"
                  tabindex="0"
                  (mousemove)="onMouseMove($event)"
                  (mousedown)="onGridMouseDown($event)"
@@ -112,7 +110,7 @@ import { Ability } from '../../models/ability';
 
             @for (token of tokens(); track token.id) {
               @if (!isTokenHiddenByFog(token)) {
-                <div class="absolute top-0 left-0 shadow-lg border-2 flex flex-col items-center justify-center transition-shadow hover:shadow-amber-500/50 z-30 group"
+                <div class="absolute top-0 left-0 shadow-lg border-2 flex flex-col items-center justify-center transition-shadow hover:shadow-amber-500/50 z-30 group outline-none caret-transparent select-none"
                      tabindex="0"
                      [class.opacity-40]="isTokenInFog(token) && currentUser()?.role === 'GM' && !combat.isPlayMode() && token.type !== 'player'"
                      [class.grayscale]="isTokenInFog(token) && currentUser()?.role === 'GM' && !combat.isPlayMode() && token.type !== 'player'"
@@ -491,6 +489,17 @@ export class GridComponent {
       return Math.abs(tx - target.x) <= widthPx / 2 && Math.abs(ty - target.y) <= lengthPx / 2;
     }
     
+    // Single target or no area shape defined
+    if (!ability.areaShape || ability.areaShape === 'none') {
+      const size = this.getTokenSize(token);
+      const tokenLeft = token.x * gridSize + (gridSize - size) / 2;
+      const tokenRight = tokenLeft + size;
+      const tokenTop = token.y * gridSize + (gridSize - size) / 2;
+      const tokenBottom = tokenTop + size;
+      
+      return target.x >= tokenLeft && target.x <= tokenRight && target.y >= tokenTop && target.y <= tokenBottom;
+    }
+    
     return false;
   }
 
@@ -731,27 +740,15 @@ export class GridComponent {
     this.combat.rightPanelTab.set('sheet');
   }
 
-  private getTokenPositionFromDOM(element: HTMLElement, token: Token): { x: number, y: number } {
-    if (!this.gridContainer) return { x: token.x * this.gridSize, y: token.y * this.gridSize };
-    
-    const rect = element.getBoundingClientRect();
-    const containerRect = this.gridContainer.nativeElement.getBoundingClientRect();
-    
-    const x = (rect.left - containerRect.left - this.combat.pan().x) / this.combat.zoom();
-    const y = (rect.top - containerRect.top - this.combat.pan().y) / this.combat.zoom();
-    
-    return { x, y };
-  }
-
   onDragMoved(event: CdkDragMove, token: Token) {
     if (!this.canMove(token)) return;
     
-    const pos = this.getTokenPositionFromDOM(event.source.element.nativeElement, token);
+    const position = event.source.getFreeDragPosition();
     const size = this.getTokenSize(token);
     
     // The center of the token in pixels
-    const px = pos.x + size / 2;
-    const py = pos.y + size / 2;
+    const px = position.x + size / 2;
+    const py = position.y + size / 2;
     
     this.combat.draggedTokenPos.set({ id: token.id, px, py });
   }
@@ -764,12 +761,12 @@ export class GridComponent {
       return;
     }
 
-    const pos = this.getTokenPositionFromDOM(event.source.element.nativeElement, token);
+    const position = event.source.getFreeDragPosition();
     const size = this.getTokenSize(token);
     
     // Calculate the center of the token, then find which grid cell that center belongs to
-    const centerX = pos.x + size / 2;
-    const centerY = pos.y + size / 2;
+    const centerX = position.x + size / 2;
+    const centerY = position.y + size / 2;
     
     let newGridX = Math.floor(centerX / this.gridSize);
     let newGridY = Math.floor(centerY / this.gridSize);
@@ -789,7 +786,9 @@ export class GridComponent {
     
     // Reset the drag transform so the [cdkDragFreeDragPosition] binding takes over
     // This ensures the token snaps perfectly to the grid center
-    event.source._dragRef.reset();
+    setTimeout(() => {
+      event.source._dragRef.reset();
+    });
     
     this.syncToFirestore(token.id, newGridX, newGridY);
   }
