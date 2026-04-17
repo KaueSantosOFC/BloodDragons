@@ -82,8 +82,8 @@ import { Ability } from '../../models/ability';
             </div>
             <!-- Area Preview SVG -->
             @if (previewAbility()) {
-              <svg class="absolute inset-0 w-full h-full pointer-events-none z-25" [attr.viewBox]="'0 0 ' + mapWidth() + ' ' + mapHeight()">
-                <path [attr.d]="areaPath()" fill="rgba(245, 158, 11, 0.3)" stroke="#f59e0b" stroke-width="2" />
+              <svg class="absolute inset-0 w-full h-full pointer-events-none z-5" [attr.viewBox]="'0 0 ' + mapWidth() + ' ' + mapHeight()">
+                <path [attr.d]="areaPath()" fill="rgba(245, 158, 11, 0.4)" stroke="#f59e0b" stroke-width="2" />
               </svg>
             }
 
@@ -328,8 +328,9 @@ export class GridComponent {
     const gridSize = this.gridSize;
     const pixelsPerMeter = gridSize / 1.5;
     
-    let ox = (origin.x + 0.5) * gridSize;
-    let oy = (origin.y + 0.5) * gridSize;
+    // O raio visual estritamente ancorado ao centro do token na grid (pos + metade do tamanho)
+    let ox = (origin.x * gridSize) + (gridSize / 2);
+    let oy = (origin.y * gridSize) + (gridSize / 2);
     
     const dragged = this.combat.draggedTokenPos();
     if (dragged && dragged.id === origin.id) {
@@ -435,11 +436,13 @@ export class GridComponent {
     const gridSize = this.gridSize;
     const pixelsPerMeter = gridSize / 1.5;
     
-    const tx = (token.x + 0.5) * gridSize;
-    const ty = (token.y + 0.5) * gridSize;
+    // Calcula as cordenadas garantidas ao centro
+    const tx = (token.x * gridSize) + (gridSize / 2);
+    const ty = (token.y * gridSize) + (gridSize / 2);
     
-    const ox = (origin.x + 0.5) * gridSize;
-    const oy = (origin.y + 0.5) * gridSize;
+    // O ox/oy do origin
+    const ox = (origin.x * gridSize) + (gridSize / 2);
+    const oy = (origin.y * gridSize) + (gridSize / 2);
     
     const dx = target.x - ox;
     const dy = target.y - oy;
@@ -758,6 +761,7 @@ export class GridComponent {
     
     const size = this.getTokenSize(token);
     
+    // Prevent non-GM from moving tokens they do not own
     if (!this.canMove(token)) {
       const snappedX = token.x * this.gridSize + (this.gridSize - size) / 2;
       const snappedY = token.y * this.gridSize + (this.gridSize - size) / 2;
@@ -768,10 +772,8 @@ export class GridComponent {
     let centerX: number;
     let centerY: number;
     
-    // Utilize event.dropPoint for maximum accuracy, bypassing any internal transform issues
     if (this.boundary && event.dropPoint) {
       const rect = this.boundary.nativeElement.getBoundingClientRect();
-      // Translate viewport coordinate to map coordinate
       const dropLocalX = (event.dropPoint.x - rect.left) / this.combat.zoom();
       const dropLocalY = (event.dropPoint.y - rect.top) / this.combat.zoom();
       
@@ -787,9 +789,11 @@ export class GridComponent {
     let newGridY = Math.floor(centerY / this.gridSize);
     
     if (this.boundary) {
+      // Calculate max grid cells
       const maxGridX = Math.max(0, Math.floor(this.mapWidth() / this.gridSize) - 1);
       const maxGridY = Math.max(0, Math.floor(this.mapHeight() / this.gridSize) - 1);
       
+      // Strict boundary clipping to prevent sticking outside
       newGridX = Math.max(0, Math.min(newGridX, maxGridX));
       newGridY = Math.max(0, Math.min(newGridY, maxGridY));
     } else {
@@ -797,19 +801,15 @@ export class GridComponent {
       newGridY = Math.max(0, newGridY);
     }
     
+    // Visually Snap:
+    // Update the state so every other system (SVG rays, etc) immediately points to correct grid coordinates.
     this.combat.updateToken(token.id, { x: newGridX, y: newGridY });
     
-    // Snap visually to exactly where it should be on the grid
     const targetPx = newGridX * this.gridSize + (this.gridSize - size) / 2;
     const targetPy = newGridY * this.gridSize + (this.gridSize - size) / 2;
     
-    // Reset standard transform first, then apply free drag constraints securely via Promise/setTimeout
-    setTimeout(() => {
-      event.source.setFreeDragPosition({ x: targetPx, y: targetPy });
-      // Minor refresh hack to ensure CdkDrag doesn't get stuck internally
-      event.source._dragRef.reset();
-      event.source.setFreeDragPosition({ x: targetPx, y: targetPy });
-    });
+    // Force the CDK Drag to reflect the exact new Snapped position, without breaking the state or dragging.
+    event.source.setFreeDragPosition({ x: targetPx, y: targetPy });
     
     this.syncToFirestore(token.id, newGridX, newGridY);
   }

@@ -132,6 +132,23 @@ export class CombatService {
     this.attackModalState.set(null);
   }
 
+  // Damage Modal State
+  damageModalState = signal<{
+    attacker: Token;
+    targets: Token[];
+    ability: Ability;
+    isCritical: boolean;
+  } | null>(null);
+
+  openDamageModal(attacker: Token, targets: Token | Token[], ability: Ability, isCritical: boolean = false) {
+    const targetArray = Array.isArray(targets) ? targets : [targets];
+    this.damageModalState.set({ attacker, targets: targetArray, ability, isCritical });
+  }
+
+  closeDamageModal() {
+    this.damageModalState.set(null);
+  }
+
   // Session Notes State
   storyContent = signal<string>('O grupo se aproxima do templo em ruínas de The <span style="color: #3b82f6; font-weight: bold;">Elden</span> <span style="color: #dc2626; font-weight: bold;">Blood</span><span style="color: #eab308; font-weight: bold;">Moon</span>. <br>Uma névoa espessa obscurece a entrada, e o cheiro de enxofre paira pesado no ar.');
   gmSecretContent = signal<string>('<strong>Segredo do Mestre:</strong> As estátuas perto da porta são na verdade Gárgulas esperando para emboscar.');
@@ -409,7 +426,12 @@ export class CombatService {
   }
 
   updateTarget(x: number, y: number) {
-    this.previewTarget.set({ x, y });
+    // Para alinhamento perfeito do cone/raio e evitar o aspecto "quebrado" nas linhas da grade, 
+    // os coordenados do target agora sofrem Snap pro centro da célula focada.
+    const gridSize = 64; // Mesma referência do GridComponent
+    const snappedX = Math.floor(x / gridSize) * gridSize + (gridSize / 2);
+    const snappedY = Math.floor(y / gridSize) * gridSize + (gridSize / 2);
+    this.previewTarget.set({ x: snappedX, y: snappedY });
   }
 
   cancelPreview() {

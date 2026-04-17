@@ -248,34 +248,9 @@ export class AttackModalComponent {
     const res = this.result();
     if (!s || !res || !this.isHit() || !s.ability.damage) return;
 
-    if (s.ability.areaShape && s.ability.areaShape !== 'none') {
-      // Use resolveAoEDamage from combat service
-      this.combat.resolveAoEDamage({x: s.attacker.x, y: s.attacker.y}, s.targets, s.ability, res.isCritical);
-    } else {
-      // Calculate damage
-      const damageDice = s.ability.damage;
-      
-      // For simplicity, we use the engine's calculateDamage
-      // We need the modifier used for the attack to add to damage (unless it's a spell, usually spells don't add modifier to damage unless specified, but we'll add it for simplicity or just use 0)
-      const attackerStats = (s.attacker.sheet as unknown) as Record<string, number>;
-      const mod = this.isSpell() ? 0 : this.engine.calculateModifier(attackerStats[res.attributeUsed] || 10);
-      
-      const damageRoll = this.engine.calculateDamage(damageDice, mod, 0);
-      
-      if (res.isCritical) {
-        const critDamage = this.engine.calculateDamage(damageDice, 0, 0);
-        damageRoll.total += critDamage.total;
-      }
-
-      s.targets.forEach(target => {
-        this.combat.updateToken(target.id, { hp: Math.max(0, target.hp - damageRoll.total) });
-        
-        // Log
-        const log = `Ataque contra ${target.name} (CA ${this.targetAC()}): d20 [${res.naturalRoll}] + Mod ${res.modifier} = ${res.total} -> ACERTOU!\nDano: ${damageRoll.total}`;
-        console.log(log);
-        this.combat.addNotification(log, 'info');
-      });
-    }
+    // Use string from DB, but we could also calculate the extra modifier from stats here 
+    // depending on the RPG system string strategy. Assuming the user requested standard parser for now:
+    this.combat.openDamageModal(s.attacker, s.targets, s.ability, res.isCritical);
     
     this.close();
   }

@@ -12,11 +12,12 @@ import { CommonModule } from '@angular/common';
 import { ItemInteractionModalComponent } from '../item-interaction-modal/item-interaction-modal.component';
 
 import { AttackModalComponent } from '../attack-modal/attack-modal.component';
+import { DamageModalComponent } from '../damage-modal/damage-modal.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [GridComponent, GmPanelComponent, RightPanelComponent, BottomBarComponent, StorySlidesComponent, SceneFilmstripComponent, MatIconModule, CommonModule, ItemInteractionModalComponent, AttackModalComponent],
+  imports: [GridComponent, GmPanelComponent, RightPanelComponent, BottomBarComponent, StorySlidesComponent, SceneFilmstripComponent, MatIconModule, CommonModule, ItemInteractionModalComponent, AttackModalComponent, DamageModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col h-screen w-screen overflow-hidden bg-black text-stone-200 font-sans">
@@ -78,6 +79,7 @@ import { AttackModalComponent } from '../attack-modal/attack-modal.component';
       <!-- Modals -->
       <app-item-interaction-modal></app-item-interaction-modal>
       <app-attack-modal></app-attack-modal>
+      <app-damage-modal></app-damage-modal>
     </div>
   `
 })
