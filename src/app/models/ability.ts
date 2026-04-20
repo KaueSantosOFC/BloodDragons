@@ -15,6 +15,8 @@ export interface Ability {
   healing?: string; // e.g., "2d4+2"
   description: string;
   
+  applyCondition?: { conditionId: string; duration?: number }; // applies a condition on hit / failed save
+  
   attackBonus?: number; // e.g., +5 to hit
   
   category?: 'weapon' | 'spell' | 'feature' | 'item_effect';

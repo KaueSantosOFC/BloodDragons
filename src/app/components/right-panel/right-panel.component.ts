@@ -165,6 +165,20 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                     <mat-icon style="font-size: 14px; width: 14px; height: 14px;">inventory_2</mat-icon>
                     Itens Coletados
                   </h4>
+                  <div class="flex items-center gap-2 text-[10px] font-mono" [class.text-red-500]="totalWeight() > maxCapacity()">
+                    <span class="text-stone-400">Peso:</span>
+                    <span class="font-bold">{{ totalWeight() | number:'1.1-1' }} / {{ maxCapacity() | number:'1.1-1' }} kg</span>
+                  </div>
+                </div>
+                
+                <!-- Weight Progress Bar -->
+                <div class="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden mb-3 border border-stone-700">
+                  <div class="h-full transition-all duration-300"
+                       [class.bg-green-500]="totalWeight() <= maxCapacity() * 0.5"
+                       [class.bg-yellow-500]="totalWeight() > maxCapacity() * 0.5 && totalWeight() <= maxCapacity()"
+                       [class.bg-red-500]="totalWeight() > maxCapacity()"
+                       [style.width.%]="Math.min((totalWeight() / (maxCapacity() || 1)) * 100, 100)">
+                  </div>
                 </div>
                 
                 @if (selectedToken()?.sheet?.inventory?.length) {
@@ -173,18 +187,39 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                       <div class="bg-stone-800 rounded border border-stone-700 overflow-hidden shadow-md">
                         <div class="p-2 border-b border-stone-700 flex justify-between items-center bg-stone-800/50">
                           <div class="flex items-center gap-2">
-                            <span class="font-bold text-amber-500 text-sm">{{ item.name }}</span>
+                            <span class="font-bold text-amber-500 text-sm flex items-center gap-1">
+                              @if (item.isEquipped) {
+                                <mat-icon class="text-green-500" style="font-size: 14px; width: 14px; height: 14px;">check_circle</mat-icon>
+                              }
+                              {{ item.name }}
+                            </span>
                           </div>
                           @if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                            <button class="text-stone-500 hover:text-red-500 transition-colors" (click)="removeInventoryItem(item.name)" title="Remover item">
-                              <mat-icon style="font-size: 14px; width: 14px; height: 14px;">delete</mat-icon>
-                            </button>
+                            <div class="flex items-center gap-1">
+                              <!-- Equip / Unequip Toggle -->
+                              <button class="text-stone-500 hover:text-green-400 transition-colors" (click)="toggleEquipItem(item.name)" [title]="item.isEquipped ? 'Desequipar item' : 'Equipar item'">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
+                                  {{ item.isEquipped ? 'shield' : 'shield_none' }}
+                                </mat-icon>
+                              </button>
+                              <!-- Drop Item -->
+                              <button class="text-stone-500 hover:text-amber-500 transition-colors ml-1" (click)="dropItem(item.name)" title="Largar no chão">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">pan_tool_alt</mat-icon>
+                              </button>
+                              <!-- Delete Form -->
+                              <button class="text-stone-500 hover:text-red-500 transition-colors ml-1" (click)="removeInventoryItem(item.name)" title="Deletar da ficha">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">delete</mat-icon>
+                              </button>
+                            </div>
                           }
                         </div>
                         <div class="p-2 text-xs space-y-2">
                           <div class="flex gap-2 font-mono flex-wrap">
                             <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700 text-stone-300">Qtd: {{ item.quantity }}</span>
                             <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700 text-stone-300">Peso: {{ item.weight }}kg</span>
+                            @if (item.isEquipped) {
+                              <span class="bg-green-900/30 text-green-500 px-2 py-1 rounded border border-green-700/50">Equipado</span>
+                            }
                           </div>
                         </div>
                       </div>
@@ -1472,6 +1507,8 @@ export class RightPanelComponent {
   combat = inject(CombatService);
   auth = inject(AuthService);
 
+  Math = Math;
+
   isEditingSheet = signal(false);
   isEditingConditions = signal(false);
   fichaSubTab = signal<'weapons' | 'spells' | 'features'>('weapons');
@@ -1704,6 +1741,70 @@ export class RightPanelComponent {
     updatedSheet.inventory = updatedSheet.inventory!.filter(i => i.name !== itemName);
 
     this.combat.updateToken(token.id, { sheet: updatedSheet });
+  }
+
+  totalWeight = computed(() => {
+    const sheet = this.selectedToken()?.sheet;
+    if (!sheet || !sheet.inventory) return 0;
+    return sheet.inventory.reduce((sum, item) => sum + (item.weight || 0) * (item.quantity || 1), 0);
+  });
+
+  maxCapacity = computed(() => {
+    const str = this.selectedToken()?.sheet?.str || 10;
+    return str * 7.5; // Aproximadamente 15 lbs por ponto de força = 7.5 kg
+  });
+
+  toggleEquipItem(itemName: string) {
+    const token = this.selectedToken();
+    if (!token || !token.sheet || !token.sheet.inventory) return;
+
+    const inventory = [...token.sheet.inventory];
+    const index = inventory.findIndex(i => i.name === itemName);
+    if (index === -1) return;
+
+    inventory[index] = { ...inventory[index], isEquipped: !inventory[index].isEquipped };
+
+    this.combat.updateToken(token.id, { sheet: { ...token.sheet, inventory } });
+  }
+
+  dropItem(itemName: string) {
+    const token = this.selectedToken();
+    if (!token || !token.sheet || !token.sheet.inventory) return;
+
+    const inventory = [...token.sheet.inventory];
+    const index = inventory.findIndex(i => i.name === itemName);
+    if (index === -1) return;
+
+    const item = inventory[index];
+    
+    // Diminui a quantidade ou remove se chegar a zero
+    if (item.quantity > 1) {
+      inventory[index] = { ...item, quantity: item.quantity - 1 };
+    } else {
+      inventory.splice(index, 1);
+    }
+    
+    // Atualiza a ficha
+    this.combat.updateToken(token.id, { sheet: { ...token.sheet, inventory } });
+
+    // Cria o token no mapa do item
+    const newItemToken = { // ItemToken
+      id: 'drop_' + Date.now().toString(),
+      x: token.x,
+      y: token.y,
+      name: item.name,
+      description: 'Item deixado por ' + token.name,
+      weight: item.weight,
+      quantity: 1,
+      isPickedUp: false,
+      actions: [],
+      // Usar uma imagem default se preferir ou sem imagem para pegar o quadrado roxo (ver grid)
+    };
+
+    // Adiciona o item
+    this.combat.itemTokens.update(items => [...items, newItemToken]);
+    
+    this.combat.addNotification(`${token.name} soltou 1 ${item.name} no chão.`, 'info');
   }
 
   isDraggingImage = signal(false);

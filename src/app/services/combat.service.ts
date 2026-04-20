@@ -838,6 +838,25 @@ export class CombatService {
       
       // Aplica o dano no alvo (opcional no exemplo)
       // this.updateToken(target.id, { hp: Math.max(0, target.hp - damageRoll.total) });
+
+      // ==========================================
+      // Apply Condition Logic
+      // ==========================================
+      if (ability.applyCondition) {
+        const condId = ability.applyCondition.conditionId;
+        const conditionDef = AVAILABLE_CONDITIONS.find(c => c.id === condId);
+        
+        if (conditionDef && (!target.conditions || !target.conditions.some(c => c.id === condId))) {
+          const newCondition = { ...conditionDef };
+          const updatedConditions = [...(target.conditions || []), newCondition];
+          
+          this.updateToken(target.id, { conditions: updatedConditions });
+          
+          log += `\n☣️ O alvo sofreu a condição: ${conditionDef.name}!`;
+          this.addNotification(`${target.name} foi atingido e agora está ${conditionDef.name}!`, 'info');
+        }
+      }
+      
     } else {
       log += `\n🛡️ ERROU!`;
     }
@@ -875,9 +894,22 @@ export class CombatService {
       }
       
       const newHp = Math.max(0, item.token.hp - dmg);
-      this.updateToken(item.token.id, { hp: newHp });
       
-      const log = `${item.token.name} sofreu ${dmg} de dano em área (${index === 0 ? 'Dano Total' : 'Dano Reduzido'}).`;
+      let newConditions = item.token.conditions || [];
+      let conditionMsg = '';
+      if (ability.applyCondition) {
+        const condId = ability.applyCondition.conditionId;
+        const conditionDef = AVAILABLE_CONDITIONS.find(c => c.id === condId);
+        
+        if (conditionDef && !newConditions.some(c => c.id === condId)) {
+          newConditions = [...newConditions, { ...conditionDef }];
+          conditionMsg = ` e está ${conditionDef.name}`;
+        }
+      }
+      
+      this.updateToken(item.token.id, { hp: newHp, conditions: newConditions });
+      
+      const log = `${item.token.name} sofreu ${dmg} de dano em área (${index === 0 ? 'Dano Total' : 'Dano Reduzido'})${conditionMsg}.`;
       this.addNotification(log, 'info');
     });
   }
