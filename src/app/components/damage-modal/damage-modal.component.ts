@@ -13,10 +13,10 @@ import { DndCoreEngineService } from '../../services/dnd-core-engine.service';
   template: `
     @if (state()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-        <div class="bg-stone-900 border border-stone-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+        <div class="bg-stone-900 border border-stone-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
           
           <!-- Header -->
-          <div class="bg-stone-800 p-4 border-b border-stone-700 flex items-center justify-between">
+          <div class="bg-stone-800 p-4 border-b border-stone-700 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full border-2 border-red-500 overflow-hidden bg-stone-900">
                 @if (state()?.attacker?.imageUrl) {
@@ -34,7 +34,7 @@ import { DndCoreEngineService } from '../../services/dnd-core-engine.service';
           </div>
 
           <!-- Body -->
-          <div class="p-5 space-y-4">
+          <div class="p-4 space-y-3 overflow-y-auto flex-1">
             
             <div class="flex flex-col gap-3 bg-stone-800/50 p-4 rounded border border-stone-700/50">
               <div class="flex items-center gap-4">
@@ -70,10 +70,10 @@ import { DndCoreEngineService } from '../../services/dnd-core-engine.service';
 
             @if (state()?.hitTier !== 'critical') {
               <!-- Parsing Display -->
-              <div class="bg-stone-800 p-6 rounded border border-stone-700 text-center space-y-4 shadow-inner">
+              <div class="bg-stone-800 p-4 rounded border border-stone-700 text-center space-y-3 shadow-inner">
                 <p class="text-base text-stone-300 font-bold">Role os dados físicos na mesa:</p>
                 
-                <div class="flex justify-center items-end gap-3 my-4">
+                <div class="flex justify-center items-end gap-3 my-3">
                   @if (parsedDamage().diceType) {
                     <div class="flex flex-col items-center">
                       <span class="text-xs text-stone-500 uppercase font-black tracking-widest">Quant.</span>
@@ -110,13 +110,13 @@ import { DndCoreEngineService } from '../../services/dnd-core-engine.service';
               </div>
 
               <!-- Input Result -->
-              <div class="space-y-4 pt-2 flex flex-col items-center">
+              <div class="space-y-2 pt-2 flex flex-col items-center">
                 <label for="manualRollInput" class="text-sm font-black text-stone-400 uppercase tracking-[0.2em] block text-center">
                   Soma Total dos Dados
                 </label>
                 <div class="w-2/3">
                   <input id="manualRollInput" type="number" [(ngModel)]="manualRoll" 
-                         class="w-full bg-stone-950 border-2 rounded-lg px-4 py-4 text-center font-mono font-black text-3xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                         class="w-full bg-stone-950 border-2 rounded-lg px-3 py-3 text-center font-mono font-black text-3xl focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                          placeholder="?"
                          [class.border-red-500]="errorMessage()"
                          [class.border-stone-700]="!errorMessage()"
@@ -141,19 +141,19 @@ import { DndCoreEngineService } from '../../services/dnd-core-engine.service';
               </div>
             }
             
-            <div class="flex justify-between items-center bg-stone-950 p-5 rounded-lg border border-stone-700 shadow-xl">
+            <div class="flex justify-between items-center bg-stone-950 p-4 rounded-lg border border-stone-700 shadow-xl">
                <span class="text-base font-black text-stone-500 uppercase tracking-widest">Total Resultante</span>
                <span class="text-4xl font-mono font-black text-amber-500">{{ calculatedTotal() }}</span>
             </div>
 
             <!-- Applicator -->
-            <div class="flex gap-2 pt-4">
-              <button (click)="close()" class="flex-1 py-3 bg-stone-700 hover:bg-stone-600 text-white font-bold rounded transition-colors">
+            <div class="flex gap-2 pt-2 pb-1 shrink-0">
+              <button (click)="close()" class="flex-1 py-2.5 bg-stone-700 hover:bg-stone-600 text-white font-bold rounded transition-colors">
                 CANCELAR
               </button>
               <button (click)="applyDamage()" 
                       [disabled]="(state()?.hitTier !== 'critical' && parsedDamage().diceType && manualRoll() === null) || errorMessage() !== null"
-                      class="flex-1 py-3 bg-red-600 hover:bg-red-500 disabled:bg-stone-800 disabled:text-stone-600 text-white font-bold rounded transition-colors flex items-center justify-center gap-2">
+                      class="flex-1 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-stone-800 disabled:text-stone-600 text-white font-bold rounded transition-colors flex items-center justify-center gap-2">
                 <mat-icon>gavel</mat-icon>
                 APLICAR
               </button>
