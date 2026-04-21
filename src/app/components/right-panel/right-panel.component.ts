@@ -1798,11 +1798,25 @@ export class RightPanelComponent {
       quantity: 1,
       isPickedUp: false,
       actions: [],
-      // Usar uma imagem default se preferir ou sem imagem para pegar o quadrado roxo (ver grid)
+    };
+
+    // Cria a representação visual para o Grid
+    const visualToken = {
+      id: newItemToken.id,
+      name: item.name,
+      x: token.x,
+      y: token.y,
+      hp: 1,
+      maxHp: 1,
+      conditions: [],
+      controlledBy: 'GM',
+      color: '#a855f7',
+      type: 'item' as const
     };
 
     // Adiciona o item
     this.combat.itemTokens.update(items => [...items, newItemToken]);
+    this.combat.tokens.update(ts => [...ts, visualToken]);
     
     this.combat.addNotification(`${token.name} soltou 1 ${item.name} no chão.`, 'info');
   }

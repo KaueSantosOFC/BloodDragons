@@ -1016,11 +1016,25 @@ export class GridComponent {
 
     // Collision Detection for Loot
     if (token.type === 'player' || token.type === 'npc') {
-      const collidedItem = this.combat.itemTokens().find(i => i.x === newGridX && i.y === newGridY);
-      if (collidedItem) {
-        // Select the item visually and trigger the confirmation modal
-        this.combat.selectedItemToken.set(collidedItem);
-        this.combat.pendingLoot.set({ playerTokenId: token.id, itemTokenId: collidedItem.id });
+      const collidedToken = this.combat.tokens().find(t => t.type === 'item' && t.x === newGridX && t.y === newGridY);
+      
+      if (collidedToken) {
+        // Encontra o item correspondente no array de itemTokens ou usa os dados do token como fallback
+        const itemInfo = this.combat.itemTokens().find(i => i.id === collidedToken.id) || 
+          { 
+            id: collidedToken.id, 
+            x: collidedToken.x, 
+            y: collidedToken.y, 
+            name: collidedToken.name, 
+            description: 'Item desconhecido', 
+            weight: 0, 
+            quantity: 1, 
+            isPickedUp: false,
+            actions: [] 
+          };
+          
+        this.combat.selectedItemToken.set(itemInfo);
+        this.combat.pendingLoot.set({ playerTokenId: token.id, itemTokenId: itemInfo.id });
       }
     }
   }
