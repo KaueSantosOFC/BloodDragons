@@ -875,7 +875,7 @@ export class CombatService {
     };
   }
 
-  resolveAoEDamage(origin: {x: number, y: number}, targets: Token[], ability: Ability, isCritical: boolean = false) {
+  resolveAoEDamage(origin: {x: number, y: number}, targets: Token[], ability: Ability, isCritical = false) {
     if (!ability.damage) return;
     
     // Sort targets by distance to origin

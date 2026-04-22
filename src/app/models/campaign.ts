@@ -1,8 +1,10 @@
+import { Token } from './token';
+
 export interface Scene {
   id: string;
   name: string;
   mapBackgroundImage: string | null;
-  tokens: any[];
+  tokens: Token[];
   fogOfWar: string[];
   isFogEnabled: boolean;
 }
@@ -12,7 +14,7 @@ export interface Campaign {
   name: string;
   createdAt: Date;
   lastPlayedAt: Date;
-  tokens?: any[];
+  tokens?: Token[];
   mapBackgroundImage?: string | null;
   fogOfWar?: string[];
   isFogEnabled?: boolean;

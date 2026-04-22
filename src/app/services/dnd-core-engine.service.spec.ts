@@ -103,4 +103,66 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
     expect(fumbleResult.isCritical).toBe(false);
     expect(fumbleResult.isFumble).toBe(true);
   });
+
+  describe('Salvagarda (Saving Throws) & Spell DC', () => {
+    it('deve calcular a Classe de Dificuldade de Magia (Spell Save DC) corretamente', () => {
+      // 8 + Prof (+3) + Mod Int (+4) = 15
+      const dc = service.calculateSpellSaveDC(4, 3);
+      expect(dc).toBe(15);
+    });
+
+    it('deve executar um Teste de Resistência (Saving Throw) corretamente sem proficiência', () => {
+      spyOn(Math, 'random').and.returnValue(0.5); // 0.5 * 20 = 10 -> natural 11
+      const save = service.executeSavingThrow(2 /* mod */, 3 /* prof */, false /* isProficient */);
+      expect(save.naturalRoll).toBe(11);
+      expect(save.modifiers).toBe(2);
+      expect(save.total).toBe(13);
+    });
+
+    it('deve executar um Teste de Resistência (Saving Throw) somando a proficiência do alvo', () => {
+      spyOn(Math, 'random').and.returnValue(0.5); // 0.5 * 20 = 10 -> natural 11
+      const save = service.executeSavingThrow(2 /* mod */, 3 /* prof */, true /* isProficient */);
+      expect(save.naturalRoll).toBe(11);
+      expect(save.modifiers).toBe(5); // 2 + 3
+      expect(save.total).toBe(16);
+    });
+  });
+
+  describe('Resolução Unificada de Vantagem / Desvantagem (D20)', () => {
+    it('deve anular a vantagem e desvantagem caso ambas estejam presentes', () => {
+      // Mock random to return 10 then 18
+      const randomValues = [0.45, 0.85]; 
+      let i = 0;
+      spyOn(Math, 'random').and.callFake(() => randomValues[i++]);
+
+      const result = service.rollD20(true, true);
+      // Math.floor(0.45 * 20) + 1 = 10
+      // Math.floor(0.85 * 20) + 1 = 18
+      // Como Vantagem e Desvantagem se anulam, só o primeiro rolamento conta.
+      expect(result.naturalRoll).toBe(10);
+      expect(result.roll1).toBe(10);
+      expect(result.roll2).toBeUndefined(); // Não roda o segundo dado se se anulam
+      expect(result.mode).toBe('normal');
+    });
+
+    it('deve escolher o maior dado na Vantagem', () => {
+      const randomValues = [0.45, 0.85]; // 10, 18
+      let i = 0;
+      spyOn(Math, 'random').and.callFake(() => randomValues[i++]);
+
+      const result = service.rollD20(true, false);
+      expect(result.naturalRoll).toBe(18);
+      expect(result.mode).toBe('advantage');
+    });
+
+    it('deve escolher o menor dado na Desvantagem', () => {
+      const randomValues = [0.45, 0.85]; // 10, 18
+      let i = 0;
+      spyOn(Math, 'random').and.callFake(() => randomValues[i++]);
+
+      const result = service.rollD20(false, true);
+      expect(result.naturalRoll).toBe(10);
+      expect(result.mode).toBe('disadvantage');
+    });
+  });
 });

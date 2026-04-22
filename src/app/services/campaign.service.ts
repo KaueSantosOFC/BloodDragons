@@ -20,11 +20,11 @@ export class CampaignService {
       try {
         const parsed = JSON.parse(saved);
         // Convert string dates back to Date objects
-        const campaigns = parsed.map((c: any) => ({
+        const campaigns = parsed.map((c: Record<string, unknown>) => ({
           ...c,
-          createdAt: new Date(c.createdAt),
-          lastPlayedAt: new Date(c.lastPlayedAt)
-        }));
+          createdAt: new Date(c['createdAt'] as string),
+          lastPlayedAt: new Date(c['lastPlayedAt'] as string)
+        })) as Campaign[];
         this.campaigns.set(campaigns);
       } catch (e) {
         console.error('Failed to parse campaigns', e);
@@ -37,7 +37,7 @@ export class CampaignService {
         name: 'Campanha Teste (Tutorial)',
         createdAt: new Date(),
         lastPlayedAt: new Date(),
-        tokens: null as any // We will handle this in CombatService
+        tokens: []
       };
       this.campaigns.set([testCampaign]);
       this.saveCampaigns([testCampaign]);

@@ -118,6 +118,80 @@ export class DndCoreEngineService {
    * Calcula um ataque completo (d20 + Mod + Prof + Bonus Mágico)
    * Identifica Crítico (20 natural) e Falha Crítica (1 natural)
    */
+  /**
+   * Resolução unificada de rolamentos de d20 para Ataques, Saves e Perícias
+   * Suporta o cancelamento mútuo de Vantagem e Desvantagem pelas regras de 5e.
+   */
+  rollD20(
+    hasAdvantage: boolean,
+    hasDisadvantage: boolean
+  ): { naturalRoll: number, roll1: number, roll2?: number, mode: 'normal' | 'advantage' | 'disadvantage' } {
+    const roll1 = Math.floor(Math.random() * 20) + 1;
+    
+    // Regra D&D 5e: Se tem vantagem e desvantagem, elas anulam-se mutuamente.
+    if (hasAdvantage && hasDisadvantage) {
+      return { naturalRoll: roll1, roll1, mode: 'normal' };
+    }
+    
+    if (hasAdvantage || hasDisadvantage) {
+      const roll2 = Math.floor(Math.random() * 20) + 1;
+      let naturalRoll = roll1;
+      let mode: 'normal' | 'advantage' | 'disadvantage' = 'normal';
+      
+      if (hasAdvantage) {
+        naturalRoll = Math.max(roll1, roll2);
+        mode = 'advantage';
+      } else if (hasDisadvantage) {
+        naturalRoll = Math.min(roll1, roll2);
+        mode = 'disadvantage';
+      }
+      return { naturalRoll, roll1, roll2, mode };
+    }
+
+    return { naturalRoll: roll1, roll1, mode: 'normal' };
+  }
+
+  /**
+   * Executa um teste de Resistência (Saving Throw) segundo as regras oficiais da 5e.
+   */
+  executeSavingThrow(
+    modifier: number,
+    proficiency: number,
+    isProficient: boolean,
+    hasAdvantage = false,
+    hasDisadvantage = false,
+    magicBonus = 0 // Ex: Paladin Aura of Protection ou Ring of Protection
+  ): ActionResult {
+    const { naturalRoll, roll1, roll2, mode } = this.rollD20(hasAdvantage, hasDisadvantage);
+    
+    let logRolls = `[${roll1}]`;
+    if (roll2 !== undefined) {
+      if (mode === 'advantage') logRolls = `[${roll1}, ${roll2}] (Vantagem: ${naturalRoll})`;
+      if (mode === 'disadvantage') logRolls = `[${roll1}, ${roll2}] (Desvantagem: ${naturalRoll})`;
+    }
+
+    const isCritical = naturalRoll === 20;
+    const isCriticalFail = naturalRoll === 1;
+
+    const profBonus = isProficient ? proficiency : 0;
+    const modifiers = modifier + profBonus + magicBonus;
+    const total = naturalRoll + modifiers;
+
+    let log = `d20: ${logRolls} + Mod: ${modifier}`;
+    if (isProficient) log += ` + Prof: ${profBonus}`;
+    if (magicBonus) log += ` + Bônus Mágico: ${magicBonus}`;
+    log += ` = ${total}`;
+
+    return {
+      total,
+      naturalRoll,
+      modifiers,
+      isCritical,
+      isCriticalFail,
+      log
+    };
+  }
+
   executeAttackRoll(
     modifier: number, 
     proficiency: number, 
@@ -125,18 +199,14 @@ export class DndCoreEngineService {
     mode: 'normal' | 'advantage' | 'disadvantage' = 'normal',
     extraDice = '' // ex: "1d4" para Bênção
   ): ActionResult {
-    const roll1 = Math.floor(Math.random() * 20) + 1;
-    const roll2 = Math.floor(Math.random() * 20) + 1;
+    const hasAdvantage = mode === 'advantage';
+    const hasDisadvantage = mode === 'disadvantage';
+    const { naturalRoll, roll1, roll2, mode: resolvedMode } = this.rollD20(hasAdvantage, hasDisadvantage);
     
-    let naturalRoll = roll1;
     let logRolls = `[${roll1}]`;
-
-    if (mode === 'advantage') {
-      naturalRoll = Math.max(roll1, roll2);
-      logRolls = `[${roll1}, ${roll2}] (Vantagem: ${naturalRoll})`;
-    } else if (mode === 'disadvantage') {
-      naturalRoll = Math.min(roll1, roll2);
-      logRolls = `[${roll1}, ${roll2}] (Desvantagem: ${naturalRoll})`;
+    if (roll2 !== undefined) {
+      if (resolvedMode === 'advantage') logRolls = `[${roll1}, ${roll2}] (Vantagem: ${naturalRoll})`;
+      if (resolvedMode === 'disadvantage') logRolls = `[${roll1}, ${roll2}] (Desvantagem: ${naturalRoll})`;
     }
 
     const isCritical = naturalRoll === 20;

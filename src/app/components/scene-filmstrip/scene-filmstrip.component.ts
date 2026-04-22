@@ -28,16 +28,18 @@ import { AuthService } from '../../services/auth.service';
           @for (scene of combat.scenes(); track scene.id; let i = $index) {
             <div class="relative group flex-shrink-0 cursor-pointer rounded border-2 transition-all duration-200 w-32 h-20 overflow-hidden"
                  cdkDrag
+                 tabindex="0"
                  [class.border-amber-500]="combat.activeSceneId() === scene.id"
                  [class.border-stone-700]="combat.activeSceneId() !== scene.id"
                  [class.opacity-60]="combat.activeSceneId() !== scene.id"
                  [class.hover:opacity-100]="combat.activeSceneId() !== scene.id"
-                 (click)="loadScene(scene.id)">
+                 (click)="loadScene(scene.id)"
+                 (keyup.enter)="loadScene(scene.id)">
               
               <div *cdkDragPlaceholder class="w-32 h-20 rounded border-2 border-dashed border-stone-500 bg-stone-800/50"></div>
               
               @if (scene.mapBackgroundImage) {
-                <img [src]="scene.mapBackgroundImage" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+                <img [src]="scene.mapBackgroundImage" alt="Background" class="w-full h-full object-cover" referrerpolicy="no-referrer">
               } @else {
                 <div class="w-full h-full bg-stone-800 flex items-center justify-center">
                   <mat-icon class="text-stone-600">map</mat-icon>
@@ -53,7 +55,7 @@ import { AuthService } from '../../services/auth.service';
               </div>
 
               <!-- Drag Handle -->
-              <div cdkDragHandle class="absolute top-1 left-1 w-6 h-6 bg-black/60 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing hover:bg-black/80" (click)="$event.stopPropagation()">
+              <div cdkDragHandle tabindex="0" class="absolute top-1 left-1 w-6 h-6 bg-black/60 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing hover:bg-black/80" (keyup.enter)="$event.stopPropagation()" (click)="$event.stopPropagation()">
                 <mat-icon style="font-size: 14px; width: 14px; height: 14px;">drag_indicator</mat-icon>
               </div>
 
@@ -78,7 +80,7 @@ export class SceneFilmstripComponent {
   combat = inject(CombatService);
   auth = inject(AuthService);
 
-  dropScene(event: CdkDragDrop<any[]>) {
+  dropScene(event: CdkDragDrop<unknown[]>) {
     if (event.previousIndex !== event.currentIndex) {
       this.combat.reorderScenes(event.previousIndex, event.currentIndex);
     }

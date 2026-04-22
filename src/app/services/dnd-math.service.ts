@@ -45,7 +45,7 @@ export class DndMathService {
    * Por cada nível após o 1º: Média do dado (arredondada p/ cima) + Mod Con.
    * O HP ganho por nível tem de ser no mínimo 1.
    */
-  calculateMaxHpGain(hitDie: number, conModifier: number, isFirstLevel: boolean = false, isRolled: boolean = false): number {
+  calculateMaxHpGain(hitDie: number, conModifier: number, isFirstLevel = false, isRolled = false): number {
     if (isFirstLevel) {
       return Math.max(1, hitDie + conModifier);
     }
@@ -103,9 +103,9 @@ export class DndMathService {
     if (config.armorType === 'none') {
       // Unarmored Calculations
       
-      let standardUnarmored = 10 + dexMod;
-      let barbarianUnarmored = 10 + dexMod + conMod; // Shield is allowed, but handled structurally later
-      let monkUnarmored = 10 + dexMod + wisMod;      // Shield NOT allowed
+      const standardUnarmored = 10 + dexMod;
+      const barbarianUnarmored = 10 + dexMod + conMod; // Shield is allowed, but handled structurally later
+      const monkUnarmored = 10 + dexMod + wisMod;      // Shield NOT allowed
 
       // Se é Monge e tem escudo equipado, as regras determinam que a C.A passa a ser a padrão.
       if (config.unarmoredDefenseClass === 'monk' && config.hasShield) {

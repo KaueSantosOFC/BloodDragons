@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { CombatService } from '../../services/combat.service';
-import { DndCoreEngineService, AttackRollResult, ActionResult } from '../../services/dnd-core-engine.service';
+import { DndCoreEngineService, AttackRollResult } from '../../services/dnd-core-engine.service';
 
 @Component({
   selector: 'app-attack-modal',
@@ -19,7 +19,9 @@ import { DndCoreEngineService, AttackRollResult, ActionResult } from '../../serv
           <div class="bg-stone-800 p-4 border-b border-stone-700 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full border-2 border-amber-500 overflow-hidden bg-stone-900">
-                <img *ngIf="state()?.attacker?.imageUrl" [src]="state()?.attacker?.imageUrl" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+                @if (state()?.attacker?.imageUrl) {
+                   <img [src]="state()?.attacker?.imageUrl" alt="Attacker" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+                }
               </div>
               <div>
                 <h2 class="text-lg font-bold text-amber-500 leading-tight">Ataque</h2>
@@ -159,10 +161,11 @@ export class AttackModalComponent {
     const s = this.state();
     if (!s) return 'str';
     
+    const sheet = s.attacker.sheet;
     const attacker = {
-      stats: (s.attacker.sheet as unknown) as Record<string, number>,
-      proficiencyBonus: s.attacker.sheet?.proficiencyBonus || 2,
-      spellcastingAbility: (s.attacker.sheet as any)?.spellcastingAbility || 'int'
+      stats: (sheet as unknown) as Record<string, number>,
+      proficiencyBonus: sheet?.proficiencyBonus || 2,
+      spellcastingAbility: sheet?.spellcastingAbility || 'int'
     };
     const weapon = {
       name: s.ability.name,
@@ -180,10 +183,11 @@ export class AttackModalComponent {
     const s = this.state();
     if (!s) return 0;
     
+    const sheet = s.attacker.sheet;
     const attacker = {
-      stats: (s.attacker.sheet as unknown) as Record<string, number>,
-      proficiencyBonus: s.attacker.sheet?.proficiencyBonus || 2,
-      spellcastingAbility: (s.attacker.sheet as any)?.spellcastingAbility || 'int'
+      stats: (sheet as unknown) as Record<string, number>,
+      proficiencyBonus: sheet?.proficiencyBonus || 2,
+      spellcastingAbility: sheet?.spellcastingAbility || 'int'
     };
     const weapon = {
       name: s.ability.name,
@@ -230,10 +234,11 @@ export class AttackModalComponent {
     }
     this.errorMsg.set(null);
 
+    const sheet = s.attacker.sheet;
     const attacker = {
-      stats: (s.attacker.sheet as unknown) as Record<string, number>,
-      proficiencyBonus: s.attacker.sheet?.proficiencyBonus || 2,
-      spellcastingAbility: (s.attacker.sheet as any)?.spellcastingAbility || 'int'
+      stats: (sheet as unknown) as Record<string, number>,
+      proficiencyBonus: sheet?.proficiencyBonus || 2,
+      spellcastingAbility: sheet?.spellcastingAbility || 'int'
     };
     const weapon = {
       name: s.ability.name,
