@@ -31,239 +31,6 @@ import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.dat
         }
       </div>
       
-      <!-- Inventory & Spells Tab -->
-      @if (combat.rightPanelTab() === 'inventory') {
-        <div class="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-4 space-y-4">
-          @if (combat.previewAbility()) {
-            <div class="bg-amber-900/30 border border-amber-500/50 rounded p-3 text-sm text-amber-500 flex items-center gap-2 mb-4">
-              <mat-icon>info</mat-icon>
-              <span>Modo de visualização ativo. Clique no mapa para confirmar o ataque.</span>
-              <button class="ml-auto bg-stone-800 hover:bg-stone-700 text-stone-300 px-2 py-1 rounded text-xs" (click)="combat.cancelPreview()">Cancelar</button>
-            </div>
-          }
-
-          @if (selectedToken()?.type === 'item') {
-              <!-- Item Image -->
-              @if (selectedToken()?.imageUrl) {
-                <div class="flex flex-col items-center mb-4">
-                  <div class="w-32 h-32 overflow-hidden rounded-md border border-stone-700 shadow-lg bg-stone-800/50 relative group"
-                       [class.cursor-grab]="isAuthorizedToEditImage() && !isDraggingImage()"
-                       [class.cursor-grabbing]="isDraggingImage()"
-                       (mousedown)="onImageDragStart($event)"
-                       (wheel)="onImageWheel($event)">
-                    <img [src]="selectedToken()?.imageUrl" 
-                         class="w-full h-full object-contain pointer-events-none" 
-                         [style.transform]="'scale(' + currentImageScale() + ') translate(' + currentImageOffsetX() + '%, ' + currentImageOffsetY() + '%)'"
-                         alt="Item Image" referrerpolicy="no-referrer" />
-                    
-                    @if (isAuthorizedToEditImage()) {
-                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                        <span class="text-[10px] text-white font-bold text-center px-2">Arraste para mover</span>
-                      </div>
-                      <button class="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10" (click)="resetImageAdjustment(); $event.stopPropagation()" title="Resetar">
-                        <mat-icon style="font-size: 12px; width: 12px; height: 12px;">restart_alt</mat-icon>
-                      </button>
-                    }
-                  </div>
-                  
-                  @if (isAuthorizedToEditImage()) {
-                    <div class="flex items-center gap-2 mt-2 w-32">
-                      <mat-icon class="text-stone-500" style="font-size: 14px; width: 14px; height: 14px;">zoom_out</mat-icon>
-                      <input type="range" min="0.5" max="3" step="0.1" [ngModel]="currentImageScale()" (ngModelChange)="updateImageAdjustment('scale', $event)" class="flex-1 accent-amber-500">
-                      <mat-icon class="text-stone-500" style="font-size: 14px; width: 14px; height: 14px;">zoom_in</mat-icon>
-                    </div>
-                  }
-                </div>
-              }
-
-              <!-- Item Details -->
-              <div class="bg-stone-800 rounded border border-stone-700 p-3 shadow-md mb-4">
-                <div class="flex justify-between items-center mb-2">
-                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
-                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">info</mat-icon>
-                    Detalhes do Item
-                  </h4>
-                  <div class="flex gap-2">
-                    @if (isEditingInventory()) {
-                      <button class="text-stone-500 hover:text-green-500 transition-colors" (click)="saveItemDetails()" title="Salvar Detalhes">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check</mat-icon>
-                      </button>
-                      <button class="text-stone-500 hover:text-red-500 transition-colors" (click)="isEditingInventory.set(false)" title="Cancelar">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                      </button>
-                    } @else if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="isEditingInventory.set(true)" title="Editar Detalhes">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
-                      </button>
-                    }
-                  </div>
-                </div>
-                
-                <div class="space-y-3">
-                  <div class="flex items-center gap-2">
-                    <span class="text-[10px] text-stone-500 uppercase font-bold w-20">Valor (PO):</span>
-                    @if (isEditingInventory()) {
-                      <input type="number" [formControl]="itemValueControl" class="w-24 bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 text-yellow-500 font-bold">
-                    } @else {
-                      <span class="text-xs font-bold text-yellow-500">{{ selectedToken()?.sheet?.gp || 0 }} PO</span>
-                    }
-                  </div>
-                  
-                  <div class="flex flex-col gap-1">
-                    <span class="text-[10px] text-stone-500 uppercase font-bold">Descrição:</span>
-                    @if (isEditingInventory()) {
-                      <textarea [formControl]="inventoryForm" rows="4" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 resize-none text-stone-300"></textarea>
-                    } @else {
-                      <div class="bg-stone-900 p-2 rounded border border-stone-700 min-h-[60px] text-xs text-stone-300 whitespace-pre-wrap">
-                        {{ selectedToken()?.sheet?.backpack || 'Sem descrição.' }}
-                      </div>
-                    }
-                  </div>
-                </div>
-              </div>
-            } @else {
-              <!-- Wallet (Carteira) -->
-              <div class="bg-stone-800 rounded border border-stone-700 p-3 shadow-md mb-4">
-                <div class="flex justify-between items-center mb-2">
-                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
-                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">account_balance_wallet</mat-icon>
-                    Carteira
-                  </h4>
-                  @if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                    <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="editSheet()" title="Editar Carteira">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
-                    </button>
-                  }
-                </div>
-                <div class="grid grid-cols-5 gap-1 text-center">
-                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
-                    <div class="text-[10px] text-stone-500 font-bold">PC</div>
-                    <div class="font-bold text-sm text-amber-700">{{ selectedToken()?.sheet?.cp || 0 }}</div>
-                  </div>
-                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
-                    <div class="text-[10px] text-stone-500 font-bold">PP</div>
-                    <div class="font-bold text-sm text-stone-400">{{ selectedToken()?.sheet?.sp || 0 }}</div>
-                  </div>
-                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
-                    <div class="text-[10px] text-stone-500 font-bold">PE</div>
-                    <div class="font-bold text-sm text-blue-300">{{ selectedToken()?.sheet?.ep || 0 }}</div>
-                  </div>
-                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
-                    <div class="text-[10px] text-stone-500 font-bold">PO</div>
-                    <div class="font-bold text-sm text-yellow-500">{{ selectedToken()?.sheet?.gp || 0 }}</div>
-                  </div>
-                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
-                    <div class="text-[10px] text-stone-500 font-bold">PL</div>
-                    <div class="font-bold text-sm text-slate-300">{{ selectedToken()?.sheet?.pp || 0 }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Inventory Section -->
-              <div class="mb-4">
-                <div class="flex justify-between items-center mb-2">
-                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
-                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">inventory_2</mat-icon>
-                    Itens Coletados
-                  </h4>
-                  <div class="flex items-center gap-2 text-[10px] font-mono" [class.text-red-500]="totalWeight() > maxCapacity()">
-                    <span class="text-stone-400">Peso:</span>
-                    <span class="font-bold">{{ totalWeight() | number:'1.1-1' }} / {{ maxCapacity() | number:'1.1-1' }} kg</span>
-                  </div>
-                </div>
-                
-                <!-- Weight Progress Bar -->
-                <div class="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden mb-3 border border-stone-700">
-                  <div class="h-full transition-all duration-300"
-                       [class.bg-green-500]="totalWeight() <= maxCapacity() * 0.5"
-                       [class.bg-yellow-500]="totalWeight() > maxCapacity() * 0.5 && totalWeight() <= maxCapacity()"
-                       [class.bg-red-500]="totalWeight() > maxCapacity()"
-                       [style.width.%]="Math.min((totalWeight() / (maxCapacity() || 1)) * 100, 100)">
-                  </div>
-                </div>
-                
-                @if (selectedToken()?.sheet?.inventory?.length) {
-                  <div class="space-y-3">
-                    @for (item of selectedToken()?.sheet?.inventory; track item.name) {
-                      <div class="bg-stone-800 rounded border border-stone-700 overflow-hidden shadow-md">
-                        <div class="p-2 border-b border-stone-700 flex justify-between items-center bg-stone-800/50">
-                          <div class="flex items-center gap-2">
-                            <span class="font-bold text-amber-500 text-sm flex items-center gap-1">
-                              @if (item.isEquipped) {
-                                <mat-icon class="text-green-500" style="font-size: 14px; width: 14px; height: 14px;">check_circle</mat-icon>
-                              }
-                              {{ item.name }}
-                            </span>
-                          </div>
-                          @if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                            <div class="flex items-center gap-1">
-                              <!-- Equip / Unequip Toggle -->
-                              <button class="text-stone-500 hover:text-green-400 transition-colors" (click)="toggleEquipItem(item.name)" [title]="item.isEquipped ? 'Desequipar item' : 'Equipar item'">
-                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
-                                  {{ item.isEquipped ? 'shield' : 'shield_none' }}
-                                </mat-icon>
-                              </button>
-                              <!-- Drop Item -->
-                              <button class="text-stone-500 hover:text-amber-500 transition-colors ml-1" (click)="dropItem(item.name)" title="Largar no chão">
-                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">pan_tool_alt</mat-icon>
-                              </button>
-                              <!-- Delete Form -->
-                              <button class="text-stone-500 hover:text-red-500 transition-colors ml-1" (click)="removeInventoryItem(item.name)" title="Deletar da ficha">
-                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">delete</mat-icon>
-                              </button>
-                            </div>
-                          }
-                        </div>
-                        <div class="p-2 text-xs space-y-2">
-                          <div class="flex gap-2 font-mono flex-wrap">
-                            <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700 text-stone-300">Qtd: {{ item.quantity }}</span>
-                            <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700 text-stone-300">Peso: {{ item.weight }}kg</span>
-                            @if (item.isEquipped) {
-                              <span class="bg-green-900/30 text-green-500 px-2 py-1 rounded border border-green-700/50">Equipado</span>
-                            }
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <p class="text-[10px] text-stone-500 italic text-center py-4 bg-stone-900 rounded border border-stone-800">Nenhum item coletado.</p>
-                }
-              </div>
-
-              <!-- Notes Backpack Section -->
-              <div class="bg-stone-800 rounded border border-stone-700 p-3 shadow-md mb-4">
-                <div class="flex justify-between items-center mb-2">
-                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
-                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">backpack</mat-icon>
-                    Anotações da Mochila
-                  </h4>
-                  <div class="flex gap-2">
-                    @if (isEditingInventory()) {
-                      <button class="text-stone-500 hover:text-green-500 transition-colors" (click)="saveInventory()" title="Salvar Inventário">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check</mat-icon>
-                      </button>
-                      <button class="text-stone-500 hover:text-red-500 transition-colors" (click)="isEditingInventory.set(false)" title="Cancelar">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
-                      </button>
-                    } @else if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="isEditingInventory.set(true)" title="Editar Inventário">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
-                      </button>
-                    }
-                  </div>
-                </div>
-                @if (isEditingInventory()) {
-                  <textarea [formControl]="inventoryForm" rows="5" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 resize-none text-stone-300"></textarea>
-                } @else {
-                  <div class="bg-stone-900 p-2 rounded border border-stone-700 min-h-[60px] text-xs text-stone-300 whitespace-pre-wrap flex items-start gap-2">
-                    <mat-icon class="text-stone-500 mt-0.5" style="font-size: 12px; width: 12px; height: 12px;">description</mat-icon>
-                    {{ selectedToken()?.sheet?.backpack || 'Sem anotações.' }}
-                  </div>
-                }
-              </div>
-            }
-
             <!-- Add Ability Form Template -->
             <ng-template #abilityFormTemplate let-category="category">
               <div class="bg-stone-800 rounded border border-stone-700 p-3 mb-4 space-y-3 shadow-md mt-2">
@@ -412,6 +179,7 @@ import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.dat
             </ng-template>
 
             <!-- Abilities Section with Sub-tabs -->
+            <ng-template #abilitiesSection>
             <div class="mt-6 border border-stone-700 rounded overflow-hidden bg-stone-900/30">
               <div class="flex border-b border-stone-700 bg-stone-900/50">
                     @if (selectedToken()?.type === 'item') {
@@ -1071,6 +839,244 @@ import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.dat
                 }
               </div>
             </div>
+            </ng-template>
+      <!-- Inventory & Spells Tab -->
+      @if (combat.rightPanelTab() === 'inventory') {
+        <div class="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-4 space-y-4">
+          @if (combat.previewAbility()) {
+            <div class="bg-amber-900/30 border border-amber-500/50 rounded p-3 text-sm text-amber-500 flex items-center gap-2 mb-4">
+              <mat-icon>info</mat-icon>
+              <span>Modo de visualização ativo. Clique no mapa para confirmar o ataque.</span>
+              <button class="ml-auto bg-stone-800 hover:bg-stone-700 text-stone-300 px-2 py-1 rounded text-xs" (click)="combat.cancelPreview()">Cancelar</button>
+            </div>
+          }
+
+          @if (selectedToken()?.type === 'item') {
+              <!-- Item Image -->
+              @if (selectedToken()?.imageUrl) {
+                <div class="flex flex-col items-center mb-4">
+                  <div class="w-32 h-32 overflow-hidden rounded-md border border-stone-700 shadow-lg bg-stone-800/50 relative group"
+                       [class.cursor-grab]="isAuthorizedToEditImage() && !isDraggingImage()"
+                       [class.cursor-grabbing]="isDraggingImage()"
+                       (mousedown)="onImageDragStart($event)"
+                       (wheel)="onImageWheel($event)">
+                    <img [src]="selectedToken()?.imageUrl" 
+                         class="w-full h-full object-contain pointer-events-none" 
+                         [style.transform]="'scale(' + currentImageScale() + ') translate(' + currentImageOffsetX() + '%, ' + currentImageOffsetY() + '%)'"
+                         alt="Item Image" referrerpolicy="no-referrer" />
+                    
+                    @if (isAuthorizedToEditImage()) {
+                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <span class="text-[10px] text-white font-bold text-center px-2">Arraste para mover</span>
+                      </div>
+                      <button class="absolute top-1 right-1 bg-black/60 hover:bg-black/80 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10" (click)="resetImageAdjustment(); $event.stopPropagation()" title="Resetar">
+                        <mat-icon style="font-size: 12px; width: 12px; height: 12px;">restart_alt</mat-icon>
+                      </button>
+                    }
+                  </div>
+                  
+                  @if (isAuthorizedToEditImage()) {
+                    <div class="flex items-center gap-2 mt-2 w-32">
+                      <mat-icon class="text-stone-500" style="font-size: 14px; width: 14px; height: 14px;">zoom_out</mat-icon>
+                      <input type="range" min="0.5" max="3" step="0.1" [ngModel]="currentImageScale()" (ngModelChange)="updateImageAdjustment('scale', $event)" class="flex-1 accent-amber-500">
+                      <mat-icon class="text-stone-500" style="font-size: 14px; width: 14px; height: 14px;">zoom_in</mat-icon>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Item Details -->
+              <div class="bg-stone-800 rounded border border-stone-700 p-3 shadow-md mb-4">
+                <div class="flex justify-between items-center mb-2">
+                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
+                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">info</mat-icon>
+                    Detalhes do Item
+                  </h4>
+                  <div class="flex gap-2">
+                    @if (isEditingInventory()) {
+                      <button class="text-stone-500 hover:text-green-500 transition-colors" (click)="saveItemDetails()" title="Salvar Detalhes">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check</mat-icon>
+                      </button>
+                      <button class="text-stone-500 hover:text-red-500 transition-colors" (click)="isEditingInventory.set(false)" title="Cancelar">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
+                      </button>
+                    } @else if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
+                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="isEditingInventory.set(true)" title="Editar Detalhes">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                      </button>
+                    }
+                  </div>
+                </div>
+                
+                <div class="space-y-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-stone-500 uppercase font-bold w-20">Valor (PO):</span>
+                    @if (isEditingInventory()) {
+                      <input type="number" [formControl]="itemValueControl" class="w-24 bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 text-yellow-500 font-bold">
+                    } @else {
+                      <span class="text-xs font-bold text-yellow-500">{{ selectedToken()?.sheet?.gp || 0 }} PO</span>
+                    }
+                  </div>
+                  
+                  <div class="flex flex-col gap-1">
+                    <span class="text-[10px] text-stone-500 uppercase font-bold">Descrição:</span>
+                    @if (isEditingInventory()) {
+                      <textarea [formControl]="inventoryForm" rows="4" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 resize-none text-stone-300"></textarea>
+                    } @else {
+                      <div class="bg-stone-900 p-2 rounded border border-stone-700 min-h-[60px] text-xs text-stone-300 whitespace-pre-wrap">
+                        {{ selectedToken()?.sheet?.backpack || 'Sem descrição.' }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @else {
+              <!-- Wallet (Carteira) -->
+              <div class="bg-stone-800 rounded border border-stone-700 p-3 shadow-md mb-4">
+                <div class="flex justify-between items-center mb-2">
+                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
+                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">account_balance_wallet</mat-icon>
+                    Carteira
+                  </h4>
+                  @if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
+                    <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="editSheet()" title="Editar Carteira">
+                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                    </button>
+                  }
+                </div>
+                <div class="grid grid-cols-5 gap-1 text-center">
+                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
+                    <div class="text-[10px] text-stone-500 font-bold">PC</div>
+                    <div class="font-bold text-sm text-amber-700">{{ selectedToken()?.sheet?.cp || 0 }}</div>
+                  </div>
+                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
+                    <div class="text-[10px] text-stone-500 font-bold">PP</div>
+                    <div class="font-bold text-sm text-stone-400">{{ selectedToken()?.sheet?.sp || 0 }}</div>
+                  </div>
+                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
+                    <div class="text-[10px] text-stone-500 font-bold">PE</div>
+                    <div class="font-bold text-sm text-blue-300">{{ selectedToken()?.sheet?.ep || 0 }}</div>
+                  </div>
+                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
+                    <div class="text-[10px] text-stone-500 font-bold">PO</div>
+                    <div class="font-bold text-sm text-yellow-500">{{ selectedToken()?.sheet?.gp || 0 }}</div>
+                  </div>
+                  <div class="bg-stone-900 border border-stone-700 rounded p-1">
+                    <div class="text-[10px] text-stone-500 font-bold">PL</div>
+                    <div class="font-bold text-sm text-slate-300">{{ selectedToken()?.sheet?.pp || 0 }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inventory Section -->
+              <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
+                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">inventory_2</mat-icon>
+                    Itens Coletados
+                  </h4>
+                  <div class="flex items-center gap-2 text-[10px] font-mono" [class.text-red-500]="totalWeight() > maxCapacity()">
+                    <span class="text-stone-400">Peso:</span>
+                    <span class="font-bold">{{ totalWeight() | number:'1.1-1' }} / {{ maxCapacity() | number:'1.1-1' }} kg</span>
+                  </div>
+                </div>
+                
+                <!-- Weight Progress Bar -->
+                <div class="w-full h-1.5 bg-stone-900 rounded-full overflow-hidden mb-3 border border-stone-700">
+                  <div class="h-full transition-all duration-300"
+                       [class.bg-green-500]="totalWeight() <= maxCapacity() * 0.5"
+                       [class.bg-yellow-500]="totalWeight() > maxCapacity() * 0.5 && totalWeight() <= maxCapacity()"
+                       [class.bg-red-500]="totalWeight() > maxCapacity()"
+                       [style.width.%]="Math.min((totalWeight() / (maxCapacity() || 1)) * 100, 100)">
+                  </div>
+                </div>
+                
+                @if (selectedToken()?.sheet?.inventory?.length) {
+                  <div class="space-y-3">
+                    @for (item of selectedToken()?.sheet?.inventory; track item.name) {
+                      <div class="bg-stone-800 rounded border border-stone-700 overflow-hidden shadow-md">
+                        <div class="p-2 border-b border-stone-700 flex justify-between items-center bg-stone-800/50">
+                          <div class="flex items-center gap-2">
+                            <span class="font-bold text-amber-500 text-sm flex items-center gap-1">
+                              @if (item.isEquipped) {
+                                <mat-icon class="text-green-500" style="font-size: 14px; width: 14px; height: 14px;">check_circle</mat-icon>
+                              }
+                              {{ item.name }}
+                            </span>
+                          </div>
+                          @if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
+                            <div class="flex items-center gap-1">
+                              <!-- Equip / Unequip Toggle -->
+                              <button class="text-stone-500 hover:text-green-400 transition-colors" (click)="toggleEquipItem(item.name)" [title]="item.isEquipped ? 'Desequipar item' : 'Equipar item'">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">
+                                  {{ item.isEquipped ? 'shield' : 'shield_none' }}
+                                </mat-icon>
+                              </button>
+                              <!-- Drop Item -->
+                              <button class="text-stone-500 hover:text-amber-500 transition-colors ml-1" (click)="dropItem(item.name)" title="Largar no chão">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">pan_tool_alt</mat-icon>
+                              </button>
+                              <!-- Delete Form -->
+                              <button class="text-stone-500 hover:text-red-500 transition-colors ml-1" (click)="removeInventoryItem(item.name)" title="Deletar da ficha">
+                                <mat-icon style="font-size: 16px; width: 16px; height: 16px;">delete</mat-icon>
+                              </button>
+                            </div>
+                          }
+                        </div>
+                        <div class="p-2 text-xs space-y-2">
+                          <div class="flex gap-2 font-mono flex-wrap">
+                            <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700 text-stone-300">Qtd: {{ item.quantity }}</span>
+                            <span class="bg-stone-900 px-2 py-1 rounded border border-stone-700 text-stone-300">Peso: {{ item.weight }}kg</span>
+                            @if (item.isEquipped) {
+                              <span class="bg-green-900/30 text-green-500 px-2 py-1 rounded border border-green-700/50">Equipado</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="text-[10px] text-stone-500 italic text-center py-4 bg-stone-900 rounded border border-stone-800">Nenhum item coletado.</p>
+                }
+              </div>
+
+              <!-- Notes Backpack Section -->
+              <div class="bg-stone-800 rounded border border-stone-700 p-3 shadow-md mb-4">
+                <div class="flex justify-between items-center mb-2">
+                  <h4 class="text-xs font-bold text-amber-500 uppercase flex items-center gap-1">
+                    <mat-icon style="font-size: 14px; width: 14px; height: 14px;">backpack</mat-icon>
+                    Anotações da Mochila
+                  </h4>
+                  <div class="flex gap-2">
+                    @if (isEditingInventory()) {
+                      <button class="text-stone-500 hover:text-green-500 transition-colors" (click)="saveInventory()" title="Salvar Inventário">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">check</mat-icon>
+                      </button>
+                      <button class="text-stone-500 hover:text-red-500 transition-colors" (click)="isEditingInventory.set(false)" title="Cancelar">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
+                      </button>
+                    } @else if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
+                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="isEditingInventory.set(true)" title="Editar Inventário">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                      </button>
+                    }
+                  </div>
+                </div>
+                @if (isEditingInventory()) {
+                  <textarea [formControl]="inventoryForm" rows="5" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 resize-none text-stone-300"></textarea>
+                } @else {
+                  <div class="bg-stone-900 p-2 rounded border border-stone-700 min-h-[60px] text-xs text-stone-300 whitespace-pre-wrap flex items-start gap-2">
+                    <mat-icon class="text-stone-500 mt-0.5" style="font-size: 12px; width: 12px; height: 12px;">description</mat-icon>
+                    {{ selectedToken()?.sheet?.backpack || 'Sem anotações.' }}
+                  </div>
+                }
+              </div>
+            }
+
+
+            @if (selectedToken()?.type === 'item') {
+              <ng-container *ngTemplateOutlet="abilitiesSection"></ng-container>
+            }
         </div>
       }
       <!-- Sheet Tab -->
@@ -1425,132 +1431,7 @@ import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.dat
                 </div>
 
                 <!-- Sub-tabs for Abilities -->
-                <div class="mt-4 border border-stone-700 rounded overflow-hidden">
-                  <div class="flex bg-stone-900 border-b border-stone-800">
-                    <button class="flex-1 py-1.5 text-[9px] font-bold uppercase transition-colors flex items-center justify-center gap-0.5"
-                            [class.text-amber-500]="fichaSubTab() === 'weapons'"
-                            [class.bg-stone-800]="fichaSubTab() === 'weapons'"
-                            (click)="fichaSubTab.set('weapons')">
-                      <mat-icon style="font-size: 12px; width: 12px; height: 12px;">shield</mat-icon>
-                      <span class="truncate">Armas</span>
-                    </button>
-                    <button class="flex-1 py-1.5 text-[9px] font-bold uppercase transition-colors border-l border-stone-800 flex items-center justify-center gap-0.5"
-                            [class.text-amber-500]="fichaSubTab() === 'spells'"
-                            [class.bg-stone-800]="fichaSubTab() === 'spells'"
-                            (click)="fichaSubTab.set('spells')">
-                      <mat-icon style="font-size: 12px; width: 12px; height: 12px;">auto_fix_high</mat-icon>
-                      <span class="truncate">Magias</span>
-                    </button>
-                    <button class="flex-1 py-1.5 text-[9px] font-bold uppercase transition-colors border-l border-stone-800 flex items-center justify-center gap-0.5"
-                            [class.text-amber-500]="fichaSubTab() === 'features'"
-                            [class.bg-stone-800]="fichaSubTab() === 'features'"
-                            (click)="fichaSubTab.set('features')">
-                      <mat-icon style="font-size: 12px; width: 12px; height: 12px;">star</mat-icon>
-                      <span class="truncate">Hards</span>
-                    </button>
-                  </div>
-
-                  <div class="p-2 min-h-[100px]">
-                    <!-- Weapons List (Ficha) -->
-                    @if (fichaSubTab() === 'weapons') {
-                      @if (weapons().length > 0) {
-                        <div class="space-y-2">
-                          @for (ability of weapons(); track ability.id) {
-                            <div class="bg-stone-900 rounded border border-stone-700 p-2 text-xs">
-                              <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-amber-500">{{ ability.name }}</span>
-                                <span class="text-[10px] font-mono text-stone-400 uppercase bg-stone-800 px-1 rounded">{{ ability.type }}</span>
-                              </div>
-                              <div class="flex gap-2 font-mono text-[10px] text-stone-400">
-                                <span>Atk: {{ (ability.attackBonus ?? 0) >= 0 ? '+' : '' }}{{ ability.attackBonus ?? 0 }}</span>
-                                @if (ability.damage) {
-                                  <span>Dano: {{ ability.damage }}</span>
-                                }
-                                @if (ability.healing) {
-                                  <span class="text-green-500">Recup. PV: {{ ability.healing }}</span>
-                                }
-                                <span>Alcance: {{ ability.range }}m</span>
-                              </div>
-                              @if (ability.description) {
-                                <p class="text-stone-500 mt-1 text-[10px]">{{ ability.description }}</p>
-                              }
-                            </div>
-                          }
-                        </div>
-                      } @else {
-                        <p class="text-[10px] text-stone-500 italic text-center py-4">Nenhuma arma equipada.</p>
-                      }
-                    }
-
-                    <!-- Spells List (Ficha) -->
-                    @if (fichaSubTab() === 'spells') {
-                      @if (spells().length > 0) {
-                        <div class="space-y-2">
-                          @for (ability of spells(); track ability.id) {
-                            <div class="bg-stone-900 rounded border border-stone-700 p-2 text-xs">
-                              <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-amber-500">{{ ability.name }}</span>
-                                <span class="text-[10px] bg-blue-900/50 text-blue-300 px-1 rounded border border-blue-700/50">Nível {{ ability.spellLevel || 0 }}</span>
-                              </div>
-                              <div class="flex gap-2 font-mono text-[10px] text-stone-400 flex-wrap">
-                                <span>Atk: {{ (ability.attackBonus ?? 0) >= 0 ? '+' : '' }}{{ ability.attackBonus ?? 0 }}</span>
-                                @if (ability.damage) {
-                                  <span>Dano: {{ ability.damage }}</span>
-                                }
-                                @if (ability.healing) {
-                                  <span class="text-green-500">Recup. PV: {{ ability.healing }}</span>
-                                }
-                                <span>Alcance: {{ ability.range }}m</span>
-                                @if (ability.maxUses) {
-                                  <div class="flex gap-[1px] w-full h-1 bg-stone-900 rounded-full overflow-hidden border border-stone-700 mt-1">
-                                    @for (i of [].constructor(ability.maxUses); track $index) {
-                                      <div class="flex-1 h-full transition-colors duration-300" 
-                                           [class.bg-blue-500]="(ability.uses || 0) > $index"
-                                           [class.bg-stone-800]="(ability.uses || 0) <= $index">
-                                      </div>
-                                    }
-                                  </div>
-                                  <span class="text-amber-500">Usos: {{ ability.uses || 0 }}/{{ ability.maxUses }}</span>
-                                }
-                              </div>
-                              @if (ability.description) {
-                                <p class="text-stone-500 mt-1 text-[10px]">{{ ability.description }}</p>
-                              }
-                            </div>
-                          }
-                        </div>
-                      } @else {
-                        <p class="text-[10px] text-stone-500 italic text-center py-4">Nenhuma magia preparada.</p>
-                      }
-                    }
-
-                    <!-- Features List (Ficha) -->
-                    @if (fichaSubTab() === 'features') {
-                      @if (features().length > 0) {
-                        <div class="space-y-2">
-                          @for (ability of features(); track ability.id) {
-                            <div class="bg-stone-900 rounded border border-stone-700 p-2 text-xs">
-                              <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-amber-500">{{ ability.name }}</span>
-                                <span class="text-[10px] font-mono text-stone-400 uppercase bg-stone-800 px-1 rounded">{{ ability.type }}</span>
-                              </div>
-                              <div class="flex gap-2 font-mono text-[10px] mb-1">
-                                @if (ability.healing) {
-                                  <span class="text-green-500">Recup. PV: {{ ability.healing }}</span>
-                                }
-                              </div>
-                              @if (ability.description) {
-                                <p class="text-stone-500 mt-1 text-[10px]">{{ ability.description }}</p>
-                              }
-                            </div>
-                          }
-                        </div>
-                      } @else {
-                        <p class="text-[10px] text-stone-500 italic text-center py-4">Nenhuma habilidade especial.</p>
-                      }
-                    }
-                  </div>
-                </div>
+                <ng-container *ngTemplateOutlet="abilitiesSection"></ng-container>
               </div>
             } @else {
               <div class="bg-stone-800 rounded border border-stone-700 p-4 text-center space-y-3">
