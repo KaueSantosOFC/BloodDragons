@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { ActionMenuComponent } from '../action-menu/action-menu.component';
 import { ActionResult, DndCoreEngineService } from '../../services/dnd-core-engine.service';
 import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.data';
+import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findClassByName } from '../../data/dnd5e-options.data';
 
 @Component({
   selector: 'app-right-panel',
@@ -1136,76 +1137,105 @@ import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.dat
                 <form [formGroup]="sheetForm" class="space-y-3">
                   <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label for="hp" class="text-[10px] text-stone-500 uppercase">PV Atual</label>
+                      <label for="hp" class="text-[10px] text-stone-500 uppercase flex items-center gap-1"><mat-icon style="font-size:10px;width:10px;height:10px;" class="text-red-500">favorite</mat-icon>PV Atual</label>
                       <input id="hp" type="number" formControlName="hp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="maxHp" class="text-[10px] text-stone-500 uppercase">PV Máximo</label>
+                      <label for="maxHp" class="text-[10px] text-stone-500 uppercase flex items-center gap-1"><mat-icon style="font-size:10px;width:10px;height:10px;" class="text-red-500">favorite_border</mat-icon>PV Máximo</label>
                       <input id="maxHp" type="number" formControlName="maxHp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label for="spellUses" class="text-[10px] text-stone-500 uppercase">Magias Atuais</label>
+                      <label for="spellUses" class="text-[10px] text-stone-500 uppercase flex items-center gap-1"><mat-icon style="font-size:10px;width:10px;height:10px;" class="text-blue-400">auto_awesome</mat-icon>Magias</label>
                       <input id="spellUses" type="number" formControlName="spellUses" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="maxSpellUses" class="text-[10px] text-stone-500 uppercase">Magias Máximo</label>
+                      <label for="maxSpellUses" class="text-[10px] text-stone-500 uppercase flex items-center gap-1"><mat-icon style="font-size:10px;width:10px;height:10px;" class="text-blue-400">auto_awesome</mat-icon>Máx Magias</label>
                       <input id="maxSpellUses" type="number" formControlName="maxSpellUses" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-3">
                     <div class="flex flex-col gap-1.5">
-                      <label for="class" class="text-xs text-stone-500 uppercase font-bold tracking-wider">Classe</label>
-                      <input id="class" formControlName="class" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                      <label for="class" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">school</mat-icon>Classe</label>
+                      <select id="class" formControlName="class" (change)="onClassChange()" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200">
+                        <option value="">-- Selecionar --</option>
+                        @for (cls of dnd5eClasses; track cls.id) {
+                          <option [value]="cls.name">{{ cls.name }} (d{{ cls.hitDie }})</option>
+                        }
+                      </select>
                     </div>
                     <div class="flex flex-col gap-1.5">
-                      <label for="level" class="text-xs text-stone-500 uppercase font-bold tracking-wider">Nível</label>
+                      <label for="level" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">military_tech</mat-icon>Nível</label>
                       <input id="level" type="number" formControlName="level" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1.5">
-                      <label for="background" class="text-xs text-stone-500 uppercase font-bold tracking-wider">Antecedente</label>
-                      <input id="background" formControlName="background" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                      <label for="background" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">history_edu</mat-icon>Antecedente</label>
+                      <select id="background" formControlName="background" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200">
+                        <option value="">-- Selecionar --</option>
+                        @for (bg of dnd5eBackgrounds; track bg.id) {
+                          <option [value]="bg.name">{{ bg.name }}</option>
+                        }
+                      </select>
                     </div>
                     <div class="flex flex-col gap-1.5">
-                      <label for="playerName" class="text-xs text-stone-500 uppercase font-bold tracking-wider">Nome do Jogador</label>
+                      <label for="playerName" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">person</mat-icon>Jogador</label>
                       <input id="playerName" formControlName="playerName" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1.5">
-                      <label for="race" class="text-xs text-stone-500 uppercase font-bold tracking-wider">Raça</label>
-                      <input id="race" formControlName="race" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                      <label for="race" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">groups</mat-icon>Raça</label>
+                      <select id="race" formControlName="race" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200">
+                        <option value="">-- Selecionar --</option>
+                        @for (r of dnd5eRaces; track r.id) {
+                          <option [value]="r.name">{{ r.name }} ({{ r.abilityBonuses }})</option>
+                        }
+                      </select>
                     </div>
                     <div class="flex flex-col gap-1.5">
-                      <label for="alignment" class="text-xs text-stone-500 uppercase font-bold tracking-wider">Tendência</label>
-                      <input id="alignment" formControlName="alignment" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                      <label for="alignment" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">balance</mat-icon>Tendência</label>
+                      <select id="alignment" formControlName="alignment" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200">
+                        <option value="">-- Selecionar --</option>
+                        @for (a of dnd5eAlignments; track a.id) {
+                          <option [value]="a.name">{{ a.name }}</option>
+                        }
+                      </select>
                     </div>
                     <div class="flex flex-col gap-1.5">
-                      <label for="xp" class="text-xs text-stone-500 uppercase font-bold tracking-wider">XP</label>
+                      <label for="xp" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">trending_up</mat-icon>XP</label>
                       <input id="xp" type="number" formControlName="xp" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1.5">
-                      <label for="hitDie" class="text-xs text-stone-500 uppercase font-bold tracking-wider">Dado de Vida (d?)</label>
-                      <input id="hitDie" type="number" formControlName="hitDie" placeholder="ex: 10" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                      <label for="hitDie" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">casino</mat-icon>Dado de Vida</label>
+                      <select id="hitDie" formControlName="hitDie" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200 font-mono">
+                        <option [value]="6">d6</option>
+                        <option [value]="8">d8</option>
+                        <option [value]="10">d10</option>
+                        <option [value]="12">d12</option>
+                      </select>
                     </div>
                   </div>
 
+                  <!-- Seção: Combate -->
+                  <div class="flex items-center gap-1.5 border-b border-stone-700 pb-1 mt-1"><mat-icon style="font-size:14px;width:14px;height:14px;" class="text-amber-600">shield</mat-icon><span class="text-[10px] text-amber-600 uppercase font-black tracking-widest">Combate</span></div>
                   <div class="grid grid-cols-3 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label for="ac" class="text-[10px] text-stone-500 uppercase text-center">CA</label>
+                      <label for="ac" class="text-[10px] text-stone-500 uppercase text-center flex items-center justify-center gap-0.5"><mat-icon style="font-size:10px;width:10px;height:10px;">security</mat-icon>CA</label>
                       <input id="ac" type="number" formControlName="ac" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="initiative" class="text-[10px] text-stone-500 uppercase text-center">Iniciativa</label>
+                      <label for="initiative" class="text-[10px] text-stone-500 uppercase text-center flex items-center justify-center gap-0.5"><mat-icon style="font-size:10px;width:10px;height:10px;">timer</mat-icon>Inic.</label>
                       <input id="initiative" type="number" formControlName="initiative" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="speed" class="text-[10px] text-stone-500 uppercase text-center">Deslocamento (Metros)</label>
+                      <label for="speed" class="text-[10px] text-stone-500 uppercase text-center flex items-center justify-center gap-0.5"><mat-icon style="font-size:10px;width:10px;height:10px;">directions_run</mat-icon>Veloc.</label>
                       <input id="speed" type="number" formControlName="speed" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500 font-mono">
                     </div>
                   </div>
 
+                  <!-- Seção: Atributos -->
+                  <div class="flex items-center gap-1.5 border-b border-stone-700 pb-1 mt-1"><mat-icon style="font-size:14px;width:14px;height:14px;" class="text-amber-600">fitness_center</mat-icon><span class="text-[10px] text-amber-600 uppercase font-black tracking-widest">Atributos</span></div>
                   <div class="grid grid-cols-3 gap-2">
                     <div class="flex flex-col gap-1">
                       <label for="str" class="text-[10px] text-stone-500 uppercase text-center">FOR</label>
@@ -1235,34 +1265,36 @@ import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.dat
 
                   <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label for="proficiencyBonus" class="text-[10px] text-stone-500 uppercase">Bônus de Proficiência</label>
+                      <label for="proficiencyBonus" class="text-[10px] text-stone-500 uppercase flex items-center gap-1"><mat-icon style="font-size:10px;width:10px;height:10px;">workspace_premium</mat-icon>Bônus Prof.</label>
                       <input id="proficiencyBonus" type="number" formControlName="proficiencyBonus" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="passivePerception" class="text-[10px] text-stone-500 uppercase">Percepção Passiva</label>
+                      <label for="passivePerception" class="text-[10px] text-stone-500 uppercase flex items-center gap-1"><mat-icon style="font-size:10px;width:10px;height:10px;">visibility</mat-icon>Percep. Passiva</label>
                       <input id="passivePerception" type="number" formControlName="passivePerception" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
+                  <!-- Seção: Moedas -->
+                  <div class="flex items-center gap-1.5 border-b border-stone-700 pb-1 mt-1"><mat-icon style="font-size:14px;width:14px;height:14px;" class="text-amber-600">toll</mat-icon><span class="text-[10px] text-amber-600 uppercase font-black tracking-widest">Moedas</span></div>
                   <div class="grid grid-cols-5 gap-1">
                     <div class="flex flex-col gap-1">
-                      <label for="cp" class="text-[10px] text-stone-500 uppercase text-center">PC</label>
+                      <label for="cp" class="text-[10px] text-amber-800 uppercase text-center font-bold">PC</label>
                       <input id="cp" type="number" formControlName="cp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="sp" class="text-[10px] text-stone-500 uppercase text-center">PP</label>
+                      <label for="sp" class="text-[10px] text-stone-400 uppercase text-center font-bold">PP</label>
                       <input id="sp" type="number" formControlName="sp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="ep" class="text-[10px] text-stone-500 uppercase text-center">PE</label>
+                      <label for="ep" class="text-[10px] text-blue-400 uppercase text-center font-bold">PE</label>
                       <input id="ep" type="number" formControlName="ep" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="gp" class="text-[10px] text-stone-500 uppercase text-center">PO</label>
+                      <label for="gp" class="text-[10px] text-amber-500 uppercase text-center font-bold">PO</label>
                       <input id="gp" type="number" formControlName="gp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="pp" class="text-[10px] text-stone-500 uppercase text-center">PL</label>
+                      <label for="pp" class="text-[10px] text-cyan-300 uppercase text-center font-bold">PL</label>
                       <input id="pp" type="number" formControlName="pp" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
@@ -1556,6 +1588,20 @@ export class RightPanelComponent {
   showHealingField = signal<boolean>(false);
   showAddAbilityForm = signal<boolean>(false);
   editingAbilityId = signal<string | null>(null);
+
+  // D&D 5e Reference Data
+  dnd5eClasses = DND5E_CLASSES;
+  dnd5eRaces = DND5E_RACES;
+  dnd5eAlignments = DND5E_ALIGNMENTS;
+  dnd5eBackgrounds = DND5E_BACKGROUNDS;
+
+  onClassChange() {
+    const className = this.sheetForm.get('class')?.value;
+    const cls = findClassByName(className || '');
+    if (cls) {
+      this.sheetForm.patchValue({ hitDie: cls.hitDie });
+    }
+  }
 
   compendiumWeaponsSimple = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'simple'));
   compendiumWeaponsMartial = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'martial'));
