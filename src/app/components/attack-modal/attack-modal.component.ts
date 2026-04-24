@@ -194,7 +194,8 @@ export class AttackModalComponent {
     const attacker = {
       stats: (sheet as unknown) as Record<string, number>,
       proficiencyBonus: sheet?.proficiencyBonus || 2,
-      spellcastingAbility: sheet?.spellcastingAbility || 'int'
+      spellcastingAbility: sheet?.spellcastingAbility || 'int',
+      sheet: sheet as any
     };
     const weapon = {
       name: s.ability.name,
@@ -216,7 +217,8 @@ export class AttackModalComponent {
     const attacker = {
       stats: (sheet as unknown) as Record<string, number>,
       proficiencyBonus: sheet?.proficiencyBonus || 2,
-      spellcastingAbility: sheet?.spellcastingAbility || 'int'
+      spellcastingAbility: sheet?.spellcastingAbility || 'int',
+      sheet: sheet as any
     };
     const weapon = {
       name: s.ability.name,
@@ -337,7 +339,8 @@ export class AttackModalComponent {
     const attacker = {
       stats: (sheet as unknown) as Record<string, number>,
       proficiencyBonus: sheet?.proficiencyBonus || 2,
-      spellcastingAbility: sheet?.spellcastingAbility || 'int'
+      spellcastingAbility: sheet?.spellcastingAbility || 'int',
+      sheet: sheet as any
     };
     const weapon = {
       name: s.ability.name,

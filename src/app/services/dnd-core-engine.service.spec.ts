@@ -13,8 +13,8 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
   });
 
   it('deve usar Força para ataques Melee, a não ser que tenha Acuidade e Destreza seja maior', () => {
-    const attackerStrHigh = { stats: { str: 16, dex: 10 }, proficiencyBonus: 2 }; // Mod STR = +3, Mod DEX = 0
-    const attackerDexHigh = { stats: { str: 10, dex: 16 }, proficiencyBonus: 2 }; // Mod STR = 0, Mod DEX = +3
+    const attackerStrHigh = { stats: { str: 16, dex: 10 }, proficiencyBonus: 2 } as any; // Mod STR = +3, Mod DEX = 0
+    const attackerDexHigh = { stats: { str: 10, dex: 16 }, proficiencyBonus: 2 } as any; // Mod STR = 0, Mod DEX = +3
     
     // Normal Melee
     const normalWeapon = { name: 'Greatsword', properties: ['heavy', 'two-handed'] };
@@ -39,7 +39,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
   });
 
   it('deve usar Força para armas de arremesso (thrown) a menos que tenham acuidade', () => {
-    const attackerDexHigh = { stats: { str: 12, dex: 18 }, proficiencyBonus: 2 }; // STR = +1, DEX = +4
+    const attackerDexHigh = { stats: { str: 12, dex: 18 }, proficiencyBonus: 2 } as any; // STR = +1, DEX = +4
     
     // Javelin (Thrown, Melee) -> MUST use STR
     const javelinWeapon = { name: 'Javelin', properties: ['thrown'] };
@@ -59,7 +59,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
       stats: { str: 8, dex: 14, int: 20 }, // Int mod = +5
       proficiencyBonus: 3,
       spellcastingAbility: 'int'
-    };
+    } as any;
     const spell = { name: 'Firebolt' };
     
     const resultSpell = service.calculateAttackRoll(wizardAttacker, spell, true, 10);
@@ -70,7 +70,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
   });
 
   it('só deve somar Proficiência ao ataque com arma SE isProficient for verdadeiro (ou não definido para defaults)', () => {
-    const fighter = { stats: { str: 14 }, proficiencyBonus: 2 }; // STR Mod = +2
+    const fighter = { stats: { str: 14 }, proficiencyBonus: 2 } as any; // STR Mod = +2
     
     // Proficient
     const weaponProf = { name: 'Longsword', isProficient: true };
@@ -92,7 +92,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
   });
 
   it('deve detetar acertos e falhas críticas', () => {
-    const attacker = { stats: { str: 10 }, proficiencyBonus: 2 };
+    const attacker = { stats: { str: 10 }, proficiencyBonus: 2 } as any;
     const weapon = { name: 'Sword' };
 
     const critResult = service.calculateAttackRoll(attacker, weapon, false, 20);
@@ -112,7 +112,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
     });
 
     it('deve executar um Teste de Resistência (Saving Throw) corretamente sem proficiência', () => {
-      spyOn(Math, 'random').and.returnValue(0.5); // 0.5 * 20 = 10 -> natural 11
+      vi.spyOn(Math, 'random').mockReturnValue(0.5); // 0.5 * 20 = 10 -> natural 11
       const save = service.executeSavingThrow(2 /* mod */, 3 /* prof */, false /* isProficient */);
       expect(save.naturalRoll).toBe(11);
       expect(save.modifiers).toBe(2);
@@ -120,7 +120,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
     });
 
     it('deve executar um Teste de Resistência (Saving Throw) somando a proficiência do alvo', () => {
-      spyOn(Math, 'random').and.returnValue(0.5); // 0.5 * 20 = 10 -> natural 11
+      vi.spyOn(Math, 'random').mockReturnValue(0.5); // 0.5 * 20 = 10 -> natural 11
       const save = service.executeSavingThrow(2 /* mod */, 3 /* prof */, true /* isProficient */);
       expect(save.naturalRoll).toBe(11);
       expect(save.modifiers).toBe(5); // 2 + 3
@@ -133,7 +133,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
       // Mock random to return 10 then 18
       const randomValues = [0.45, 0.85]; 
       let i = 0;
-      spyOn(Math, 'random').and.callFake(() => randomValues[i++]);
+      vi.spyOn(Math, 'random').mockImplementation(() => randomValues[i++]);
 
       const result = service.rollD20(true, true);
       // Math.floor(0.45 * 20) + 1 = 10
@@ -148,7 +148,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
     it('deve escolher o maior dado na Vantagem', () => {
       const randomValues = [0.45, 0.85]; // 10, 18
       let i = 0;
-      spyOn(Math, 'random').and.callFake(() => randomValues[i++]);
+      vi.spyOn(Math, 'random').mockImplementation(() => randomValues[i++]);
 
       const result = service.rollD20(true, false);
       expect(result.naturalRoll).toBe(18);
@@ -158,7 +158,7 @@ describe('DndCoreEngineService - Attack Rolls (D&D 5e)', () => {
     it('deve escolher o menor dado na Desvantagem', () => {
       const randomValues = [0.45, 0.85]; // 10, 18
       let i = 0;
-      spyOn(Math, 'random').and.callFake(() => randomValues[i++]);
+      vi.spyOn(Math, 'random').mockImplementation(() => randomValues[i++]);
 
       const result = service.rollD20(false, true);
       expect(result.naturalRoll).toBe(10);

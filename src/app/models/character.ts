@@ -34,10 +34,15 @@ export interface CharacterSheet {
   // Fluff / Bio
   name: string;
   characterClass: CharacterClass;
+  subclass?: string;
   race: CharacterRace;
+  subrace?: string;
+  background?: string;
   level: number;
   publicDescription: string;
   gmOnlyNotes?: string; // Visible only to DM
+  
+  spellcastingAbility?: 'int' | 'wis' | 'cha' | 'none';
   
   // Core Stats
   attributes: {
@@ -61,8 +66,24 @@ export interface CharacterSheet {
   // Skills (Key-Value for O(1) access)
   skills: Record<string, { proficient: boolean; expertise: boolean }>; // e.g., 'stealth': {true, true}
   
+  // Proficiencies (Armor, Weapons, Tools, Languages)
+  proficiencies?: {
+    armor: string[]; // e.g., 'light', 'medium', 'heavy', 'shields'
+    weapons: string[]; // e.g., 'simple', 'martial', 'longsword', 'shortbow'
+    tools: string[];
+    languages: string[];
+  };
+  
   // Inventory & Spells
-  inventory: { name: string; quantity: number; weight: number; isEquipped: boolean }[];
+  inventory: { 
+    id?: string;
+    name: string; 
+    quantity: number; 
+    weight: number; 
+    isEquipped: boolean;
+    type?: 'weapon' | 'armor' | 'shield' | 'gear' | 'tool';
+    armorType?: 'light' | 'medium' | 'heavy' | 'shield' | 'none';
+  }[];
   spells: {
      slots: { 
        level1: { max: number; used: number };

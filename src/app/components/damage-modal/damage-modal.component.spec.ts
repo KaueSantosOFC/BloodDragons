@@ -9,24 +9,20 @@ describe('DamageModalComponent', () => {
   // Criando mocks manuais para as dependências cruciais
   const mockCombatService = {
     // Adicione propriedades do combat service usadas no modal se necessário.
-    addNotification: jasmine.createSpy('addNotification')
+    addNotification: vi.fn()
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      // Como é um standalone component, não declaramos, nós importamos
-      // Mas para testes simples de unidade das funções puras de lógica, podemos só instanciar a classe
       providers: [
         DndMathService,
         { provide: CombatService, useValue: mockCombatService }
       ]
     });
     
-    const mathService = TestBed.inject(DndMathService);
-    const combatService = TestBed.inject(CombatService);
-    
-    // Instanciação manual para isolar métodos que não dependem do DOM
-    component = new DamageModalComponent(combatService as any, mathService);
+    TestBed.runInInjectionContext(() => {
+      component = new DamageModalComponent();
+    });
   });
 
   describe('parseDamageString (Validação e Separação de Dados)', () => {

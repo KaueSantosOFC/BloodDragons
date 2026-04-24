@@ -57,8 +57,8 @@ export class DndCoreEngineService {
   // ==========================================
 
   calculateAttackRoll(
-    attacker: { stats: Record<string, number>, proficiencyBonus: number, spellcastingAbility?: string },
-    weapon: { name: string, properties?: string[], attackBonus?: number, isProficient?: boolean },
+    attacker: { stats: Record<string, number>, proficiencyBonus: number, spellcastingAbility?: string, sheet?: CharacterSheet },
+    weapon: { name: string, properties?: string[], attackBonus?: number, isProficient?: boolean, weaponType?: 'simple' | 'martial' },
     isSpell: boolean,
     manualRoll?: number
   ): AttackRollResult {
@@ -66,7 +66,21 @@ export class DndCoreEngineService {
     let attributeUsed = 'str';
     let attributeScore = attacker.stats['str'] || 10;
 
+    // Evaluate armor penalties if we have the full sheet
+    let hasDisadvantage = false;
+    let canCastSpells = true;
+    if (attacker.sheet) {
+      const penalties = this.validateArmorPenalties(attacker.sheet);
+      hasDisadvantage = penalties.hasDisadvantage;
+      canCastSpells = penalties.canCastSpells;
+    }
+
     if (isSpell) {
+      if (!canCastSpells) {
+        // Technically shouldn't be able to cast, but if they try, we could impose penalty or just let the caller handle it.
+        // We'll impose disadvantage as a fallback penalty.
+        hasDisadvantage = true;
+      }
       attributeUsed = attacker.spellcastingAbility || 'int';
       attributeScore = attacker.stats[attributeUsed] || 10;
     } else {
@@ -98,19 +112,35 @@ export class DndCoreEngineService {
     let appliedProficiency = 0;
     if (isSpell) {
       appliedProficiency = attacker.proficiencyBonus || 0;
-    } else if (weapon.isProficient) {
-      appliedProficiency = attacker.proficiencyBonus || 0;
+    } else {
+      // Dynamic check for weapon proficiency
+      let isProficient = weapon.isProficient;
+      if (isProficient === undefined && attacker.sheet) {
+        isProficient = this.isProficientWithWeapon(attacker.sheet, weapon);
+      }
+      if (isProficient) {
+        appliedProficiency = attacker.proficiencyBonus || 0;
+      }
     }
 
-    const total = naturalRoll + modifier + appliedProficiency + (weapon.attackBonus || 0);
+    // Apply disadvantage if from armor and using STR/DEX
+    let finalNaturalRoll = naturalRoll;
+    if (hasDisadvantage && !manualRoll) {
+       if (attributeUsed === 'str' || attributeUsed === 'dex' || isSpell) {
+          const roll2 = Math.floor(Math.random() * 20) + 1;
+          finalNaturalRoll = Math.min(naturalRoll, roll2);
+       }
+    }
+
+    const total = finalNaturalRoll + modifier + appliedProficiency + (weapon.attackBonus || 0);
 
     return {
       total,
-      naturalRoll,
+      naturalRoll: finalNaturalRoll,
       attributeUsed,
       modifier,
-      isCritical: naturalRoll === 20,
-      isFumble: naturalRoll === 1
+      isCritical: finalNaturalRoll === 20,
+      isFumble: finalNaturalRoll === 1
     };
   }
 
@@ -459,5 +489,59 @@ export class DndCoreEngineService {
       success: total >= dc,
       margin: total - dc
     };
+  }
+
+  // ==========================================
+  // 7. Validação de Regras Restritas (Proficiências)
+  // ==========================================
+
+  /**
+   * Avalia as penalidades de usar uma armadura sem proficiência.
+   * Regra: Desvantagem em testes de STR/DEX e ataques com STR/DEX, e não pode conjurar magias.
+   */
+  validateArmorPenalties(character: CharacterSheet): { hasDisadvantage: boolean; canCastSpells: boolean } {
+    let hasDisadvantage = false;
+    let canCastSpells = true;
+
+    if (!character.proficiencies?.armor) return { hasDisadvantage: false, canCastSpells: true };
+
+    const equippedArmorList = character.inventory.filter(item => item.isEquipped && item.type === 'armor');
+    const equippedShieldList = character.inventory.filter(item => item.isEquipped && item.type === 'shield');
+
+    for (const armor of equippedArmorList) {
+      if (armor.armorType && armor.armorType !== 'none' && !character.proficiencies.armor.includes(armor.armorType)) {
+        hasDisadvantage = true;
+        canCastSpells = false;
+      }
+    }
+
+    for (const shield of equippedShieldList) {
+      if (!character.proficiencies.armor.includes('shields')) {
+        hasDisadvantage = true;
+        canCastSpells = false;
+      }
+    }
+
+    return { hasDisadvantage, canCastSpells };
+  }
+
+  /**
+   * Verifica se o personagem é proficiente com uma determinada arma.
+   */
+  isProficientWithWeapon(character: CharacterSheet, weapon: { name: string, weaponType?: 'simple' | 'martial' }): boolean {
+    if (!character.proficiencies?.weapons) return false;
+    
+    // Verifica por categoria
+    if (weapon.weaponType && character.proficiencies.weapons.includes(weapon.weaponType)) {
+      return true;
+    }
+
+    // Verifica pelo nome específico
+    const lowerName = weapon.name.toLowerCase();
+    if (character.proficiencies.weapons.some(w => w.toLowerCase() === lowerName)) {
+      return true;
+    }
+
+    return false;
   }
 }
