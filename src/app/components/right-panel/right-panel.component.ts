@@ -43,12 +43,19 @@ import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.dat
                   </button>
                 </div>
                 
-                @if (!editingAbilityId() && category === 'weapon' && filteredCompendiumWeapons().length > 0) {
+                @if (!editingAbilityId() && category === 'weapon') {
                   <select class="w-full bg-stone-900 border border-amber-600/50 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 text-amber-500 mb-1" (change)="onCompendiumSelect($event, 'weapon')">
-                    <option value="">-- Importar Arma do Compêndio (Proficientes) --</option>
-                    @for (w of filteredCompendiumWeapons(); track w.id) {
-                      <option [value]="w.id">{{ w.name }} ({{ w.damage }} {{ w.damageType }})</option>
-                    }
+                    <option value="">-- Importar Arma do Compêndio --</option>
+                    <optgroup label="Armas Simples">
+                      @for (w of compendiumWeaponsSimple(); track w.id) {
+                        <option [value]="w.id">{{ w.name }} ({{ w.damage }} {{ w.damageType }}) [{{ w.attackType === 'melee' ? 'Corpo' : 'Dist.' }}]</option>
+                      }
+                    </optgroup>
+                    <optgroup label="Armas Marciais">
+                      @for (w of compendiumWeaponsMartial(); track w.id) {
+                        <option [value]="w.id">{{ w.name }} ({{ w.damage }} {{ w.damageType }}) [{{ w.attackType === 'melee' ? 'Corpo' : 'Dist.' }}]</option>
+                      }
+                    </optgroup>
                   </select>
                 }
                 
@@ -1550,11 +1557,8 @@ export class RightPanelComponent {
   showAddAbilityForm = signal<boolean>(false);
   editingAbilityId = signal<string | null>(null);
 
-  filteredCompendiumWeapons = computed(() => {
-    const token = this.selectedToken();
-    if (!token?.sheet) return [];
-    return COMPENDIUM_WEAPONS.filter(w => this.engine.isProficientWithWeapon(token.sheet as any, w as any));
-  });
+  compendiumWeaponsSimple = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'simple'));
+  compendiumWeaponsMartial = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'martial'));
 
   filteredCompendiumSpells = computed(() => {
     const token = this.selectedToken();
@@ -1570,16 +1574,28 @@ export class RightPanelComponent {
     if (category === 'weapon') {
       const w = COMPENDIUM_WEAPONS.find(x => x.id === target.value);
       if (w) {
+        // Auto-detect proficiency if sheet has proficiencies data
+        const token = this.selectedToken();
+        const isProf = token?.sheet
+          ? this.engine.isProficientWithWeapon(token.sheet as any, w as any)
+          : false;
+
+        // Map ranged weapons to use 'ranged' property for attack calc
+        const props = [...w.properties];
+        if (w.attackType === 'ranged' && !props.includes('ranged')) {
+          props.push('ranged');
+        }
+
         this.abilityForm.patchValue({
           name: w.name,
           category: 'weapon',
           type: 'action',
           range: w.range,
           damage: w.damage,
-          isProficient: true,
-          description: `Tipo: ${w.weaponType}, Dano: ${w.damageType}. Propriedades: ${w.properties.join(', ')}`
+          isProficient: isProf,
+          description: `Tipo: ${w.weaponType === 'simple' ? 'Simples' : 'Marcial'}, Ataque: ${w.attackType === 'melee' ? 'Corpo-a-corpo' : 'À distância'}, Dano: ${w.damageType}. Propriedades: ${props.join(', ')}`
         });
-        this.showDamageField.set(true);
+        this.showDamageField.set(!!w.damage);
         this.showHealingField.set(false);
       }
     } else if (category === 'spell') {
