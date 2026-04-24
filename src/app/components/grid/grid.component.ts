@@ -854,10 +854,16 @@ export class GridComponent {
            return;
         }
 
-        // Check if it's an attack
-        const isAttack = ability.category === 'weapon' || ability.attackBonus !== undefined || ability.damage;
+        // Check if it's an attack or a saving throw
+        const isSave = !!ability.saveAttribute;
+        const isAttack = !isSave && (ability.category === 'weapon' || ability.attackBonus !== undefined || ability.damage);
 
-        if (isAttack) {
+        if (isSave) {
+           const spellcastingAttr = originToken.sheet?.spellcastingAbility || 'int';
+           const attrScore = (originToken.sheet as any)?.[spellcastingAttr] || 10;
+           const dc = 8 + (originToken.sheet?.proficiencyBonus || 2) + this.mathService.calculateModifier(attrScore);
+           this.combat.openDamageModal(originToken, [targetToken], ability, {}, dc);
+        } else if (isAttack) {
            this.combat.openAttackModal(originToken, [targetToken], ability);
         } else if (ability.healing) {
            const result = this.combat.resolveHealing(targetToken, ability);
@@ -885,9 +891,17 @@ export class GridComponent {
         return;
       }
 
-      const isAttack = ability.category === 'weapon' || ability.attackBonus !== undefined || ability.damage;
+      const isSave = !!ability.saveAttribute || (ability.category === 'spell' && !!ability.areaShape && !!ability.damage);
+      const isAttack = !isSave && (ability.category === 'weapon' || ability.attackBonus !== undefined || ability.damage);
 
-      if (isAttack) {
+      if (isSave) {
+        if (originToken && ability.damage) {
+          const spellcastingAttr = originToken.sheet?.spellcastingAbility || 'int';
+          const attrScore = (originToken.sheet as any)?.[spellcastingAttr] || 10;
+          const dc = 8 + (originToken.sheet?.proficiencyBonus || 2) + this.mathService.calculateModifier(attrScore);
+          this.combat.openDamageModal(originToken, affected, ability, {}, dc);
+        }
+      } else if (isAttack) {
         if (originToken) {
           this.combat.openAttackModal(originToken, affected, ability);
         }

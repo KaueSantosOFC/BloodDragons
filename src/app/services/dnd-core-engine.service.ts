@@ -249,10 +249,12 @@ export class DndCoreEngineService {
     diceString: string, 
     modifier: number, 
     itemBonus = 0, 
-    resistanceMultiplier = 1 // 0.5 para resistência, 2 para vulnerabilidade
+    resistanceMultiplier = 1, // 0.5 para resistência, 2 para vulnerabilidade
+    isOffhand = false
   ): ActionResult {
     const parsed = this.parseAndRoll(diceString);
-    const modifiers = modifier + itemBonus;
+    const appliedModifier = isOffhand ? Math.min(0, modifier) : modifier;
+    const modifiers = appliedModifier + itemBonus;
     
     let rawTotal = parsed.total + modifiers;
     // Dano não pode ser negativo
@@ -260,7 +262,7 @@ export class DndCoreEngineService {
 
     const finalTotal = Math.floor(rawTotal * resistanceMultiplier);
 
-    let log = `Dados: ${parsed.log} + Mod: ${modifier}`;
+    let log = `Dados: ${parsed.log} + Mod: ${appliedModifier}`;
     if (itemBonus) log += ` + Item: ${itemBonus}`;
     if (resistanceMultiplier !== 1) log += ` (x${resistanceMultiplier})`;
     log += ` = ${finalTotal}`;
@@ -301,17 +303,42 @@ export class DndCoreEngineService {
   /**
    * Lógica inteligente de Armadura
    */
-  calculateAC(armorType: 'heavy' | 'medium' | 'light' | 'none', baseAC: number, dexModifier: number, shieldBonus = 0): number {
+  calculateAC(
+    armorType: 'heavy' | 'medium' | 'light' | 'none', 
+    baseAC: number, 
+    dexModifier: number, 
+    shieldBonus = 0,
+    conModifier = 0,
+    wisModifier = 0,
+    unarmoredDefenseClass: 'barbarian' | 'monk' | 'none' = 'none'
+  ): number {
     let effectiveDexMod = dexModifier;
     
     if (armorType === 'heavy') {
-      effectiveDexMod = 0; // Ignora Destreza
+      return baseAC + shieldBonus; // Ignora Destreza
     } else if (armorType === 'medium') {
       effectiveDexMod = Math.min(dexModifier, 2); // Limita Destreza a +2
+      return baseAC + effectiveDexMod + shieldBonus;
+    } else if (armorType === 'light') {
+      return baseAC + effectiveDexMod + shieldBonus;
     }
-    // 'light' e 'none' usam a Destreza total
     
-    return baseAC + effectiveDexMod + shieldBonus;
+    // armorType === 'none'
+    const standardUnarmored = 10 + dexModifier;
+    const barbarianUnarmored = 10 + dexModifier + conModifier;
+    const monkUnarmored = 10 + dexModifier + wisModifier;
+
+    let calculatedAC = standardUnarmored;
+
+    if (unarmoredDefenseClass === 'monk' && shieldBonus > 0) {
+      calculatedAC = standardUnarmored; // Monge perde a Defesa sem Armadura se usar escudo
+    } else if (unarmoredDefenseClass === 'barbarian') {
+      calculatedAC = Math.max(standardUnarmored, barbarianUnarmored);
+    } else if (unarmoredDefenseClass === 'monk' && shieldBonus === 0) {
+      calculatedAC = Math.max(standardUnarmored, monkUnarmored);
+    }
+
+    return calculatedAC + shieldBonus;
   }
 
   // ==========================================
@@ -331,16 +358,18 @@ export class DndCoreEngineService {
   // ==========================================
 
   calculateMaxHP(hitDice: number, level: number, conModifier: number): number {
-    // Nível 1: Dado cheio + Mod Con
-    let totalHp = hitDice + conModifier;
+    // Nível 1: Dado cheio + Mod Con. Mínimo 1.
+    let totalHp = Math.max(1, hitDice + conModifier);
     
     // Níveis seguintes: Média arredondada para cima (hitDice / 2 + 1) + Mod Con
     if (level > 1) {
-      const averageHpPerLevel = Math.floor(hitDice / 2) + 1;
-      totalHp += (level - 1) * (averageHpPerLevel + conModifier);
+      const averageHpPerLevel = Math.ceil(hitDice / 2) + 1;
+      for (let i = 2; i <= level; i++) {
+        totalHp += Math.max(1, averageHpPerLevel + conModifier);
+      }
     }
     
-    return Math.max(totalHp, level); // Mínimo 1 PV por nível
+    return totalHp;
   }
 
   // ==========================================
@@ -353,13 +382,18 @@ export class DndCoreEngineService {
   }
 
   calculateCarryingCapacity(strScore: number): number {
-    return strScore * 15;
+    return strScore * 7.5; // Em kg
   }
 
-  calculateJumpDistance(strScore: number, strModifier: number): { long: number, high: number } {
+  calculatePushDragLift(strScore: number): number {
+    return this.calculateCarryingCapacity(strScore) * 2; // Em kg
+  }
+
+  calculateJumpDistance(strScore: number, strModifier: number, hasRunningStart = true): { long: number, high: number } {
+    const multiplier = hasRunningStart ? 1 : 0.5;
     return {
-      long: strScore, // Em pés
-      high: Math.max(0, 3 + strModifier) // Em pés
+      long: (strScore * 0.3) * multiplier, // Em metros
+      high: Math.max(0, 0.9 + (strModifier * 0.3)) * multiplier // Em metros
     };
   }
 

@@ -318,8 +318,10 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                     </div>
                     @if (showDamageField()) {
                       <div class="flex flex-col gap-1">
-                        <label for="abilityDamage" class="text-[10px] text-stone-500 uppercase">Dano</label>
-                        <input id="abilityDamage" formControlName="damage" placeholder="ex: 8d6" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                        <label for="abilityDamage" class="text-[10px] text-stone-500 uppercase flex justify-between">Dano <span *ngIf="abilityForm.get('damage')?.invalid" class="text-red-500 font-bold">INVÁLIDO (Ex: 2d6)</span></label>
+                        <input id="abilityDamage" formControlName="damage" placeholder="ex: 2d6 (Sem bônus)" 
+                               [class.border-red-500]="abilityForm.get('damage')?.invalid"
+                               class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                       </div>
                     }
                   </div>
@@ -327,13 +329,22 @@ import { ActionResult } from '../../services/dnd-core-engine.service';
                   <div class="grid grid-cols-2 gap-2">
                     @if (showHealingField()) {
                       <div class="flex flex-col gap-1">
-                        <label for="abilityHealing" class="text-[10px] text-stone-500 uppercase">Recuperação de PV</label>
-                        <input id="abilityHealing" formControlName="healing" placeholder="ex: 2d8+4" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                        <label for="abilityHealing" class="text-[10px] text-stone-500 uppercase flex justify-between">Recuperação de PV <span *ngIf="abilityForm.get('healing')?.invalid" class="text-red-500 font-bold">INVÁLIDO</span></label>
+                        <input id="abilityHealing" formControlName="healing" placeholder="ex: 2d8" 
+                               [class.border-red-500]="abilityForm.get('healing')?.invalid"
+                               class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                       </div>
                     }
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2 mt-2">
                     <div class="flex flex-col gap-1">
                       <label for="attackBonus" class="text-[10px] text-stone-500 uppercase">Bônus de Ataque</label>
                       <input id="attackBonus" type="number" formControlName="attackBonus" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <label for="damageBonus" class="text-[10px] text-stone-500 uppercase">Bônus de Dano/Cura</label>
+                      <input id="damageBonus" type="number" formControlName="damageBonus" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
 
@@ -1648,6 +1659,7 @@ export class RightPanelComponent {
       damageType: 'slashing',
       description: '',
       attackBonus: 0,
+      damageBonus: 0,
       isProficient: true,
       isOffHand: false,
       category: category,
@@ -1672,6 +1684,7 @@ export class RightPanelComponent {
       healing: ability.healing || '',
       description: ability.description || '',
       attackBonus: ability.attackBonus || 0,
+      damageBonus: ability.damageBonus || 0,
       isProficient: ability.isProficient !== undefined ? ability.isProficient : true,
       isOffHand: ability.isOffHand || false,
       category: ability.category || 'feature',
@@ -1728,11 +1741,12 @@ export class RightPanelComponent {
     type: new FormControl<'action' | 'bonus_action' | 'reaction' | 'passive'>('action', { nonNullable: true, validators: [Validators.required] }),
     range: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
     areaShape: new FormControl<AreaShape>('none', { nonNullable: true, validators: [Validators.required] }),
-    damage: new FormControl('', { nonNullable: true }),
+    damage: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d*(d\d+)?$/i)] }),
     damageType: new FormControl('slashing', { nonNullable: true }),
-    healing: new FormControl('', { nonNullable: true }),
+    healing: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d*(d\d+)?$/i)] }),
     description: new FormControl('', { nonNullable: true }),
     attackBonus: new FormControl(0, { nonNullable: true }),
+    damageBonus: new FormControl(0, { nonNullable: true }),
     isProficient: new FormControl(true, { nonNullable: true }),
     isOffHand: new FormControl(false, { nonNullable: true }),
     category: new FormControl<'weapon' | 'spell' | 'feature' | 'item_effect'>('feature', { nonNullable: true }),

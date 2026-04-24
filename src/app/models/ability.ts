@@ -18,8 +18,10 @@ export interface Ability {
   applyCondition?: { conditionId: string; duration?: number }; // applies a condition on hit / failed save
   
   attackBonus?: number; // e.g., +5 to hit
+  damageBonus?: number; // e.g., +3 to damage
   isProficient?: boolean;
   isOffHand?: boolean; // Off-hand attacks do NOT add positive ability modifiers to damage
+  saveAttribute?: 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha'; // If present, forces a saving throw instead of an attack roll
   
   category?: 'weapon' | 'spell' | 'feature' | 'item_effect';
   properties?: string[]; // e.g., ['finesse', 'ranged', 'heavy']
