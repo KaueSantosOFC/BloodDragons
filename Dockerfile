@@ -14,7 +14,7 @@ COPY . .
 
 # LIMITA a memória RAM do Node.js durante o build (evita travar instâncias pequenas)
 # O valor 768 significa 768MB, deixando um pouco de RAM para o sistema operacional respirar.
-#ENV NODE_OPTIONS="--max_old_space_size=768"
+#ENV NODE_OPTIONS="--max_old_space_size=768" teste
 
 # Executa o build
 RUN npm run build
