@@ -1,20 +1,63 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# BloodDragons - D&D 5e Virtual Tabletop
 
-# Run and deploy your AI Studio app
+## Arquitetura
 
-This contains everything you need to run your app locally.
+Este projeto foi desacoplado em **Frontend** e **Backend**:
 
-View your app in AI Studio: https://ai.studio/apps/e33de52f-71dd-4ec4-8d23-b29a634c7a19
+```
+BloodDragons/
+├── backend/    → Java 21 + Spring Boot 3.4 (API REST)
+├── frontend/   → Angular 21 (Interface Visual)
+├── .rules/     → Regras D&D 5e de referência
+└── docker-compose.yml
+```
 
-## Run Locally
+### Backend (Java)
+Toda a lógica de negócio reside no backend:
+- **DndMathService** — Cálculos matemáticos, geometria AoE, dice rolling
+- **DndCoreEngineService** — Motor de regras D&D 5e (ataques, dano, saving throws)
+- **CombatService** — Resolução de combate, XP, level up
+- **CampaignService** — CRUD de campanhas com persistência JSON
 
-**Prerequisites:**  Node.js
+### Frontend (Angular)
+Interface visual consumindo a API REST:
+- Grid de mapa com tokens
+- Fichas de personagem
+- Painel do GM
+- Combat tracker
 
+## Como Rodar
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Desenvolvimento Local
+
+**Backend:**
+```bash
+cd backend
+mvn spring-boot:run
+# API disponível em http://localhost:8080
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+# App disponível em http://localhost:3000
+```
+
+### Docker
+```bash
+docker-compose up --build
+# Frontend: http://localhost:3000
+# Backend: http://localhost:8080
+```
+
+## API Endpoints
+
+| Endpoint | Descrição |
+|----------|-----------|
+| `GET /api/compendium/*` | Armas, magias, classes, raças |
+| `POST /api/engine/*` | Dice roll, modificadores, AC, HP |
+| `POST /api/combat/*` | Ataques, dano, cura, saving throws |
+| `GET/POST/PUT/DELETE /api/campaigns` | CRUD de campanhas |
+| `POST /api/upload` | Upload de imagens |

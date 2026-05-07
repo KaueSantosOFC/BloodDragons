@@ -1,0 +1,12 @@
+[ {
+  "id" : "test-campaign",
+  "name" : "Campanha Teste (Tutorial)",
+  "createdAt" : [ 2026, 5, 6, 20, 40, 3, 789561166 ],
+  "lastPlayedAt" : [ 2026, 5, 6, 20, 40, 3, 789581016 ],
+  "tokens" : [ ],
+  "mapBackgroundImage" : null,
+  "fogOfWar" : [ ],
+  "isFogEnabled" : null,
+  "scenes" : [ ],
+  "activeSceneId" : null
+} ]

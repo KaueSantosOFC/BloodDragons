@@ -1,11 +1,7 @@
 node_modules
-dist
 .angular
+dist
 .git
-.env
-.env.example
-README.md
-Dockerfile
-.dockerignore
-eslint.config.js
-tsconfig.spec.json
+.agents
+.context
+*.md
