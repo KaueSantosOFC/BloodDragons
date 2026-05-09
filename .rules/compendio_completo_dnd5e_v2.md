@@ -1,182 +1,157 @@
-# Compêndio Completo de Criação de Personagem - D&D 5ª Edição
+# Compêndio Completo de Criação de Personagem — D&D 5e (PHB Oficial)
 
-Este documento detalha exaustivamente as Raças, Classes, Antecedentes e Mecânicas de Personalidade do D&D 5e. Ele foi estruturado para servir como base lógica de dados e regras para o sistema Antigravity.
+> Fonte: Livro do Jogador D&D 5e. Este documento detalha as Raças, Classes, Antecedentes e 
+> Mecânicas de Personalidade, estruturado como base lógica para o sistema Antigravity.
 
 ---
 
 ## 1. AS RAÇAS (Ancestralidades e Habilidades Únicas)
 
-Cada raça possui bônus de atributos e características biológicas ou mágicas inatas.
+Cada raça possui bônus de atributos, deslocamento (velocidade), tamanho e características inatas.
 
 ### Anão (Dwarf)
-* **Aumento no Valor de Habilidade:** Constituição +2.
-* **Visão no Escuro:** 18 metros.
-* **Resiliência Anã:** Vantagem em testes de resistência contra veneno e resistência a dano de veneno.
+* **Tamanho:** Médio | **Deslocamento:** 7,5 m (Não reduzido por armadura pesada)
+* **Aumento no Valor de Habilidade:** Constituição +2
+* **Visão no Escuro:** 18 metros
+* **Resiliência Anã:** Vantagem em saves contra veneno e resistência a dano de veneno.
 * **Treinamento Anão em Combate:** Proficiência com machado de batalha, machado de mão, martelo de arremesso e martelo de guerra.
-* **Proficiência com Ferramentas:** Uma à escolha: ferramentas de pedreiro, ferreiro ou suprimentos de cervejeiro.
-* **Especialização em Rochas:** Dobro do bônus de proficiência em testes de História relacionados à origem de trabalhos em pedra.
 * **Sub-raças:**
-    * **Anão da Colina:** Sabedoria +1. *Tenacidade Anã:* +1 PV máximo por nível.
-    * **Anão da Montanha:** Força +2. Proficiência com armaduras leves e médias.
+  * **Anão da Colina:** Sabedoria +1. *Tenacidade Anã:* +1 PV máximo por nível.
+  * **Anão da Montanha:** Força +2. Proficiência com armaduras leves e médias.
 
 ### Elfo (Elf)
-* **Aumento no Valor de Habilidade:** Destreza +2.
+* **Tamanho:** Médio | **Deslocamento:** 9 m
+* **Aumento no Valor de Habilidade:** Destreza +2
+* **Visão no Escuro:** 18 metros
 * **Sentidos Aguçados:** Proficiência em Percepção.
-* **Ancestralidade Feérica:** Vantagem contra ser enfeitiçado e imunidade a sono mágico.
-* **Transe:** Descanso longo em 4 horas através de meditação.
+* **Ancestralidade Feérica:** Vantagem em saves contra ser enfeitiçado, imunidade a magias de sono.
+* **Transe:** Descanso longo em 4 horas (meditação).
 * **Sub-raças:**
-    * **Alto Elfo:** Inteligência +1. Treinamento com Espadas e Arcos. 1 Truque de Mago.
-    * **Elfo da Floresta:** Sabedoria +1. Treinamento com Espadas e Arcos. *Pés Ligeiros:* Deslocamento de 10,5m. *Máscara da Natureza:* Esconder-se mesmo em folhagem leve.
-    * **Drow (Elfo Negro):** Carisma +1. Visão no Escuro Superior (36m). Sensibilidade à Luz Solar (Desvantagem). Magia Drow (*Globos de Luz*, *Fogo das Fadas*, *Escuridão*).
+  * **Alto Elfo:** Inteligência +1. Treinamento (Espadas e Arcos). 1 Truque de Mago (INT).
+  * **Elfo da Floresta:** Sabedoria +1. Treinamento (Espadas e Arcos). Deslocamento: 10,5m. Esconder-se em folhagem leve.
+  * **Drow (Elfo Negro):** Carisma +1. Visão no Escuro Superior (36m). Sensibilidade à Luz Solar (Desvantagem em ataques/Percepção). Magia Drow (CAR).
 
 ### Halfling
-* **Aumento no Valor de Habilidade:** Destreza +2.
-* **Sorte:** Rola novamente qualquer '1' natural em d20.
-* **Bravura:** Vantagem contra medo.
-* **Agilidade Halfling:** Pode passar pelo espaço de qualquer criatura maior que ele.
+* **Tamanho:** Pequeno | **Deslocamento:** 7,5 m
+* **Aumento no Valor de Habilidade:** Destreza +2
+* **Sorte:** Rola novamente qualquer '1' natural em d20 (ataque, save ou teste) e usa o novo valor.
+* **Bravura:** Vantagem contra ficar amedrontado.
+* **Agilidade Halfling:** Pode passar pelo espaço de qualquer criatura Maior ou superior.
 * **Sub-raças:**
-    * **Pés Leves:** Carisma +1. *Furtividade Natural:* Esconder-se usando uma criatura maior como cobertura.
-    * **Robusto:** Constituição +1. Resistência contra veneno.
+  * **Pés Leves:** Carisma +1. Furtividade Natural (Esconder-se atrás de criaturas Médias ou maiores).
+  * **Robusto:** Constituição +1. Resistência contra veneno (vantagem em save e resistência a dano).
 
 ### Humano
-* **Aumento no Valor de Habilidade:** +1 em todos os valores (ou +1 em dois valores, uma perícia e um talento na versão variante).
-* **Versatilidade:** Adaptam-se a qualquer classe com facilidade.
+* **Tamanho:** Médio | **Deslocamento:** 9 m
+* **Padrão:** +1 em **TODOS** os seis atributos.
+* **Variante:** +1 em dois atributos diferentes, +1 Perícia, +1 Talento.
 
 ### Draconato (Dragonborn)
-* **Aumento no Valor de Habilidade:** Força +2, Carisma +1.
-* **Ancestralidade Dracônica:** Escolhe uma cor (Ex: Vermelho/Fogo, Azul/Relâmpago).
-* **Arma de Sopro:** Ataque em área (Cone ou Linha) baseado na cor. Dano 2d6 (escala com o nível).
-* **Resistência a Dano:** Resistência ao tipo de dano associado à cor.
+* **Tamanho:** Médio | **Deslocamento:** 9 m
+* **Aumento no Valor de Habilidade:** Força +2, Carisma +1
+* **Ancestralidade Dracônica:** Define cor, tipo de dano e área do sopro.
+* **Arma de Sopro:** Ação. Dano em área (2d6, escala 3d6, 4d6, 5d6). Save reduz à metade. (1/descanso curto).
+* **Resistência a Dano:** Resistência ao tipo de dano do sopro.
 
 ### Gnomo (Gnome)
-* **Aumento no Valor de Habilidade:** Inteligência +2.
-* **Esperteza Gnômica:** Vantagem em testes de resistência de Int, Sab e Car contra magia.
+* **Tamanho:** Pequeno | **Deslocamento:** 7,5 m
+* **Aumento no Valor de Habilidade:** Inteligência +2
+* **Visão no Escuro:** 18 metros
+* **Esperteza Gnômica:** Vantagem em todos os saves de INT, SAB e CAR contra magia.
 * **Sub-raças:**
-    * **Gnomo da Floresta:** Destreza +1. Truque *Ilusão Menor*. Falar com pequenos animais.
-    * **Gnomo das Rochas:** Constituição +1. *Conhecimento de Artífice:* Dobro de proficiência em História sobre itens mágicos/tecnológicos. *Engenhoqueiro:* Cria dispositivos mecânicos (isqueiro, caixa de música).
+  * **Gnomo da Floresta:** Destreza +1. Truque *Ilusão Menor* (INT). Falar com bestas Minúsculas.
+  * **Gnomo das Rochas:** Constituição +1. Conhecimento de Artífice (+2 prof. em História de itens mágicos). Engenhoqueiro.
 
 ### Meio-Elfo (Half-Elf)
-* **Aumento no Valor de Habilidade:** Carisma +2, outros dois valores +1 à escolha.
-* **Versatilidade em Perícias:** Ganha duas perícias à escolha.
-* **Ancestralidade Feérica:** Mesmo que os Elfos.
+* **Tamanho:** Médio | **Deslocamento:** 9 m
+* **Aumento no Valor de Habilidade:** Carisma +2, +1 em dois outros atributos diferentes.
+* **Visão no Escuro:** 18 metros
+* **Ancestralidade Feérica:** Vantagem contra feitiços, imunidade a sono mágico.
+* **Versatilidade em Perícias:** Proficiência em 2 perícias quaisquer.
 
 ### Meio-Orc (Half-Orc)
-* **Aumento no Valor de Habilidade:** Força +2, Constituição +1.
+* **Tamanho:** Médio | **Deslocamento:** 9 m
+* **Aumento no Valor de Habilidade:** Força +2, Constituição +1
+* **Visão no Escuro:** 18 metros
 * **Ameaçador:** Proficiência em Intimidação.
-* **Resistência Implacável:** Quando cai a 0 PV, pode cair a 1 PV em vez disso (1x por descanso longo).
-* **Ataques Selvagens:** No crítico corpo-a-corpo, rola um dado de dano extra da arma.
+* **Resistência Implacável:** Se cair a 0 PV (sem morte instantânea), fica com 1 PV. (1/descanso longo).
+* **Ataques Selvagens:** No crítico corpo-a-corpo, rola +1 dado de dano da arma.
 
 ### Tiefling
-* **Aumento no Valor de Habilidade:** Carisma +2, Inteligência +1.
+* **Tamanho:** Médio | **Deslocamento:** 9 m
+* **Aumento no Valor de Habilidade:** Carisma +2, Inteligência +1
+* **Visão no Escuro:** 18 metros
 * **Resistência Infernal:** Resistência a dano de fogo.
-* **Legado Infernal:** Truque *Taumaturgia*. Magias *Repreensão Infernal* e *Escuridão* desbloqueadas nos níveis 3 e 5.
+* **Legado Infernal (CAR):** Truque *Taumaturgia*. Nvl 3: *Repreensão Infernal* (1/dia). Nvl 5: *Escuridão* (1/dia).
 
 ---
 
-## 2. AS CLASSES (Estrutura e Progressão)
+## 2. AS CLASSES E PROGRESSÃO
 
-### Bárbaro
-* **Dado de Vida:** d12.
-* **Atributos Chave:** Força e Constituição.
-* **Habilidade Única:** *Fúria* (Dano extra, resistência a dano físico), *Defesa sem Armadura* (10 + Des + Con).
-
-### Bardo
-* **Dado de Vida:** d8.
-* **Atributo Chave:** Carisma.
-* **Habilidade Única:** *Inspiração Bárdica* (Bônus para aliados), *Pau para Toda Obra* (Metade da proficiência em tudo).
-
-### Bruxo (Warlock)
-* **Dado de Vida:** d8.
-* **Atributo Chave:** Carisma.
-* **Habilidade Única:** *Magia de Pacto* (Slots recuperam em descanso curto), *Invocações Místicas*.
-
-### Clérigo
-* **Dado de Vida:** d8.
-* **Atributo Chave:** Sabedoria.
-* **Habilidade Única:** *Canalizar Divindade*, *Intervenção Divina*, Domínios Divinos.
-
-### Druida
-* **Dado de Vida:** d8.
-* **Atributo Chave:** Sabedoria.
-* **Habilidade Única:** *Forma Selvagem* (Transformação em animais).
-* **Exceção:** Não usam armaduras ou escudos de metal.
-
-### Feiticeiro (Sorcerer)
-* **Dado de Vida:** d6.
-* **Atributo Chave:** Carisma.
-* **Habilidade Única:** *Metamagia* (Alterar magias), *Pontos de Feitiçaria*.
-
-### Guerreiro (Fighter)
-* **Dado de Vida:** d10.
-* **Atributos Chave:** Força ou Destreza.
-* **Habilidade Única:** *Retomar o Fôlego*, *Surto de Ação*, Maior número de aumentos de Atributo/Talentos.
-
-### Ladino (Rogue)
-* **Dado de Vida:** d8.
-* **Atributo Chave:** Destreza.
-* **Habilidade Única:** *Ataque Furtivo* (Dano extra massivo), *Especialização* (Dobro de proficiência em perícias).
-
-### Mago (Wizard)
-* **Dado de Vida:** d6.
-* **Atributo Chave:** Inteligência.
-* **Habilidade Única:** *Recuperação Arcana*, *Livro de Magias* (Prepara magias da lista escrita).
-
-### Monge
-* **Dado de Vida:** d8.
-* **Atributos Chave:** Destreza e Sabedoria.
-* **Habilidade Única:** *Pontos de Ki*, *Defesa sem Armadura* (10 + Des + Sab), *Artes Marciais*.
-
-### Paladino
-* **Dado de Vida:** d10.
-* **Atributos Chave:** Força e Carisma.
-* **Habilidade Única:** *Destruição Divina* (Gasta slot para dano radiante), *Mãos Curadoras*.
-
-### Patrulheiro (Ranger)
-* **Dado de Vida:** d10.
-* **Atributos Chave:** Destreza e Sabedoria.
-* **Habilidade Única:** *Inimigo Favorito*, *Explorador Natural*.
+| Classe | Dado Vida | Saves | Atributo Principal | Destaque Mecânico |
+|:---|:---:|:---|:---|:---|
+| **Bárbaro** | d12 | FOR, CON | Força | Fúria (dano/resistência), Defesa Sem Armadura, Ataque Temerário |
+| **Bardo** | d8 | DES, CAR | Carisma | Magia, Inspiração Bárdica, Pau para Toda Obra, Especialização |
+| **Bruxo** | d8 | SAB, CAR | Carisma | Magia de Pacto (recupera em desc. curto), Invocações Místicas |
+| **Clérigo** | d8 | SAB, CAR | Sabedoria | Magia preparada, Domínio Divino (Nv 1), Canalizar Divindade |
+| **Druida** | d8 | INT, SAB | Sabedoria | Magia preparada, Forma Selvagem (transformação) |
+| **Feiticeiro**| d6 | CON, CAR | Carisma | Magia conhecida, Metamagia (modifica feitiços), Pontos de Feitiçaria |
+| **Guerreiro** | d10 | FOR, CON | FOR ou DES | Surto de Ação, Retomar o Fôlego, Múltiplos Ataques Extras, Talentos extras |
+| **Ladino** | d8 | DES, INT | Destreza | Ataque Furtivo (dano maciço condicional), Ação Astuta, Especialização |
+| **Mago** | d6 | INT, SAB | Inteligência | Maior lista de magias, Livro de Magias, Recuperação Arcana |
+| **Monge** | d8 | FOR, DES | DES e SAB | Artes Marciais, Pontos de Ki (Ruptura, Defesa do Paciente), Defesa Sem Armadura |
+| **Paladino** | d10 | SAB, CAR | FOR e CAR | Magia, Destruição Divina (smite = radiante), Aura de Proteção |
+| **Patrulheiro**| d10 | FOR, DES | DES e SAB | Magia, Inimigo Favorito, Explorador Natural, Estilo de Luta |
 
 ---
 
 ## 3. ANTECEDENTES (Backgrounds) E PERSONALIDADE
 
-Os antecedentes fornecem as "ferramentas de vida" e a base da personalidade.
+Antecedentes concedem 2 perícias, e uma mistura de 2 ferramentas ou idiomas, além de equipamento inicial e um Recurso narrativo.
 
-### Estrutura de Antecedente
-* **Perícias:** Geralmente duas proficiências.
-* **Ferramentas/Idiomas:** Duas escolhas somadas.
-* **Equipamento:** Itens temáticos e ouro inicial.
-* **Característica Especial:** Um benefício social (Ex: Alojamento em templos, contatos criminais).
+### Lista Base (PHB p.125-141)
+| Antecedente | Perícias | Ferramentas/Idiomas | Recurso (Roleplay) |
+|:---|:---|:---|:---|
+| **Acólito** | Intuição, Religião | 2 idiomas | Abrigo dos Fiéis (apoio em templos) |
+| **Artesão** | Intuição, Persuasão | 1 artesão, 1 idioma | Filiação à Guilda Comercial |
+| **Artista** | Acrobacia, Atuação | 1 disfarce, 1 musical | Por Demanda (comida/estadia por shows) |
+| **Charlatão** | Enganação, Prestidigitação| Disfarce, Falsificação | Identidade Falsa |
+| **Criminoso** | Enganação, Furtividade | Jogo, Ladrão | Contato Criminal |
+| **Eremita** | Medicina, Religião | Herbalismo, 1 idioma | Descoberta (segredo do mundo) |
+| **Forasteiro**| Atletismo, Sobrevivência | 1 musical, 1 idioma | Andarilho (lembra mapas, forrageia para 6) |
+| **Herói do Povo**| Adestrar Animais, Sobrev.| 1 artesão, veículos | Hospitalidade Rústica (abrigo no povo) |
+| **Marinheiro**| Atletismo, Percepção | Navegador, embarcação | Passagem de Navio |
+| **Nobre** | História, Persuasão | 1 jogo, 1 idioma | Posição de Privilégio |
+| **Órfão** | Furtividade, Prestidigitação| Disfarce, Ladrão | Segredos da Cidade (locomoção 2x rápida) |
+| **Sábio** | Arcanismo, História | 2 idiomas | Pesquisador (sabe onde achar informação) |
+| **Soldado** | Atletismo, Intimidação | 1 jogo, veículos | Patente Militar |
 
-### Lista de Antecedentes Base
-1.  **Acólito:** Percepção do sagrado, abrigo em templos.
-2.  **Charlatão:** Identidade falsa, kit de falsificação.
-3.  **Criminoso/Espião:** Contatos no submundo, ferramentas de ladrão.
-4.  **Artista:** Vive de performances, instrumentos musicais.
-5.  **Herói do Povo:** Respeito das massas, ferramentas de artesão.
-6.  **Artesão de Guilda:** Apoio de guilda comercial, ferramentas de artesão.
-7.  **Eremita:** Revelação espiritual, kit de herbalismo.
-8.  **Nobre:** Privilégios de casta, jogos de estratégia.
-9.  **Forasteiro:** Memória para mapas e geografia, sobrevivência.
-10. **Sábio:** Pesquisador de bibliotecas, idiomas extras.
-11. **Marinheiro:** Passagem gratuita em navios, ferramentas de navegador.
-12. **Soldado:** Patente militar, veículos terrestres.
-13. **Órfão:** Conhecimento de passagens secretas na cidade.
+### Mecânica de Personalidade (PHB p.122)
+* **Traços de Personalidade:** Hábitos gerais, maneirismos ou excentricidades.
+* **Ideais:** O que motiva o personagem. Define tendências de alinhamento moral (Bem, Mal, Lei, Caos, Neutralidade).
+* **Vínculos:** Conexão com pessoas, lugares ou objetos. Pode inspirar heroicidade.
+* **Defeitos:** Vícios, medos, ou fraquezas exploráveis.
 
-### Sistema de Personalidade (Roleplay)
-O sistema usa quatro pilares para definir o comportamento:
-* **Traços de Personalidade:** Pequenos hábitos ou qualidades.
-* **Ideais:** O que motiva o personagem (Ordem, Caos, Bem, Mal, Neutro).
-* **Vínculos:** A conexão com o mundo (Uma pessoa, lugar ou objeto).
-* **Defeitos:** Uma falha que pode causar problemas.
+**Inspiração:** O Mestre concede "Inspiração" quando o jogador interpreta seus traços/defeitos de forma fiel ou prejudicial. O jogador gasta a Inspiração para ganhar Vantagem em 1 teste.
 
 ---
 
-## 4. EXCEÇÕES E REGRAS ESPECIAIS (The "Rules")
+## 4. REGRAS E LIMITAÇÕES GERAIS
 
-* **Multiclasse:** Requer valor 13 nos atributos primários das classes envolvidas.
-* **Armaduras Pesadas:** Impõem desvantagem em Furtividade. Se a Força for baixa, reduzem o deslocamento em 3m (Anões ignoram essa penalidade de movimento).
-* **Tamanho Pequeno (Halfling/Gnomo):** Desvantagem ao usar armas com a propriedade "Pesada" (Greatsword, Greataxe, etc).
-* **Conjuradores em Armadura:** Não podem lançar magias se estiverem usando armadura com a qual não têm proficiência.
-* **Escudos:** Contam como armadura para fins de proficiência.
-* **Druidas e Metal:** Um Druida não usará uma armadura de placas ou escudo de metal, mesmo que tenha proficiência via multiclasse.
+* **Multiclasse (PHB p.163):** Requer Atributo **13** nas classes de origem E de destino.
+  * Bárbaro: FOR
+  * Bardo: CAR
+  * Bruxo: CAR
+  * Clérigo: SAB
+  * Druida: SAB
+  * Feiticeiro: CAR
+  * Guerreiro: FOR ou DES
+  * Ladino: DES
+  * Mago: INT
+  * Monge: DES e SAB
+  * Paladino: FOR e CAR
+  * Patrulheiro: DES e SAB
+* **Tamanho Pequeno (Halfling/Gnomo):** Desvantagem ao usar armas com propriedade "Pesada" (Greatsword, Heavy Crossbow, etc).
+* **Conjuradores em Armadura:** Não podem lançar magias se estiverem usando armadura/escudo na qual não têm proficiência.
+* **Escudos:** Contam como armadura para fins de proficiência. Bloqueia Artes Marciais do Monge.
+* **Druidas e Metal:** Um Druida não veste armadura nem usa escudo feito de metal, mesmo com proficiência ganha de outra classe/talento.

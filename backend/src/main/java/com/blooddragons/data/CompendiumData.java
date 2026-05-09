@@ -28,6 +28,7 @@ public class CompendiumData {
     }
 
     public static final List<CompendiumWeapon> WEAPONS = List.of(
+        w("unarmed_strike","Ataque Desarmado","natural","melee","1","concussão",1.5,List.of("finesse_monk")),
         w("dagger","Adaga","simple","melee","1d4","perfurante",6,List.of("finesse","light","thrown")),
         w("javelin","Azagaia","simple","melee","1d6","perfurante",9,List.of("thrown")),
         w("club","Bastão","simple","melee","1d4","pancada",1.5,List.of("light")),

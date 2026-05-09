@@ -30,24 +30,57 @@ export const DND5E_CLASSES: Dnd5eClass[] = [
   { id: 'patrulheiro', name: 'Patrulheiro', hitDie: 10, spellcastingAbility: 'wis',  icon: 'nature_people',   primaryAttributes: ['dex', 'wis'], weaponProficiencies: ['simple', 'martial'], armorProficiencies: ['light', 'medium', 'shields'] },
 ];
 
+export interface Dnd5eSubRace {
+  id: string;
+  name: string;
+  abilityBonuses: string;
+}
+
 export interface Dnd5eRace {
   id: string;
   name: string;
   icon: string;
   abilityBonuses: string; // Human-readable summary
+  size: 'medium' | 'small';
+  speed: number; // metros
+  darkvision: number; // metros (0 se não possuir)
+  subRaces: Dnd5eSubRace[];
 }
 
 export const DND5E_RACES: Dnd5eRace[] = [
-  { id: 'anao',       name: 'Anão',       icon: 'hardware',          abilityBonuses: 'CON +2' },
-  { id: 'elfo',       name: 'Elfo',       icon: 'park',              abilityBonuses: 'DES +2' },
-  { id: 'halfling',   name: 'Halfling',   icon: 'child_care',        abilityBonuses: 'DES +2' },
-  { id: 'humano',     name: 'Humano',     icon: 'person',            abilityBonuses: '+1 em todos' },
-  { id: 'draconato',  name: 'Draconato',  icon: 'local_fire_department', abilityBonuses: 'FOR +2, CAR +1' },
-  { id: 'gnomo',      name: 'Gnomo',      icon: 'lightbulb',         abilityBonuses: 'INT +2' },
-  { id: 'meio-elfo',  name: 'Meio-Elfo',  icon: 'diversity_3',       abilityBonuses: 'CAR +2, +1 x2' },
-  { id: 'meio-orc',   name: 'Meio-Orc',   icon: 'fitness_center',    abilityBonuses: 'FOR +2, CON +1' },
-  { id: 'tiefling',   name: 'Tiefling',   icon: 'whatshot',          abilityBonuses: 'CAR +2, INT +1' },
+  { id: 'anao',       name: 'Anão',       icon: 'hardware',              abilityBonuses: 'CON +2', size: 'medium', speed: 7.5, darkvision: 18,
+    subRaces: [
+      { id: 'anao_colina',    name: 'Anão da Colina',    abilityBonuses: 'SAB +1, +1 PV/nível' },
+      { id: 'anao_montanha',  name: 'Anão da Montanha',  abilityBonuses: 'FOR +2' },
+    ] },
+  { id: 'elfo',       name: 'Elfo',       icon: 'park',                  abilityBonuses: 'DES +2', size: 'medium', speed: 9, darkvision: 18,
+    subRaces: [
+      { id: 'alto_elfo',      name: 'Alto Elfo',         abilityBonuses: 'INT +1, Truque de Mago' },
+      { id: 'elfo_floresta',  name: 'Elfo da Floresta',  abilityBonuses: 'SAB +1, Veloc. 10.5m' },
+      { id: 'drow',           name: 'Drow (Elfo Negro)',  abilityBonuses: 'CAR +1, Visão 36m' },
+    ] },
+  { id: 'halfling',   name: 'Halfling',   icon: 'child_care',            abilityBonuses: 'DES +2', size: 'small', speed: 7.5, darkvision: 0,
+    subRaces: [
+      { id: 'pes_leves',      name: 'Pés Leves',         abilityBonuses: 'CAR +1' },
+      { id: 'robusto',        name: 'Robusto',           abilityBonuses: 'CON +1' },
+    ] },
+  { id: 'humano',     name: 'Humano',     icon: 'person',                abilityBonuses: '+1 em todos', size: 'medium', speed: 9, darkvision: 0,
+    subRaces: [] },
+  { id: 'draconato',  name: 'Draconato',  icon: 'local_fire_department', abilityBonuses: 'FOR +2, CAR +1', size: 'medium', speed: 9, darkvision: 0,
+    subRaces: [] },
+  { id: 'gnomo',      name: 'Gnomo',      icon: 'lightbulb',             abilityBonuses: 'INT +2', size: 'small', speed: 7.5, darkvision: 18,
+    subRaces: [
+      { id: 'gnomo_floresta', name: 'Gnomo da Floresta', abilityBonuses: 'DES +1' },
+      { id: 'gnomo_rochas',   name: 'Gnomo das Rochas',  abilityBonuses: 'CON +1' },
+    ] },
+  { id: 'meio_elfo',  name: 'Meio-Elfo',  icon: 'diversity_3',           abilityBonuses: 'CAR +2, +1 x2', size: 'medium', speed: 9, darkvision: 18,
+    subRaces: [] },
+  { id: 'meio_orc',   name: 'Meio-Orc',   icon: 'fitness_center',        abilityBonuses: 'FOR +2, CON +1', size: 'medium', speed: 9, darkvision: 18,
+    subRaces: [] },
+  { id: 'tiefling',   name: 'Tiefling',   icon: 'whatshot',              abilityBonuses: 'CAR +2, INT +1', size: 'medium', speed: 9, darkvision: 18,
+    subRaces: [] },
 ];
+
 
 export interface Dnd5eAlignment {
   id: string;

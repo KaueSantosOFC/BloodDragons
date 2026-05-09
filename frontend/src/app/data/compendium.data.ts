@@ -1,59 +1,115 @@
 export interface CompendiumWeapon {
   id: string;
   name: string;
-  weaponType: 'simple' | 'martial';
+  weaponType: 'simple' | 'martial' | 'natural';
   attackType: 'melee' | 'ranged';
   damage: string;
   damageType: string;
   properties: string[];
   range: number;
+  description?: string;
 }
 
+/** Traduz propriedades de arma para português com explicação */
+export const WEAPON_PROPERTY_LABELS: Record<string, string> = {
+  'finesse': '⚔️ Acuidade — Pode usar FOR ou DES para ataque e dano',
+  'light': '🪶 Leve — Pode ser usada em combate com duas armas',
+  'thrown': '🎯 Arremesso — Pode ser arremessada para ataque à distância',
+  'versatile': '🔄 Versátil — Pode ser empunhada com 1 ou 2 mãos (dado maior)',
+  'two-handed': '🤲 Duas Mãos — Requer as duas mãos para usar',
+  'heavy': '🏋️ Pesada — Criaturas Pequenas têm desvantagem',
+  'reach': '📏 Alcance — Alcance de 3m em vez de 1.5m',
+  'ammunition': '🏹 Munição — Requer munição para disparar',
+  'loading': '⏳ Recarga — Apenas 1 ataque por ação (independente de Ataque Extra)',
+  'special': '⭐ Especial — Consulte as regras especiais da arma',
+};
+
 export const COMPENDIUM_WEAPONS: CompendiumWeapon[] = [
+  // Ataque Desarmado (disponível para todos)
+  { id: 'unarmed', name: 'Ataque Desarmado', weaponType: 'natural', attackType: 'melee', damage: '1', damageType: 'pancada', properties: [],
+    range: 1.5, description: 'Soco, chute ou cabeçada. Todos são proficientes. Dano = 1 + mod. FOR. Monges podem usar DES e o dado escala com nível (1d4→1d10).' },
+
   // Armas Simples Corpo-a-Corpo
-  { id: 'dagger', name: 'Adaga', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'perfurante', properties: ['finesse', 'light', 'thrown'], range: 6 },
-  { id: 'javelin', name: 'Azagaia', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['thrown'], range: 9 },
-  { id: 'club', name: 'Bastão', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'pancada', properties: ['light'], range: 1.5 },
-  { id: 'quarterstaff', name: 'Bordão', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'pancada', properties: ['versatile'], range: 1.5 },
-  { id: 'greatclub', name: 'Clava Grande', weaponType: 'simple', attackType: 'melee', damage: '1d8', damageType: 'pancada', properties: ['two-handed'], range: 1.5 },
-  { id: 'sickle', name: 'Foice', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'cortante', properties: ['light'], range: 1.5 },
-  { id: 'spear', name: 'Lança', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['thrown', 'versatile'], range: 6 },
-  { id: 'mace', name: 'Maça', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'pancada', properties: [], range: 1.5 },
-  { id: 'handaxe', name: 'Machado de Mão', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'cortante', properties: ['light', 'thrown'], range: 6 },
-  { id: 'lighthammer', name: 'Martelo Leve', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'pancada', properties: ['light', 'thrown'], range: 6 },
+  { id: 'dagger', name: 'Adaga', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'perfurante', properties: ['finesse', 'light', 'thrown'], range: 6,
+    description: 'Lâmina curta e versátil. Pode usar FOR ou DES (Acuidade). Arremesso: 6/18m.' },
+  { id: 'javelin', name: 'Azagaia', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['thrown'], range: 9,
+    description: 'Lança de arremesso leve. Arremesso: 9/36m.' },
+  { id: 'club', name: 'Bastão', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'pancada', properties: ['light'], range: 1.5,
+    description: 'Porrete simples. Leve: pode ser usada em combate com duas armas.' },
+  { id: 'quarterstaff', name: 'Bordão', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'pancada', properties: ['versatile'], range: 1.5,
+    description: 'Bastão longo. Versátil: 1d6 (1 mão) ou 1d8 (2 mãos). Monges o usam como arma de Artes Marciais.' },
+  { id: 'greatclub', name: 'Clava Grande', weaponType: 'simple', attackType: 'melee', damage: '1d8', damageType: 'pancada', properties: ['two-handed'], range: 1.5,
+    description: 'Clava pesada. Requer duas mãos.' },
+  { id: 'sickle', name: 'Foice', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'cortante', properties: ['light'], range: 1.5,
+    description: 'Foice curva e leve. Pode ser usada em combate com duas armas.' },
+  { id: 'spear', name: 'Lança', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['thrown', 'versatile'], range: 6,
+    description: 'Lança versátil. 1d6 (1 mão) ou 1d8 (2 mãos). Arremesso: 6/18m.' },
+  { id: 'mace', name: 'Maça', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'pancada', properties: [], range: 1.5,
+    description: 'Arma pesada de impacto. Favorita de Clérigos.' },
+  { id: 'handaxe', name: 'Machado de Mão', weaponType: 'simple', attackType: 'melee', damage: '1d6', damageType: 'cortante', properties: ['light', 'thrown'], range: 6,
+    description: 'Machado leve e arremessável. Arremesso: 6/18m.' },
+  { id: 'lighthammer', name: 'Martelo Leve', weaponType: 'simple', attackType: 'melee', damage: '1d4', damageType: 'pancada', properties: ['light', 'thrown'], range: 6,
+    description: 'Martelo leve e arremessável. Arremesso: 6/18m.' },
   
   // Armas Simples à Distância
-  { id: 'shortbow', name: 'Arco Curto', weaponType: 'simple', attackType: 'ranged', damage: '1d6', damageType: 'perfurante', properties: ['ammunition', 'two-handed'], range: 24 },
-  { id: 'lightcrossbow', name: 'Besta Leve', weaponType: 'simple', attackType: 'ranged', damage: '1d8', damageType: 'perfurante', properties: ['ammunition', 'loading', 'two-handed'], range: 24 },
-  { id: 'dart', name: 'Dardo', weaponType: 'simple', attackType: 'ranged', damage: '1d4', damageType: 'perfurante', properties: ['finesse', 'thrown'], range: 6 },
-  { id: 'sling', name: 'Funda', weaponType: 'simple', attackType: 'ranged', damage: '1d4', damageType: 'pancada', properties: ['ammunition'], range: 9 },
+  { id: 'shortbow', name: 'Arco Curto', weaponType: 'simple', attackType: 'ranged', damage: '1d6', damageType: 'perfurante', properties: ['ammunition', 'two-handed'], range: 24,
+    description: 'Arco leve. Alcance: 24/96m. Requer flechas.' },
+  { id: 'lightcrossbow', name: 'Besta Leve', weaponType: 'simple', attackType: 'ranged', damage: '1d8', damageType: 'perfurante', properties: ['ammunition', 'loading', 'two-handed'], range: 24,
+    description: 'Besta simples. Alcance: 24/96m. Recarga: apenas 1 disparo por ação.' },
+  { id: 'dart', name: 'Dardo', weaponType: 'simple', attackType: 'ranged', damage: '1d4', damageType: 'perfurante', properties: ['finesse', 'thrown'], range: 6,
+    description: 'Dardo arremessável. Acuidade: pode usar DES. Arremesso: 6/18m.' },
+  { id: 'sling', name: 'Funda', weaponType: 'simple', attackType: 'ranged', damage: '1d4', damageType: 'pancada', properties: ['ammunition'], range: 9,
+    description: 'Funda com pedra. Alcance: 9/36m.' },
 
   // Armas Marciais Corpo-a-Corpo
-  { id: 'halberd', name: 'Alabarda', weaponType: 'martial', attackType: 'melee', damage: '1d10', damageType: 'cortante', properties: ['heavy', 'reach', 'two-handed'], range: 3 },
-  { id: 'whip', name: 'Chicote', weaponType: 'martial', attackType: 'melee', damage: '1d4', damageType: 'cortante', properties: ['finesse', 'reach'], range: 3 },
-  { id: 'scimitar', name: 'Cimitarra', weaponType: 'martial', attackType: 'melee', damage: '1d6', damageType: 'cortante', properties: ['finesse', 'light'], range: 1.5 },
-  { id: 'shortsword', name: 'Espada Curta', weaponType: 'martial', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['finesse', 'light'], range: 1.5 },
-  { id: 'greatsword', name: 'Espada Grande', weaponType: 'martial', attackType: 'melee', damage: '2d6', damageType: 'cortante', properties: ['heavy', 'two-handed'], range: 1.5 },
-  { id: 'longsword', name: 'Espada Longa', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'cortante', properties: ['versatile'], range: 1.5 },
-  { id: 'glaive', name: 'Glaive', weaponType: 'martial', attackType: 'melee', damage: '1d10', damageType: 'cortante', properties: ['heavy', 'reach', 'two-handed'], range: 3 },
-  { id: 'lance', name: 'Lança de Montaria', weaponType: 'martial', attackType: 'melee', damage: '1d12', damageType: 'perfurante', properties: ['reach', 'special'], range: 3 },
-  { id: 'battleaxe', name: 'Machado de Batalha', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'cortante', properties: ['versatile'], range: 1.5 },
-  { id: 'greataxe', name: 'Machado Grande', weaponType: 'martial', attackType: 'melee', damage: '1d12', damageType: 'cortante', properties: ['heavy', 'two-handed'], range: 1.5 },
-  { id: 'maul', name: 'Malho', weaponType: 'martial', attackType: 'melee', damage: '2d6', damageType: 'pancada', properties: ['heavy', 'two-handed'], range: 1.5 },
-  { id: 'flail', name: 'Mangual', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'pancada', properties: [], range: 1.5 },
-  { id: 'warhammer', name: 'Martelo de Guerra', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'pancada', properties: ['versatile'], range: 1.5 },
-  { id: 'morningstar', name: 'Maça Estrela', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'perfurante', properties: [], range: 1.5 },
-  { id: 'warpick', name: 'Picareta de Guerra', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'perfurante', properties: [], range: 1.5 },
-  { id: 'rapier', name: 'Rapieira', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'perfurante', properties: ['finesse'], range: 1.5 },
-  { id: 'trident', name: 'Tridente', weaponType: 'martial', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['thrown', 'versatile'], range: 6 },
+  { id: 'halberd', name: 'Alabarda', weaponType: 'martial', attackType: 'melee', damage: '1d10', damageType: 'cortante', properties: ['heavy', 'reach', 'two-handed'], range: 3,
+    description: 'Arma de haste com lâmina. Alcance: 3m. Pesada: Halflings e Gnomos têm desvantagem.' },
+  { id: 'whip', name: 'Chicote', weaponType: 'martial', attackType: 'melee', damage: '1d4', damageType: 'cortante', properties: ['finesse', 'reach'], range: 3,
+    description: 'Arma com alcance de 3m e Acuidade (FOR ou DES).' },
+  { id: 'scimitar', name: 'Cimitarra', weaponType: 'martial', attackType: 'melee', damage: '1d6', damageType: 'cortante', properties: ['finesse', 'light'], range: 1.5,
+    description: 'Lâmina curva. Acuidade + Leve: ideal para combate com duas armas usando DES. Druidas são proficientes.' },
+  { id: 'shortsword', name: 'Espada Curta', weaponType: 'martial', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['finesse', 'light'], range: 1.5,
+    description: 'Lâmina curta. Acuidade + Leve. Monges e Ladinos são proficientes.' },
+  { id: 'greatsword', name: 'Espada Grande', weaponType: 'martial', attackType: 'melee', damage: '2d6', damageType: 'cortante', properties: ['heavy', 'two-handed'], range: 1.5,
+    description: 'Montante pesada. 2d6 = melhor média de dano. Pesada: desvantagem para criaturas Pequenas.' },
+  { id: 'longsword', name: 'Espada Longa', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'cortante', properties: ['versatile'], range: 1.5,
+    description: 'Arma versátil clássica. 1d8 (1 mão) ou 1d10 (2 mãos).' },
+  { id: 'glaive', name: 'Glaive', weaponType: 'martial', attackType: 'melee', damage: '1d10', damageType: 'cortante', properties: ['heavy', 'reach', 'two-handed'], range: 3,
+    description: 'Arma de haste similar à Alabarda. Alcance: 3m.' },
+  { id: 'lance', name: 'Lança de Montaria', weaponType: 'martial', attackType: 'melee', damage: '1d12', damageType: 'perfurante', properties: ['reach', 'special'], range: 3,
+    description: 'Especial: desvantagem contra alvos a 1.5m. Requer 2 mãos se não estiver montado.' },
+  { id: 'battleaxe', name: 'Machado de Batalha', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'cortante', properties: ['versatile'], range: 1.5,
+    description: 'Machado versátil. 1d8 (1 mão) ou 1d10 (2 mãos). Anões são proficientes.' },
+  { id: 'greataxe', name: 'Machado Grande', weaponType: 'martial', attackType: 'melee', damage: '1d12', damageType: 'cortante', properties: ['heavy', 'two-handed'], range: 1.5,
+    description: 'Machado pesado de duas mãos. 1d12 = maior dado único. Favorita de Bárbaros (Crítico Brutal).' },
+  { id: 'maul', name: 'Malho', weaponType: 'martial', attackType: 'melee', damage: '2d6', damageType: 'pancada', properties: ['heavy', 'two-handed'], range: 1.5,
+    description: 'Martelo gigante de duas mãos. 2d6 pancada.' },
+  { id: 'flail', name: 'Mangual', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'pancada', properties: [], range: 1.5,
+    description: 'Bola com espinhos em corrente.' },
+  { id: 'warhammer', name: 'Martelo de Guerra', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'pancada', properties: ['versatile'], range: 1.5,
+    description: 'Versátil. 1d8 (1 mão) ou 1d10 (2 mãos). Anões são proficientes.' },
+  { id: 'morningstar', name: 'Maça Estrela', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'perfurante', properties: [], range: 1.5,
+    description: 'Maça com espinhos pontiagudos.' },
+  { id: 'warpick', name: 'Picareta de Guerra', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'perfurante', properties: [], range: 1.5,
+    description: 'Picareta militar de combate.' },
+  { id: 'rapier', name: 'Rapieira', weaponType: 'martial', attackType: 'melee', damage: '1d8', damageType: 'perfurante', properties: ['finesse'], range: 1.5,
+    description: 'Lâmina fina e ágil. Acuidade: melhor arma d8 para personagens com DES alta. Favorita de Ladinos.' },
+  { id: 'trident', name: 'Tridente', weaponType: 'martial', attackType: 'melee', damage: '1d6', damageType: 'perfurante', properties: ['thrown', 'versatile'], range: 6,
+    description: 'Arma de três pontas. Versátil: 1d6/1d8. Arremesso: 6/18m.' },
 
   // Armas Marciais à Distância
-  { id: 'longbow', name: 'Arco Longo', weaponType: 'martial', attackType: 'ranged', damage: '1d8', damageType: 'perfurante', properties: ['ammunition', 'heavy', 'two-handed'], range: 45 },
-  { id: 'handcrossbow', name: 'Besta de Mão', weaponType: 'martial', attackType: 'ranged', damage: '1d6', damageType: 'perfurante', properties: ['ammunition', 'light', 'loading'], range: 9 },
-  { id: 'heavycrossbow', name: 'Besta Pesada', weaponType: 'martial', attackType: 'ranged', damage: '1d10', damageType: 'perfurante', properties: ['ammunition', 'heavy', 'loading', 'two-handed'], range: 30 },
-  { id: 'net', name: 'Rede', weaponType: 'martial', attackType: 'ranged', damage: '', damageType: '', properties: ['special', 'thrown'], range: 1.5 },
-  { id: 'blowgun', name: 'Zarabatana', weaponType: 'martial', attackType: 'ranged', damage: '1', damageType: 'perfurante', properties: ['ammunition', 'loading'], range: 7.5 }
+  { id: 'longbow', name: 'Arco Longo', weaponType: 'martial', attackType: 'ranged', damage: '1d8', damageType: 'perfurante', properties: ['ammunition', 'heavy', 'two-handed'], range: 45,
+    description: 'Arco de guerra. Alcance: 45/180m. Pesada: desvantagem para criaturas Pequenas.' },
+  { id: 'handcrossbow', name: 'Besta de Mão', weaponType: 'martial', attackType: 'ranged', damage: '1d6', damageType: 'perfurante', properties: ['ammunition', 'light', 'loading'], range: 9,
+    description: 'Besta compacta de uma mão. Alcance: 9/36m. Leve: pode ser usada com outra arma.' },
+  { id: 'heavycrossbow', name: 'Besta Pesada', weaponType: 'martial', attackType: 'ranged', damage: '1d10', damageType: 'perfurante', properties: ['ammunition', 'heavy', 'loading', 'two-handed'], range: 30,
+    description: 'Besta potente. Alcance: 30/120m. Recarga: 1 disparo por ação.' },
+  { id: 'net', name: 'Rede', weaponType: 'martial', attackType: 'ranged', damage: '', damageType: '', properties: ['special', 'thrown'], range: 1.5,
+    description: 'Especial: não causa dano. Impede criatura Grande ou menor (CD 10 FOR ou cortando CA 10).' },
+  { id: 'blowgun', name: 'Zarabatana', weaponType: 'martial', attackType: 'ranged', damage: '1', damageType: 'perfurante', properties: ['ammunition', 'loading'], range: 7.5,
+    description: 'Tubo que dispara agulhas. Alcance: 7.5/30m. Dano mínimo mas útil para venenos.' }
 ];
+
 
 export interface CompendiumSpell {
   id: string;

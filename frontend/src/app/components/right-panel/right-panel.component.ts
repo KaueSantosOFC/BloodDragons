@@ -9,8 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { ActionMenuComponent } from '../action-menu/action-menu.component';
 import { ActionResult, DndCoreEngineService } from '../../services/dnd-core-engine.service';
-import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS } from '../../data/compendium.data';
-import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findClassByName } from '../../data/dnd5e-options.data';
+import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS, WEAPON_PROPERTY_LABELS } from '../../data/compendium.data';
+import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findClassByName, Dnd5eSubRace } from '../../data/dnd5e-options.data';
 
 @Component({
   selector: 'app-right-panel',
@@ -47,12 +47,17 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                 @if (!editingAbilityId() && category === 'weapon') {
                   <select class="w-full bg-stone-900 border border-amber-600/50 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 text-amber-500 mb-1" (change)="onCompendiumSelect($event, 'weapon')">
                     <option value="">-- Importar Arma do Compêndio --</option>
-                    <optgroup label="Armas Simples">
+                    <optgroup label="🤜 Desarmado / Natural">
+                      @for (w of compendiumWeaponsNatural(); track w.id) {
+                        <option [value]="w.id">{{ w.name }} ({{ w.damage }} {{ w.damageType }}) — Todos proficientes</option>
+                      }
+                    </optgroup>
+                    <optgroup label="⚔️ Armas Simples">
                       @for (w of compendiumWeaponsSimple(); track w.id) {
                         <option [value]="w.id">{{ w.name }} ({{ w.damage }} {{ w.damageType }}) [{{ w.attackType === 'melee' ? 'Corpo' : 'Dist.' }}]</option>
                       }
                     </optgroup>
-                    <optgroup label="Armas Marciais">
+                    <optgroup label="🗡️ Armas Marciais">
                       @for (w of compendiumWeaponsMartial(); track w.id) {
                         <option [value]="w.id">{{ w.name }} ({{ w.damage }} {{ w.damageType }}) [{{ w.attackType === 'melee' ? 'Corpo' : 'Dist.' }}]</option>
                       }
@@ -1193,13 +1198,25 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                     </div>
                     <div class="flex flex-col gap-1.5">
                       <label for="race" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">groups</mat-icon>Raça</label>
-                      <select id="race" formControlName="race" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200">
-                        <option value="">-- Selecionar --</option>
+                      <select id="race" formControlName="race" (change)="onRaceChange()" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200">
+                        <option value="">-- Selecionar Raça --</option>
                         @for (r of dnd5eRaces; track r.id) {
-                          <option [value]="r.name">{{ r.name }} ({{ r.abilityBonuses }})</option>
+                          <option [value]="r.name" [title]="'Velocidade: ' + r.speed + 'm | Visão Escuro: ' + r.darkvision + 'm | Tamanho: ' + (r.size === 'small' ? 'Pequeno' : 'Médio')">{{ r.name }} ({{ r.abilityBonuses }})</option>
                         }
                       </select>
                     </div>
+                    @if (availableSubRaces().length > 0) {
+                      <div class="flex flex-col gap-1.5">
+                        <label class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">diversity_1</mat-icon>Sub-Raça</label>
+                        <select class="bg-stone-900 border border-amber-600/40 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-amber-400">
+                          <option value="">-- Escolha a Sub-Raça --</option>
+                          @for (sr of availableSubRaces(); track sr.id) {
+                            <option [value]="sr.id">{{ sr.name }} ({{ sr.abilityBonuses }})</option>
+                          }
+                        </select>
+                        <span class="text-[9px] text-stone-500 italic">Bônus da sub-raça é adicionado ao da raça principal</span>
+                      </div>
+                    }
                     <div class="flex flex-col gap-1.5">
                       <label for="alignment" class="text-xs text-stone-500 uppercase font-bold tracking-wider flex items-center gap-1"><mat-icon style="font-size:12px;width:12px;height:12px;">balance</mat-icon>Tendência</label>
                       <select id="alignment" formControlName="alignment" class="bg-stone-900 border border-stone-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-amber-500 text-stone-200">
@@ -1606,6 +1623,10 @@ export class RightPanelComponent {
   dnd5eRaces = DND5E_RACES;
   dnd5eAlignments = DND5E_ALIGNMENTS;
   dnd5eBackgrounds = DND5E_BACKGROUNDS;
+  weaponPropertyLabels = WEAPON_PROPERTY_LABELS;
+
+  /** Sub-raças disponíveis para a raça selecionada no formulário */
+  availableSubRaces = signal<Dnd5eSubRace[]>([]);
 
   onClassChange() {
     const className = this.sheetForm.get('class')?.value;
@@ -1615,6 +1636,21 @@ export class RightPanelComponent {
     }
   }
 
+  onRaceChange() {
+    const raceName = this.sheetForm.get('race')?.value;
+    const race = DND5E_RACES.find(r => r.name === raceName);
+    if (race && race.subRaces.length > 0) {
+      this.availableSubRaces.set(race.subRaces);
+    } else {
+      this.availableSubRaces.set([]);
+    }
+    // Auto-set speed based on race
+    if (race) {
+      this.sheetForm.patchValue({ speed: race.speed });
+    }
+  }
+
+  compendiumWeaponsNatural = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'natural'));
   compendiumWeaponsSimple = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'simple'));
   compendiumWeaponsMartial = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'martial'));
 
@@ -2264,7 +2300,7 @@ export class RightPanelComponent {
     const token = this.selectedToken();
     if (!token) return;
 
-    let sheetData = this.sheetForm.getRawValue();
+    let sheetData: any = this.sheetForm.getRawValue();
     const levelUpResult = this.combat.checkLevelUp(sheetData, token.name);
     sheetData = levelUpResult.sheet;
     this.combat.updateToken(token.id, { 

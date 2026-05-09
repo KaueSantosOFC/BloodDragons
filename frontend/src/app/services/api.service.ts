@@ -153,4 +153,52 @@ export class ApiService {
     formData.append('image', file);
     return this.http.post<{ url: string }>(`${this.baseUrl}/upload`, formData);
   }
+
+  // ==========================================
+  // Criação de Personagem (D&D 5e Engine)
+  // ==========================================
+
+  /** Cria uma ficha completa com todas as regras PHB aplicadas */
+  createCharacter(params: {
+    raceId: string; subRaceId?: string; classId: string;
+    str: number; dex: number; con: number; intAttr: number; wis: number; cha: number;
+    background: string; alignment: string; playerName: string;
+  }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/character/create`, params);
+  }
+
+  /** Valida se multiclasse é possível */
+  validateMulticlass(sheet: any, newClassId: string): Observable<{ valid: boolean; errors: string[] }> {
+    return this.http.post<any>(`${this.baseUrl}/character/validate-multiclass`, { sheet, newClassId });
+  }
+
+  /** Retorna raças expandidas com sub-raças, traits e magias inatas */
+  getExpandedRaces(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/character/races`);
+  }
+
+  /** Retorna classes expandidas com spell slots e progressão */
+  getExpandedClasses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/character/classes`);
+  }
+
+  /** Retorna armaduras com CA, força mínima e desvantagem furtividade */
+  getArmors(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/character/armors`);
+  }
+
+  /** Retorna condições com efeitos mecânicos completos */
+  getExpandedConditions(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/character/conditions`);
+  }
+
+  /** Retorna spell slots para uma classe e nível */
+  getSpellSlots(casterType: string, level: number): Observable<{ slots: number[] }> {
+    return this.http.get<any>(`${this.baseUrl}/character/spell-slots`, { params: { casterType, level: level.toString() } });
+  }
+
+  /** Calcula dano de truque escalado pelo nível */
+  getCantripDamage(baseDice: string, characterLevel: number): Observable<{ scaledDice: string }> {
+    return this.http.post<any>(`${this.baseUrl}/character/cantrip-damage`, { baseDice, characterLevel });
+  }
 }

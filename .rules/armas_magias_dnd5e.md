@@ -1,182 +1,194 @@
-# Catálogo Detalhado de Armas, Armaduras, Ataques e Magias (D&D 5e)
+# Catálogo Completo de Armas, Armaduras e Magias (D&D 5e — PHB Oficial)
 
-Este documento contém o detalhamento exaustivo das proficiências, restrições, exceções e catálogos de equipamento e magia do Dungeons & Dragons 5ª Edição. Foi concebido para ser utilizado como base de dados primária e *template* na criação de fichas de personagens para o seu sistema (Antigravity).
-
----
-
-## 1. Regras de Proficiência e Exceções Raciais
-
-As raças em D&D 5e fornecem habilidades inatas que se sobrepõem ou complementam as proficiências de classe. Estas são as regras estritas que devem ser aplicadas no momento da criação da ficha:
-
-### Raças com Proficiências em Armas e Ataques Inatos
-* **Anão (Dwarf):**
-    * *Treino Anão em Combate:* Proficiência com machados de batalha, machados de mão, martelos de arremesso e martelos de guerra.
-* **Elfo (Elf):**
-    * *Alto Elfo (High Elf):* Proficiência com espadas longas, espadas curtas, arcos longos e arcos curtos. Acesso a 1 Truque (Cantrip) da lista de Mago (Atributo Mágico: Inteligência).
-    * *Elfo da Floresta (Wood Elf):* Proficiência com espadas longas, espadas curtas, arcos longos e arcos curtos.
-    * *Elfo Negro (Drow):* Proficiência com rapieiras, espadas curtas e bestas de mão. Magia Inata: *Globos de Luz* (Truque). No 3º nível: *Fogo das Fadas* (1/dia). No 5º nível: *Escuridão* (1/dia). (Atributo Mágico: Carisma).
-* **Draconato (Dragonborn):**
-    * *Arma de Sopro:* Não é uma arma padrão nem uma magia, mas uma ação especial. Causa 2d6 de dano (escala para 3d6 no nvl 6, 4d6 no nvl 11, 5d6 no nvl 16) numa área (linha ou cone). O tipo de dano (Fogo, Frio, Ácido, Relâmpago ou Veneno) e o Teste de Resistência (Destreza ou Constituição) dependem da Ancestralidade Dracónica escolhida.
-* **Gnomo (Gnome):**
-    * *Gnomo da Floresta (Forest Gnome):* Acesso ao truque *Ilusão Menor* (Atributo Mágico: Inteligência).
-* **Meio-Orc (Half-Orc):**
-    * *Ataques Selvagens:* Quando o personagem obtém um acerto crítico com uma arma corpo-a-corpo, pode rolar um dos dados de dano da arma mais uma vez e adicioná-lo ao dano extra.
-* **Tiefling:**
-    * *Legado Infernal (Magia Inata):* Acesso ao truque *Taumaturgia*. No 3º nível: *Repreensão Infernal* (Magia de 2º nível, 1/dia). No 5º nível: *Escuridão* (1/dia). (Atributo Mágico: Carisma).
+> Fonte: Livro do Jogador D&D 5e. Todas as tabelas, proficiências, exceções raciais e
+> propriedades de armas foram validadas contra o livro oficial.
 
 ---
 
-## 2. Proficiências Rigorosas por Classe
+## 1. Ataque Desarmado (PHB p.195)
 
-O seu motor deve validar o uso de armaduras e armas com base nesta tabela. Se um personagem usar uma armadura com a qual não tem proficiência, ele **tem desvantagem** em qualquer teste de atributo, teste de resistência ou jogada de ataque que envolva Força ou Destreza, e **não pode conjurar magias**.
+| Propriedade | Valor |
+|:---|:---|
+| Dano | 1 + mod. Força (concussão/pancada) |
+| Tipo de Ataque | Corpo-a-corpo |
+| Proficiência | **Todos** são proficientes |
+| Alcance | 1,5m |
 
-| Classe | Armaduras e Escudos | Armas | Exceções e Notas Especiais |
-| :--- | :--- | :--- | :--- |
-| **Bárbaro** | Leves, Médias, Escudos | Simples, Marciais | Não pode lançar magias ou concentrar-se em Fúria. |
-| **Bardo** | Leves | Simples, bestas de mão, espadas longas, rapieiras, espadas curtas | O Bardo da escola do Valor ou Espadas ganha proficiências extras (Armaduras médias, Escudos, Armas Marciais). |
-| **Bruxo** | Leves | Simples | O Pacto da Lâmina permite criar qualquer arma de corpo-a-corpo na qual se é proficiente enquanto a segurar. |
-| **Clérigo** | Leves, Médias, Escudos | Simples | Domínios da Vida, Natureza, Tempestade e Guerra concedem Armaduras Pesadas. Domínios da Morte, Tempestade e Guerra concedem Armas Marciais. |
-| **Druida** | Leves, Médias, Escudos | Clavas, adagas, dardos, azagaias, maças, bordões, cimitarras, foices, fundas, lanças | **Regra Absoluta:** Druidas não usarão armaduras ou escudos feitos de metal. |
-| **Feiticeiro**| Nenhuma | Adagas, dardos, fundas, bordões, bestas leves | - |
-| **Guerreiro** | Leves, Médias, Pesadas, Escudos | Simples, Marciais | - |
-| **Ladino** | Leves | Simples, bestas de mão, espadas longas, rapieiras, espadas curtas | Ataque Furtivo só funciona com armas de *Acuidade* (Finesse) ou à *Distância* (Ranged). |
-| **Mago** | Nenhuma | Adagas, dardos, fundas, bordões, bestas leves | - |
-| **Monge** | Nenhuma | Simples, espadas curtas | **Artes Marciais:** Pode usar Destreza para armas de monge, dado de dano muda com nível, bloqueado se usar armadura ou escudo. |
-| **Paladino** | Leves, Médias, Pesadas, Escudos | Simples, Marciais | - |
-| **Patrulheiro**| Leves, Médias, Escudos | Simples, Marciais | - |
+**Exceção Monge — Artes Marciais:**
+- Pode usar **Destreza** em vez de Força (ataque e dano)
+- Dado de dano substitui o "1": 1d4 (nvl 1-4) → 1d6 (5-10) → 1d8 (11-16) → 1d10 (17+)
+- Condição: sem armadura, sem escudo
+- Golpe desarmado como ação bônus ao atacar com golpe desarmado ou arma de monge
 
 ---
 
-## 3. Catálogo Completo de Armas (Detalhado)
+## 2. Proficiências em Armas por Raça
 
-### Armas Simples Corpo-a-Corpo (Melee)
+### Anão (Dwarf) — Treino em Combate
+- Machado de Batalha, Machado de Mão, Martelo de Arremesso, Martelo de Guerra
+
+### Elfo (Elf)
+- **Alto Elfo:** Espada Longa, Espada Curta, Arco Longo, Arco Curto + **1 Truque de Mago** (INT)
+- **Elfo da Floresta:** Espada Longa, Espada Curta, Arco Longo, Arco Curto
+- **Drow:** Rapieira, Espada Curta, Besta de Mão + Magia Inata (CAR):
+  - Nível 1: *Globos de Luz* (truque)
+  - Nível 3: *Fogo das Fadas* (1/dia longo)
+  - Nível 5: *Escuridão* (1/dia longo)
+
+### Draconato — Arma de Sopro
+- Ação, não arma. Área: cone 4,5m ou linha 1,5×9m (depende da cor)
+- Dano: 2d6 (nvl 1) → 3d6 (nvl 6) → 4d6 (nvl 11) → 5d6 (nvl 16)
+- Save: DES ou CON (depende da cor). Sucesso = metade do dano
+- Uso: 1/descanso curto ou longo
+
+### Gnomo da Floresta
+- Truque *Ilusão Menor* (INT)
+
+### Meio-Orc — Ataques Selvagens
+- Crítico corpo-a-corpo: rola **1 dado de dano extra** da arma
+
+### Tiefling — Legado Infernal (CAR)
+- Nível 1: *Taumaturgia* (truque)
+- Nível 3: *Repreensão Infernal* como magia de **2° nível** (1/dia longo)
+- Nível 5: *Escuridão* (1/dia longo)
+
+---
+
+## 3. Proficiências por Classe
+
+| Classe | Armaduras | Armas | Notas Especiais |
+|:---|:---|:---|:---|
+| **Bárbaro** | Leves, Médias, Escudos | Simples, Marciais | Fúria: não conjura magias; Defesa s/ Armadura: 10+DES+CON |
+| **Bardo** | Leves | Simples, Besta de Mão, Esp. Longa, Rapieira, Esp. Curta | Colégio do Valor/Espadas: +Médias, +Escudos, +Marciais |
+| **Bruxo** | Leves | Simples | Pacto da Lâmina: cria arma corpo-a-corpo proficiente |
+| **Clérigo** | Leves, Médias, Escudos | Simples | Domínios Vida/Natureza/Tempestade/Guerra: +Pesadas. Morte/Tempestade/Guerra: +Marciais |
+| **Druida** | Leves, Médias, Escudos | Clavas, Adagas, Dardos, Azagaias, Maças, Bordões, Cimitarras, Foices, Fundas, Lanças | **NUNCA** usam armaduras/escudos de metal |
+| **Feiticeiro** | Nenhuma | Adagas, Dardos, Fundas, Bordões, Bestas Leves | — |
+| **Guerreiro** | Todas, Escudos | Simples, Marciais | — |
+| **Ladino** | Leves | Simples, Besta de Mão, Esp. Longa, Rapieira, Esp. Curta | Ataque Furtivo: só com Acuidade ou à Distância |
+| **Mago** | Nenhuma | Adagas, Dardos, Fundas, Bordões, Bestas Leves | — |
+| **Monge** | Nenhuma | Simples, Espadas Curtas | Artes Marciais: DES em armas de monge; bloqueado com armadura/escudo |
+| **Paladino** | Todas, Escudos | Simples, Marciais | — |
+| **Patrulheiro** | Leves, Médias, Escudos | Simples, Marciais | — |
+
+---
+
+## 4. Catálogo Completo de Armas
+
+### Propriedades de Armas (PHB p.149)
+| Propriedade | Efeito Mecânico |
+|:---|:---|
+| **Acuidade (Finesse)** | Pode usar FOR ou DES para ataque e dano |
+| **Leve (Light)** | Pode ser usada em combate com duas armas |
+| **Arremesso (Thrown)** | Pode ser arremessada; usa FOR para ataque à distância |
+| **Versátil (Versatile)** | Dano maior com duas mãos (dado indicado entre parênteses) |
+| **Duas Mãos (Two-Handed)** | Requer as duas mãos |
+| **Pesada (Heavy)** | Criaturas Pequenas têm **desvantagem** |
+| **Alcance (Reach)** | Alcance corpo-a-corpo de 3m em vez de 1,5m |
+| **Munição (Ammunition)** | Requer munição; gasta 1 por ataque |
+| **Recarga (Loading)** | Máximo 1 ataque por ação (ignora Ataque Extra) |
+| **Especial (Special)** | Regras únicas (ver descrição da arma) |
+
+### Armas Simples Corpo-a-Corpo
 | Arma | Custo | Dano | Peso | Propriedades |
-| :--- | :--- | :--- | :--- | :--- |
-| Adaga (Dagger) | 2 po | 1d4 perfurante | 0.5 kg | Acuidade, leve, arremesso (6/18m) |
-| Azagaia (Javelin) | 5 pp | 1d6 perfurante | 1 kg | Arremesso (9/36m) |
-| Bastão (Club) | 1 pp | 1d4 pancada | 1 kg | Leve |
-| Bordão (Quarterstaff) | 2 pp | 1d6 pancada | 2 kg | Versátil (1d8) |
-| Clava Grande (Greatclub) | 2 pp | 1d8 pancada | 5 kg | Duas mãos |
-| Foice (Sickle) | 1 po | 1d4 cortante | 1 kg | Leve |
-| Lança (Spear) | 1 po | 1d6 perfurante | 1.5 kg | Arremesso (6/18m), versátil (1d8) |
-| Maça (Mace) | 5 po | 1d6 pancada | 2 kg | - |
-| Machado de Mão (Handaxe) | 5 po | 1d6 cortante | 1 kg | Leve, arremesso (6/18m) |
-| Martelo Leve (Light Hammer)| 2 po | 1d4 pancada | 1 kg | Leve, arremesso (6/18m) |
+|:---|:---:|:---|:---:|:---|
+| Adaga | 2 po | 1d4 perfurante | 0,5 kg | Acuidade, Leve, Arremesso (6/18m) |
+| Azagaia | 5 pp | 1d6 perfurante | 1 kg | Arremesso (9/36m) |
+| Bastão | 1 pp | 1d4 pancada | 1 kg | Leve |
+| Bordão | 2 pp | 1d6 pancada | 2 kg | Versátil (1d8) |
+| Clava Grande | 2 pp | 1d8 pancada | 5 kg | Duas Mãos |
+| Foice | 1 po | 1d4 cortante | 1 kg | Leve |
+| Lança | 1 po | 1d6 perfurante | 1,5 kg | Arremesso (6/18m), Versátil (1d8) |
+| Maça | 5 po | 1d6 pancada | 2 kg | — |
+| Machado de Mão | 5 po | 1d6 cortante | 1 kg | Leve, Arremesso (6/18m) |
+| Martelo Leve | 2 po | 1d4 pancada | 1 kg | Leve, Arremesso (6/18m) |
 
-### Armas Simples à Distância (Ranged)
+### Armas Simples à Distância
 | Arma | Custo | Dano | Peso | Propriedades |
-| :--- | :--- | :--- | :--- | :--- |
-| Arco Curto (Shortbow) | 25 po | 1d6 perfurante | 1 kg | Munição (24/96m), duas mãos |
-| Besta Leve (Light Crossbow)| 25 po | 1d8 perfurante | 2.5 kg | Munição (24/96m), recarga, duas mãos |
-| Dardo (Dart) | 5 pc | 1d4 perfurante | 0.1 kg | Acuidade, arremesso (6/18m) |
-| Funda (Sling) | 1 pp | 1d4 pancada | - | Munição (9/36m) |
+|:---|:---:|:---|:---:|:---|
+| Arco Curto | 25 po | 1d6 perfurante | 1 kg | Munição (24/96m), Duas Mãos |
+| Besta Leve | 25 po | 1d8 perfurante | 2,5 kg | Munição (24/96m), Recarga, Duas Mãos |
+| Dardo | 5 pc | 1d4 perfurante | 0,1 kg | Acuidade, Arremesso (6/18m) |
+| Funda | 1 pp | 1d4 pancada | — | Munição (9/36m) |
 
-### Armas Marciais Corpo-a-Corpo (Melee)
+### Armas Marciais Corpo-a-Corpo
 | Arma | Custo | Dano | Peso | Propriedades |
-| :--- | :--- | :--- | :--- | :--- |
-| Alabarda (Halberd) | 20 po | 1d10 cortante | 3 kg | Pesada, alcance, duas mãos |
-| Chicote (Whip) | 2 po | 1d4 cortante | 1.5 kg | Acuidade, alcance |
-| Cimitarra (Scimitar) | 25 po | 1d6 cortante | 1.5 kg | Acuidade, leve |
-| Espada Curta (Shortsword) | 10 po | 1d6 perfurante | 1 kg | Acuidade, leve |
-| Espada Grande (Greatsword) | 50 po | 2d6 cortante | 3 kg | Pesada, duas mãos |
-| Espada Longa (Longsword) | 15 po | 1d8 cortante | 1.5 kg | Versátil (1d10) |
-| Glaive | 20 po | 1d10 cortante | 3 kg | Pesada, alcance, duas mãos |
-| Lança de Montaria (Lance) | 10 po | 1d12 perfurante | 3 kg | Alcance, especial |
-| Machado de Batalha (Battleaxe)| 10 po | 1d8 cortante | 2 kg | Versátil (1d10) |
-| Machado Grande (Greataxe) | 30 po | 1d12 cortante | 3.5 kg | Pesada, duas mãos |
-| Malho (Maul) | 10 po | 2d6 pancada | 5 kg | Pesada, duas mãos |
-| Mangual (Flail) | 10 po | 1d8 pancada | 1 kg | - |
-| Martelo de Guerra (Warhammer)| 15 po | 1d8 pancada | 1 kg | Versátil (1d10) |
-| Maça Estrela (Morningstar) | 15 po | 1d8 perfurante | 2 kg | - |
-| Picareta de Guerra (War pick)| 5 po | 1d8 perfurante | 1 kg | - |
-| Rapieira (Rapier) | 25 po | 1d8 perfurante | 1 kg | Acuidade |
-| Tridente (Trident) | 5 po | 1d6 perfurante | 2 kg | Arremesso (6/18m), versátil (1d8) |
+|:---|:---:|:---|:---:|:---|
+| Alabarda | 20 po | 1d10 cortante | 3 kg | Pesada, Alcance, Duas Mãos |
+| Chicote | 2 po | 1d4 cortante | 1,5 kg | Acuidade, Alcance |
+| Cimitarra | 25 po | 1d6 cortante | 1,5 kg | Acuidade, Leve |
+| Espada Curta | 10 po | 1d6 perfurante | 1 kg | Acuidade, Leve |
+| Espada Grande | 50 po | 2d6 cortante | 3 kg | Pesada, Duas Mãos |
+| Espada Longa | 15 po | 1d8 cortante | 1,5 kg | Versátil (1d10) |
+| Glaive | 20 po | 1d10 cortante | 3 kg | Pesada, Alcance, Duas Mãos |
+| Lança de Montaria | 10 po | 1d12 perfurante | 3 kg | Alcance, Especial* |
+| Machado de Batalha | 10 po | 1d8 cortante | 2 kg | Versátil (1d10) |
+| Machado Grande | 30 po | 1d12 cortante | 3,5 kg | Pesada, Duas Mãos |
+| Malho | 10 po | 2d6 pancada | 5 kg | Pesada, Duas Mãos |
+| Mangual | 10 po | 1d8 pancada | 1 kg | — |
+| Martelo de Guerra | 15 po | 1d8 pancada | 1 kg | Versátil (1d10) |
+| Maça Estrela | 15 po | 1d8 perfurante | 2 kg | — |
+| Picareta de Guerra | 5 po | 1d8 perfurante | 1 kg | — |
+| Rapieira | 25 po | 1d8 perfurante | 1 kg | Acuidade |
+| Tridente | 5 po | 1d6 perfurante | 2 kg | Arremesso (6/18m), Versátil (1d8) |
 
-### Armas Marciais à Distância (Ranged)
+*Lança de Montaria: Desvantagem a 1,5m. Requer 2 mãos se não montado.
+
+### Armas Marciais à Distância
 | Arma | Custo | Dano | Peso | Propriedades |
-| :--- | :--- | :--- | :--- | :--- |
-| Arco Longo (Longbow) | 50 po | 1d8 perfurante | 1 kg | Munição (45/180m), pesada, duas mãos |
-| Besta de Mão (Hand Crossbow)| 75 po | 1d6 perfurante | 1.5 kg | Munição (9/36m), leve, recarga |
-| Besta Pesada (Heavy Crossbow)| 50 po | 1d10 perfurante | 9 kg | Munição (30/120m), pesada, recarga, duas mãos |
-| Rede (Net) | 1 po | - | 1.5 kg | Especial, arremesso (1.5/4.5m) |
-| Zarabatana (Blowgun) | 10 po | 1 perfurante | 0.5 kg | Munição (7.5/30m), recarga |
+|:---|:---:|:---|:---:|:---|
+| Arco Longo | 50 po | 1d8 perfurante | 1 kg | Munição (45/180m), Pesada, Duas Mãos |
+| Besta de Mão | 75 po | 1d6 perfurante | 1,5 kg | Munição (9/36m), Leve, Recarga |
+| Besta Pesada | 50 po | 1d10 perfurante | 9 kg | Munição (30/120m), Pesada, Recarga, Duas Mãos |
+| Rede | 1 po | — | 1,5 kg | Especial**, Arremesso (1,5/4,5m) |
+| Zarabatana | 10 po | 1 perfurante | 0,5 kg | Munição (7,5/30m), Recarga |
+
+**Rede: Não causa dano. Impede criatura Grande ou menor. Escapar: FOR CD 10 ou cortar (CA 10, 5 PV).
 
 ---
 
-## 4. Classificação de Magias e Atributos Chave
+## 5. Magias — Atributos e Listas por Classe
 
-Para configurar as fichas, o sistema de magias é validado pelos "Espaços de Magia" (Spell Slots) e pela classe conjuradora.
+### Atributos de Conjuração
+| Atributo | Classes |
+|:---|:---|
+| **Inteligência** | Mago, Cavaleiro Arcano (Guerreiro), Trapaceiro Arcano (Ladino) |
+| **Sabedoria** | Clérigo, Druida, Patrulheiro, Monge (Quatro Elementos) |
+| **Carisma** | Bardo, Bruxo, Feiticeiro, Paladino |
 
-### Atributos Mágicos (Spellcasting Abilities)
-* **Inteligência:** Mago, Cavaleiro Arcano (Guerreiro), Trapaceiro Arcano (Ladino), Artífice.
-* **Sabedoria:** Clérigo, Druida, Patrulheiro, Monge (Caminho dos Quatro Elementos).
-* **Carisma:** Bardo, Bruxo, Feiticeiro, Paladino.
+### Truques (Nível 0) — Escalam nos níveis 5, 11, 17
+| Magia | Classes | Dano | Notas |
+|:---|:---|:---|:---|
+| Raio de Fogo | Mago, Feiticeiro | 1d10 fogo | Ataque à distância |
+| Raio de Gelo | Mago, Feiticeiro | 1d8 frio | -3m velocidade por 1 turno |
+| Toque Chocante | Mago, Feiticeiro | 1d8 relâmpago | Vantagem se alvo usar metal |
+| Rajada Mística | Bruxo | 1d10 força | +1 raio nos nvl 5, 11, 17 |
+| Chama Sagrada | Clérigo | 1d8 radiante | Save DES (não CA) |
+| Zombaria Viciosa | Bardo | 1d4 psíquico | Save SAB, desvantagem no próximo ataque |
+| Criar Chamas | Druida | 1d8 fogo | Ilumina 3m, arremesso |
+| Chicote de Espinhos | Druida | 1d6 perfurante | Puxa alvo 3m |
 
-### Estrutura de Listas de Magias (Resumo por Nível para o Template)
-Em vez de programar 300 magias manualmente, o seu software deverá utilizar esta estrutura de categorização para as classes:
+### Magias de Nível 1 (Requerem Slot Nível 1+)
+| Magia | Classes | Efeito | Upcast |
+|:---|:---|:---|:---|
+| Mísseis Mágicos | Mago, Feiticeiro | 3×(1d4+1) força, acerto auto | +1 míssil/nível |
+| Armadura Mágica | Mago, Feiticeiro | CA = 13 + DES (8h) | — |
+| Escudo Arcano | Mago, Feiticeiro | Reação: +5 CA até próx. turno | — |
+| Curar Ferimentos | Clérigo, Druida, Bardo, Paladino, Patrulheiro | 1d8 + mod_conj | +1d8/nível |
+| Palavra Curativa | Clérigo, Druida, Bardo | Ação bônus: 1d4 + mod_conj | +1d4/nível |
+| Raio Guiador | Clérigo | 4d6 radiante + vantagem próx. ataque | +1d6/nível |
+| Bênção | Clérigo, Paladino | +1d4 ataques e saves (até 3 alvos) | +1 alvo/nível |
+| Perdição | Clérigo, Bardo | -1d4 ataques e saves (até 3 alvos) | +1 alvo/nível |
+| Marca do Caçador | Patrulheiro | +1d6 dano a cada acerto (concentração) | +1d6 a cada 2 níveis |
+| Bruxa (Hex) | Bruxo | +1d6 necrótico + desvantagem 1 atributo | Duração maior |
+| Repreensão Infernal | Bruxo | Reação: 2d10 fogo (save DES = metade) | +1d10/nível |
 
-**Nível 0 (Truques / Cantrips):**
-Escalam em dano nos níveis 5, 11 e 17. Exemplo: *Raio de Fogo* (1d10, passa a 2d10 no Nvl 5).
-* *Mago/Feiticeiro:* Raio de Fogo, Ilusão Menor, Mãos Mágicas, Prestidigitação, Raio de Gelo, Toque Chocante.
-* *Bruxo:* Rajada Mística (Eldritch Blast - a magia de ataque mais poderosa do jogo graças às Invocações Místicas).
-* *Clérigo:* Chama Sagrada, Orientação, Resistência, Taumaturgia.
-* *Druida:* Criar Chamas, Chicote de Espinhos, Bordão Mágico.
-* *Bardo:* Zombaria Viciosa.
-
-**Nível 1 (Magias Iniciais - Requerem Slot Nvl 1):**
-* *Mago/Feiticeiro:* Mísseis Mágicos, Armadura Mágica, Escudo Arcano, Sono, Onda Trovejante, Enfeitiçar Pessoa.
-* *Clérigo:* Curar Ferimentos, Palavra Curativa, Perdição, Bênção, Raio Guiador.
-* *Druida:* Bom Fruto, Fogo das Fadas, Enredar, Palavra Curativa.
-* *Bardo:* Palavra Curativa, Perdição, Onda Trovejante, Sono.
-* *Paladino:* Destruição Colérica, Curar Ferimentos.
-* *Patrulheiro:* Marca do Caçador (Hunter's Mark - Exclusiva e essencial), Curar Ferimentos.
-* *Bruxo:* Bruxa, Repreensão Infernal, Raio de Bruxa.
-
-**Mecânica de "Upcast" (Conjuração em Nível Superior):**
-O seu sistema Antigravity deve suportar o "Upcast". Se um mago conjurar *Mísseis Mágicos* (Magia de Nível 1) a gastar um Espaço de Magia de Nível 2, a magia lança um míssil adicional. A maioria das magias de dano em D&D 5e aumenta o número de dados rolados quando conjuradas em níveis superiores.
+### Mecânica de Upcast
+O motor deve suportar conjurar magias em slots superiores. Efeito varia por magia (dados extras, alvos extras, duração maior). Consultar descrição individual de cada magia.
 
 ---
 
-## 5. Exemplo de *Template JSON* Completo para Personagem (Engine de Combate)
-
-Para integrar estes dados todos numa ficha legível pela sua engine de RPG, utilize a seguinte estrutura de dados:
-
-```json
-{
-  "personagem": {
-    "nome": "Thia",
-    "raca": "Elfo da Floresta",
-    "classe": "Ladino",
-    "nivel": 3,
-    "proficiencias": {
-      "armaduras": ["Leves"],
-      "armas": ["Simples", "Bestas de mão", "Espadas longas", "Rapieiras", "Espadas curtas", "Arcos longos", "Arcos curtos"]
-    },
-    "equipamento": {
-      "arma_principal": {
-        "nome": "Rapieira",
-        "tipo": "corpo-a-corpo",
-        "dano": "1d8",
-        "tipo_dano": "perfurante",
-        "propriedades": ["Acuidade"]
-      },
-      "arma_distancia": {
-        "nome": "Arco Curto",
-        "tipo": "distancia",
-        "dano": "1d6",
-        "tipo_dano": "perfurante",
-        "propriedades": ["Munição", "Duas mãos"]
-      }
-    },
-    "ataques_calculados": [
-      {
-        "nome": "Ataque com Rapieira",
-        "bonus_ataque": 5, 
-        "dano_total": "1d8 + 3",
-        "nota": "Pode usar Ataque Furtivo (+2d6) se tiver vantagem."
-      }
-    ],
-    "magias_inatas": []
-  }
-}
-```
+## 6. Combate com Duas Armas (Two-Weapon Fighting — PHB p.195)
+- Quando atacar com arma **Leve** na mão principal, pode usar ação bônus para atacar com arma **Leve** na mão secundária
+- Ataque off-hand: **NÃO** adiciona modificador de atributo ao dano (a não ser que seja negativo)
+- Estilo de Luta "Combate com Duas Armas" (Guerreiro/Patrulheiro): permite adicionar modificador
