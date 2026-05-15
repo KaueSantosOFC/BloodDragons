@@ -23,7 +23,7 @@ import { Token } from '../../models/token';
             <mat-icon style="font-size: 20px; width: 20px; height: 20px;">exit_to_app</mat-icon>
           </button>
           <div class="flex flex-col">
-            <span class="text-sm font-bold text-stone-200">The <span class="text-blue-500">Elden</span> <span class="text-red-600">Blood</span><span class="text-yellow-500">Moon</span> 1.2.1</span>
+            <span class="text-sm font-bold text-stone-200">The <span class="text-blue-500">Elden</span> <span class="text-red-600">Blood</span><span class="text-yellow-500">Moon</span> 2.0.0</span>
           </div>
 
           <!-- GM / Play Toggle -->

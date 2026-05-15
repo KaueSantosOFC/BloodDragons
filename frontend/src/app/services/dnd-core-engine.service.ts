@@ -88,7 +88,8 @@ export class DndCoreEngineService {
       if (properties.includes('ranged')) {
         attributeUsed = 'dex';
         attributeScore = attacker.stats['dex'] || 10;
-      } else if (properties.includes('finesse')) {
+      } else if (properties.includes('finesse') || properties.includes('finesse_monk')) {
+        // finesse_monk: Monge pode usar DES para desarmado/armas de monge (sem armadura/escudo)
         const str = attacker.stats['str'] || 10;
         const dex = attacker.stats['dex'] || 10;
         if (dex > str) {
@@ -528,15 +529,20 @@ export class DndCoreEngineService {
   /**
    * Verifica se o personagem é proficiente com uma determinada arma.
    */
-  isProficientWithWeapon(character: CharacterSheet, weapon: { name: string, weaponType?: 'simple' | 'martial' }): boolean {
+  isProficientWithWeapon(character: CharacterSheet, weapon: { name: string, weaponType?: 'simple' | 'martial' | 'natural' }): boolean {
+    // PHB p.195: Todos são proficientes com ataques desarmados (armas naturais)
+    if ((weapon as any).weaponType === 'natural') {
+      return true;
+    }
+
     if (!character.proficiencies?.weapons) return false;
     
-    // Verifica por categoria
+    // Verifica por categoria (simple/martial)
     if (weapon.weaponType && character.proficiencies.weapons.includes(weapon.weaponType)) {
       return true;
     }
 
-    // Verifica pelo nome específico
+    // Verifica pelo nome específico da arma
     const lowerName = weapon.name.toLowerCase();
     if (character.proficiencies.weapons.some(w => w.toLowerCase() === lowerName)) {
       return true;

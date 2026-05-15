@@ -198,6 +198,8 @@ public class DndCoreEngineService {
     }
 
     public boolean isProficientWithWeapon(CharacterSheet character, String weaponName, String weaponType) {
+        // PHB p.195: Todos são proficientes com ataques desarmados (armas naturais)
+        if ("natural".equals(weaponType)) return true;
         if (character.getProficiencies() == null || character.getProficiencies().getWeapons() == null)
             return false;
         if (weaponType != null && character.getProficiencies().getWeapons().contains(weaponType)) return true;

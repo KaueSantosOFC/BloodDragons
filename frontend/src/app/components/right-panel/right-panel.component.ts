@@ -83,7 +83,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
 
                 <form [formGroup]="abilityForm" (ngSubmit)="addAbility()" class="space-y-2">
                   <div class="grid grid-cols-2 gap-2">
-                    <input formControlName="name" placeholder="Nome" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
+                    <input formControlName="name" placeholder="Ex: Espada Longa" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                     <select formControlName="category" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500 hidden">
                       <option value="item_effect">Efeito do Item</option>
                       <option value="weapon">Arma</option>
@@ -126,7 +126,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                     @if (showDamageField()) {
                       <div class="flex flex-col gap-1">
                         <label for="abilityDamage" class="text-[10px] text-stone-500 uppercase flex justify-between">Dano <span *ngIf="abilityForm.get('damage')?.invalid" class="text-red-500 font-bold">INVÁLIDO (Ex: 2d6)</span></label>
-                        <input id="abilityDamage" formControlName="damage" placeholder="ex: 2d6 (Sem bônus)" 
+                        <input id="abilityDamage" formControlName="damage" placeholder="Ex: 1d8 ou 2d6" 
                                [class.border-red-500]="abilityForm.get('damage')?.invalid"
                                class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                       </div>
@@ -137,7 +137,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                     @if (showHealingField()) {
                       <div class="flex flex-col gap-1">
                         <label for="abilityHealing" class="text-[10px] text-stone-500 uppercase flex justify-between">Recuperação de PV <span *ngIf="abilityForm.get('healing')?.invalid" class="text-red-500 font-bold">INVÁLIDO</span></label>
-                        <input id="abilityHealing" formControlName="healing" placeholder="ex: 2d8" 
+                        <input id="abilityHealing" formControlName="healing" placeholder="Ex: 1d8 ou 2d6" 
                                [class.border-red-500]="abilityForm.get('healing')?.invalid"
                                class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                       </div>
@@ -189,7 +189,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                     </div>
                   }
 
-                  <textarea formControlName="description" placeholder="Descrição/Detalhes" rows="2" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500"></textarea>
+                  <textarea formControlName="description" placeholder="Descreva o efeito, regras especiais ou notas para o Mestre..." rows="2" class="w-full bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500"></textarea>
 
                   <button type="submit" [disabled]="abilityForm.invalid" class="w-full py-1 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 disabled:hover:bg-amber-600 text-stone-900 font-bold rounded text-xs transition-colors">
                     {{ editingAbilityId() ? 'Salvar Edição' : 'Adicionar' }}
@@ -1648,6 +1648,17 @@ export class RightPanelComponent {
     if (race) {
       this.sheetForm.patchValue({ speed: race.speed });
     }
+  }
+
+  /** Traduz o tipo de ação para exibição amigável */
+  translateAbilityType(type: string): string {
+    const map: Record<string, string> = {
+      'action': 'Ação',
+      'bonus_action': 'Ação Bônus',
+      'reaction': 'Reação',
+      'passive': 'Passiva'
+    };
+    return map[type] || type;
   }
 
   compendiumWeaponsNatural = computed(() => COMPENDIUM_WEAPONS.filter(w => w.weaponType === 'natural'));
