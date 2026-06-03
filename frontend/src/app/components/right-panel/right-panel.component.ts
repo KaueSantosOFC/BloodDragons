@@ -126,7 +126,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                     @if (showDamageField()) {
                       <div class="flex flex-col gap-1">
                         <label for="abilityDamage" class="text-[10px] text-stone-500 uppercase flex justify-between">Dano <span *ngIf="abilityForm.get('damage')?.invalid" class="text-red-500 font-bold">INVÁLIDO (Ex: 2d6)</span></label>
-                        <input id="abilityDamage" formControlName="damage" placeholder="Ex: 1d8 ou 2d6" 
+                        <input id="abilityDamage" formControlName="damage" placeholder="Ex: 1d8, 2d6+3, 10" 
                                [class.border-red-500]="abilityForm.get('damage')?.invalid"
                                class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                       </div>
@@ -137,7 +137,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                     @if (showHealingField()) {
                       <div class="flex flex-col gap-1">
                         <label for="abilityHealing" class="text-[10px] text-stone-500 uppercase flex justify-between">Recuperação de PV <span *ngIf="abilityForm.get('healing')?.invalid" class="text-red-500 font-bold">INVÁLIDO</span></label>
-                        <input id="abilityHealing" formControlName="healing" placeholder="Ex: 1d8 ou 2d6" 
+                        <input id="abilityHealing" formControlName="healing" placeholder="Ex: 1d8, 2d6+3, 10" 
                                [class.border-red-500]="abilityForm.get('healing')?.invalid"
                                class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-amber-500">
                       </div>
@@ -383,7 +383,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                             <button class="w-full py-1 bg-stone-700 hover:bg-amber-600 hover:text-stone-900 text-stone-300 font-bold rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:bg-stone-700 disabled:hover:text-stone-300 disabled:cursor-not-allowed mt-2"
                                     [disabled]="!selectedToken()?.sheet"
                                     (click)="useAbility(ability)">
-                              <mat-icon class="text-sm">my_location</mat-icon> Usar Arma no Mapa
+                              <mat-icon class="text-sm">my_location</mat-icon> 🎯 Usar no Mapa (Selecionar Alvo)
                             </button>
                           </div>
                         </div>
@@ -547,7 +547,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                             <button class="w-full py-1 bg-stone-700 hover:bg-amber-600 hover:text-stone-900 text-stone-300 font-bold rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:bg-stone-700 disabled:hover:text-stone-300 disabled:cursor-not-allowed mt-2"
                                     [disabled]="!selectedToken()?.sheet"
                                     (click)="useAbility(ability)">
-                              <mat-icon class="text-sm">my_location</mat-icon> Lançar Magia no Mapa
+                              <mat-icon class="text-sm">my_location</mat-icon> 🎯 Usar no Mapa (Selecionar Alvo)
                             </button>
                           </div>
                         </div>
@@ -846,7 +846,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                               <button class="w-full py-1 bg-stone-700 hover:bg-amber-600 hover:text-stone-900 text-stone-300 font-bold rounded transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:bg-stone-700 disabled:hover:text-stone-300 disabled:cursor-not-allowed mt-2"
                                       [disabled]="!selectedToken()?.sheet"
                                       (click)="useAbility(ability)">
-                                <mat-icon class="text-sm">my_location</mat-icon> Usar Habilidade no Mapa
+                                <mat-icon class="text-sm">my_location</mat-icon> 🎯 Usar no Mapa (Selecionar Alvo)
                               </button>
                             }
                           </div>
@@ -1259,30 +1259,30 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                   </div>
 
                   <!-- Seção: Atributos -->
-                  <div class="flex items-center gap-1.5 border-b border-stone-700 pb-1 mt-1"><mat-icon style="font-size:14px;width:14px;height:14px;" class="text-amber-600">fitness_center</mat-icon><span class="text-[10px] text-amber-600 uppercase font-black tracking-widest">Atributos</span></div>
+                  <div class="flex items-center gap-1.5 border-b border-stone-700 pb-1 mt-1"><mat-icon style="font-size:14px;width:14px;height:14px;" class="text-amber-600">fitness_center</mat-icon><span class="text-[10px] text-amber-600 uppercase font-black tracking-widest">Atributos</span><span class="text-[9px] text-stone-600 ml-auto">Valor base (8-20)</span></div>
                   <div class="grid grid-cols-3 gap-2">
                     <div class="flex flex-col gap-1">
-                      <label for="str" class="text-[10px] text-stone-500 uppercase text-center">FOR</label>
+                      <label for="str" class="text-[10px] text-stone-500 uppercase text-center cursor-help" title="Força: Ataques corpo-a-corpo, atletismo, carga">FOR</label>
                       <input id="str" type="number" formControlName="str" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="dex" class="text-[10px] text-stone-500 uppercase text-center">DES</label>
+                      <label for="dex" class="text-[10px] text-stone-500 uppercase text-center cursor-help" title="Destreza: Ataques à distância, CA, furtividade, reflexos">DES</label>
                       <input id="dex" type="number" formControlName="dex" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="con" class="text-[10px] text-stone-500 uppercase text-center">CON</label>
+                      <label for="con" class="text-[10px] text-stone-500 uppercase text-center cursor-help" title="Constituição: Pontos de vida máximos, resistências">CON</label>
                       <input id="con" type="number" formControlName="con" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="int" class="text-[10px] text-stone-500 uppercase text-center">INT</label>
+                      <label for="int" class="text-[10px] text-stone-500 uppercase text-center cursor-help" title="Inteligência: Magias de Mago, investigação, história">INT</label>
                       <input id="int" type="number" formControlName="int" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="wis" class="text-[10px] text-stone-500 uppercase text-center">SAB</label>
+                      <label for="wis" class="text-[10px] text-stone-500 uppercase text-center cursor-help" title="Sabedoria: Magias de Clérigo, percepção, sobrevivência">SAB</label>
                       <input id="wis" type="number" formControlName="wis" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                     <div class="flex flex-col gap-1">
-                      <label for="cha" class="text-[10px] text-stone-500 uppercase text-center">CAR</label>
+                      <label for="cha" class="text-[10px] text-stone-500 uppercase text-center cursor-help" title="Carisma: Magias de Feiticeiro/Bruxo, persuasão, engano">CAR</label>
                       <input id="cha" type="number" formControlName="cha" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-xs text-center focus:outline-none focus:border-amber-500">
                     </div>
                   </div>
@@ -1815,9 +1815,9 @@ export class RightPanelComponent {
     type: new FormControl<'action' | 'bonus_action' | 'reaction' | 'passive'>('action', { nonNullable: true, validators: [Validators.required] }),
     range: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
     areaShape: new FormControl<AreaShape>('none', { nonNullable: true, validators: [Validators.required] }),
-    damage: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d*(d\d+)?$/i)] }),
+    damage: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^(?:\d+)?d\d+(?:\s*[+-]\s*\d+)?$|^\d+$/i)] }),
     damageType: new FormControl('slashing', { nonNullable: true }),
-    healing: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d*(d\d+)?$/i)] }),
+    healing: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^(?:\d+)?d\d+(?:\s*[+-]\s*\d+)?$|^\d+$/i)] }),
     description: new FormControl('', { nonNullable: true }),
     attackBonus: new FormControl(0, { nonNullable: true }),
     damageBonus: new FormControl(0, { nonNullable: true }),

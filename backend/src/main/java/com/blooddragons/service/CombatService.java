@@ -71,12 +71,94 @@ public class CombatService {
      */
     public AttackResponse resolveAttack(Token attacker, Token target, Ability ability, String mode) {
         if (mode == null) mode = "normal";
-        int strMod = engine.calculateModifier(attacker.getSheet() != null ? attacker.getSheet().getStr() : 10);
         int profBonus = attacker.getSheet() != null ? attacker.getSheet().getProficiencyBonus() : 2;
         int magicBonus = ability.getAttackBonus() != null ? ability.getAttackBonus() : 0;
         int targetAC = target.getSheet() != null ? target.getSheet().getAc() : 10;
 
-        // Vantagem automática por condições
+        // Determinar o modificador de atributo correto (D&D 5e PHB)
+        int attrScore = 10;
+        if (attacker.getSheet() != null) {
+            CharacterSheet sheet = attacker.getSheet();
+            if ("spell".equalsIgnoreCase(ability.getCategory())) {
+                // Spellcasting ability
+                String spellAttr = sheet.getSpellcastingAbility();
+                if (spellAttr == null || spellAttr.isBlank()) {
+                    String className = sheet.getClassName();
+                    if (className != null) {
+                        String normClass = className.toLowerCase();
+                        if (normClass.contains("mago") || normClass.contains("wizard") || normClass.contains("arcane")) {
+                            spellAttr = "int";
+                        } else if (normClass.contains("clérigo") || normClass.contains("cleric") || normClass.contains("druida") || normClass.contains("druid") || normClass.contains("patrulheiro") || normClass.contains("ranger") || normClass.contains("monge") || normClass.contains("monk")) {
+                            spellAttr = "wis";
+                        } else {
+                            spellAttr = "cha";
+                        }
+                    } else {
+                        spellAttr = "cha";
+                    }
+                }
+                
+                attrScore = switch (spellAttr.toLowerCase()) {
+                    case "int" -> sheet.getIntAttr();
+                    case "wis" -> sheet.getWis();
+                    case "cha" -> sheet.getCha();
+                    case "str" -> sheet.getStr();
+                    case "dex" -> sheet.getDex();
+                    case "con" -> sheet.getCon();
+                    default -> sheet.getCha();
+                };
+            } else {
+                // Arma ou habilidade física
+                boolean canUseDex = false;
+                String nameLower = ability.getName() != null ? ability.getName().toLowerCase() : "";
+                
+                boolean isUnarmed = "natural".equalsIgnoreCase(ability.getCategory()) || 
+                                    nameLower.contains("desarmado") || 
+                                    nameLower.contains("natural") || 
+                                    nameLower.contains("pancada");
+                                    
+                if (ability.getProperties() != null) {
+                    if (ability.getProperties().contains("finesse") || ability.getProperties().contains("ranged") || ability.getProperties().contains("acuidade")) {
+                        canUseDex = true;
+                    }
+                }
+                if (nameLower.contains("arco") || nameLower.contains("besta") || nameLower.contains("dardo") || nameLower.contains("funda")) {
+                    canUseDex = true;
+                }
+                
+                boolean canUseDexUnarmed = false;
+                String race = sheet.getRace();
+                String className = sheet.getClassName();
+                if (race != null && race.equalsIgnoreCase("Tiefling")) {
+                    canUseDexUnarmed = true;
+                }
+                if (className != null && (className.equalsIgnoreCase("Monge") || className.equalsIgnoreCase("Monk"))) {
+                    canUseDexUnarmed = true;
+                }
+                
+                if (isUnarmed && canUseDexUnarmed) {
+                    canUseDex = true;
+                }
+                
+                if (canUseDex) {
+                    attrScore = Math.max(sheet.getStr(), sheet.getDex());
+                } else {
+                    attrScore = sheet.getStr();
+                }
+            }
+        }
+        int abilityMod = engine.calculateModifier(attrScore);
+
+        // Validar proficiência com a arma/magia
+        boolean isProficient = true;
+        if (ability.getIsProficient() != null) {
+            isProficient = ability.getIsProficient();
+        } else if (attacker.getSheet() != null) {
+            isProficient = engine.isProficientWithWeapon(attacker.getSheet(), ability.getName(), ability.getCategory());
+        }
+        int appliedProfBonus = isProficient ? profBonus : 0;
+
+        // Vantagem automática por condições no alvo
         String finalMode = mode;
         if (target.getConditions() != null) {
             for (var c : target.getConditions()) {
@@ -84,7 +166,7 @@ public class CombatService {
             }
         }
 
-        ActionResult attackRoll = engine.executeAttackRoll(strMod, profBonus, magicBonus, finalMode, null);
+        ActionResult attackRoll = engine.executeAttackRoll(abilityMod, appliedProfBonus, magicBonus, finalMode, null);
         var hitCheck = engine.validateSuccess(attackRoll.getTotal(), targetAC);
         boolean isHit = hitCheck.success() || attackRoll.isCritical();
 
@@ -95,10 +177,13 @@ public class CombatService {
         ActionResult damageRoll = null;
         if (isHit && (attackRoll.getIsCriticalFail() == null || !attackRoll.getIsCriticalFail())) {
             log.append("\n🎯 ACERTOU!");
-            String damageDice = ability.getDamage() != null ? ability.getDamage() : "1d8";
-            damageRoll = engine.calculateDamage(damageDice, strMod, 0);
+            String damageDice = ability.getDamage() != null && !ability.getDamage().isBlank() ? ability.getDamage() : "1d8";
+            int damageBonus = ability.getDamageBonus() != null ? ability.getDamageBonus() : 0;
+            boolean isOffhand = ability.getIsOffHand() != null && ability.getIsOffHand();
+            
+            damageRoll = engine.calculateDamage(damageDice, abilityMod, damageBonus, 1.0, isOffhand);
             if (attackRoll.isCritical()) {
-                ActionResult critDmg = engine.calculateDamage(damageDice, 0, 0);
+                ActionResult critDmg = engine.calculateDamage(damageDice, 0, 0, 1.0, false);
                 damageRoll.setTotal(damageRoll.getTotal() + critDmg.getTotal());
                 damageRoll.setLog(damageRoll.getLog() + " + Crítico: " + critDmg.getLog());
             }
