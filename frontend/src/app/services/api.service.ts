@@ -201,4 +201,68 @@ export class ApiService {
   getCantripDamage(baseDice: string, characterLevel: number): Observable<{ scaledDice: string }> {
     return this.http.post<any>(`${this.baseUrl}/character/cantrip-damage`, { baseDice, characterLevel });
   }
+
+  // ==========================================
+  // Guia do Mestre (DMG)
+  // ==========================================
+
+  getFallDamage(distanceMeters: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dmg/fall-damage`, { params: { distanceMeters: distanceMeters.toString() } });
+  }
+
+  resolveTrapSave(body: { attributeScore: number; profBonus?: number; isProficient?: boolean; trapDC: number; damageDice?: string; halfOnSuccess?: boolean }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/dmg/trap/save`, body);
+  }
+
+  getPoisons(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/dmg/poisons`);
+  }
+
+  resolvePoisonSave(body: { conScore: number; profBonus?: number; isProfConSave?: boolean; poisonName: string }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/dmg/poison/save`, body);
+  }
+
+  getDiseases(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/dmg/diseases`);
+  }
+
+  getEnvironmentalDamage(level: number, severity: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dmg/environmental-damage`, { params: { level: level.toString(), severity } });
+  }
+
+  getXpTable(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/dmg/xp`);
+  }
+
+  calculateXP(body: { challengeRatings: string[]; partySize?: number }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/dmg/xp/calculate`, body);
+  }
+
+  getAoeTargets(shape: string, sizeMeters: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dmg/aoe-targets`, { params: { shape, sizeMeters: sizeMeters.toString() } });
+  }
+
+  getDcTable(): Observable<Record<string, number>> {
+    return this.http.get<Record<string, number>>(`${this.baseUrl}/dmg/dc-table`);
+  }
+
+  getObjectAC(material: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dmg/object/ac`, { params: { material } });
+  }
+
+  getObjectHP(size: string, resilient: boolean): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dmg/object/hp`, { params: { size, resilient: resilient.toString() } });
+  }
+
+  getSurvivalFoodDays(conScore: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dmg/survival/food-days`, { params: { conScore: conScore.toString() } });
+  }
+
+  resolveForage(body: { wisMod: number; profBonus?: number; isProficient?: boolean; dc?: number }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/dmg/survival/forage`, body);
+  }
+
+  getMagicItemCraftingTable(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/dmg/crafting/magic-items`);
+  }
 }

@@ -92,6 +92,10 @@ public class CharacterSheet {
 
     // Exaustão (0-6)
     private int exhaustionLevel;
+    private Integer exhaustion;
+    private Integer restLevel;
+    private Integer rations;
+    private Integer water;
 
     // Death saves
     private int deathSaveSuccesses;

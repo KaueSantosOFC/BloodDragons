@@ -64,7 +64,7 @@ import { MatIconModule } from '@angular/material/icon';
 
           <!-- Version badge -->
           <div class="mt-4 px-4 py-1.5 rounded-full border border-stone-800 bg-stone-900/60 backdrop-blur-sm">
-            <span class="text-[10px] font-mono text-stone-500 tracking-widest uppercase">Engine v2.0.0 — PHB 5e Validated</span>
+            <span class="text-[10px] font-mono text-stone-500 tracking-widest uppercase">Engine v2.1.0 — PHB/DMG 5e Validated</span>
           </div>
         </div>
 
@@ -190,7 +190,7 @@ import { MatIconModule } from '@angular/material/icon';
 
       <!-- Footer -->
       <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-stone-700 font-mono tracking-wider">
-        BloodDragons Engine — D&D 5e © Wizards of the Coast
+        BloodDragons Engine v2.1.0 — D&D 5e © Wizards of the Coast
       </div>
 
       <!-- Delete Confirmation Popup -->

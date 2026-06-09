@@ -16,15 +16,28 @@ import { DamageModalComponent } from '../damage-modal/damage-modal.component';
 import { LevelUpModalComponent } from '../level-up-modal/level-up-modal.component';
 
 import { CombatTrackerComponent } from '../combat-tracker/combat-tracker.component';
+import { FullscreenSheetComponent } from '../fullscreen-sheet/fullscreen-sheet.component';
+import { GameplayHudComponent } from '../gameplay-hud/gameplay-hud.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [GridComponent, GmPanelComponent, RightPanelComponent, BottomBarComponent, StorySlidesComponent, SceneFilmstripComponent, MatIconModule, CommonModule, ItemInteractionModalComponent, AttackModalComponent, DamageModalComponent, LevelUpModalComponent, CombatTrackerComponent],
+  imports: [
+    GridComponent, GmPanelComponent, RightPanelComponent, BottomBarComponent, 
+    StorySlidesComponent, SceneFilmstripComponent, MatIconModule, CommonModule, 
+    ItemInteractionModalComponent, AttackModalComponent, DamageModalComponent, 
+    LevelUpModalComponent, CombatTrackerComponent, FullscreenSheetComponent, 
+    GameplayHudComponent
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-col h-screen w-screen overflow-hidden bg-black text-stone-200 font-sans">
+    <div class="flex flex-col h-screen w-screen overflow-hidden bg-black text-stone-200 font-sans relative">
       
+      <!-- Gameplay HUD (Play Mode Only) -->
+      @if (combat.isPlayMode()) {
+        <app-gameplay-hud></app-gameplay-hud>
+      }
+
       <!-- Main Content Area -->
       <div class="flex flex-1 overflow-hidden relative">
         
@@ -88,6 +101,7 @@ import { CombatTrackerComponent } from '../combat-tracker/combat-tracker.compone
       <app-attack-modal></app-attack-modal>
       <app-damage-modal></app-damage-modal>
       <app-level-up-modal></app-level-up-modal>
+      <app-fullscreen-sheet></app-fullscreen-sheet>
     </div>
   `
 })

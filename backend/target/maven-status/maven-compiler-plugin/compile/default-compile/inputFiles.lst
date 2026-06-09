@@ -5,10 +5,12 @@
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/controller/CharacterController.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/controller/CombatController.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/controller/CompendiumController.java
+/home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/controller/DmgController.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/controller/EngineController.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/controller/UploadController.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/data/CompendiumData.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/data/Dnd5eClassData.java
+/home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/data/Dnd5eDmgData.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/data/Dnd5eEquipmentData.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/data/Dnd5eOptionsData.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/data/Dnd5eRaceData.java
@@ -27,6 +29,7 @@
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/service/CampaignService.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/service/CharacterCreationService.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/service/CombatService.java
+/home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/service/DmgRulesService.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/service/DndCoreEngineService.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/service/DndMathService.java
 /home/ksantos/Projetos/Sistema RPG/BloodDragons/backend/src/main/java/com/blooddragons/service/SpellService.java

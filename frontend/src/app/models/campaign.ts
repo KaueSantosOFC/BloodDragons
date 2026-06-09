@@ -20,4 +20,7 @@ export interface Campaign {
   isFogEnabled?: boolean;
   scenes?: Scene[];
   activeSceneId?: string | null;
+  currentHour?: number;
+  currentMinute?: number;
+  currentDay?: number;
 }

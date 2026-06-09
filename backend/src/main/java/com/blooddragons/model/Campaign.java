@@ -40,4 +40,13 @@ public class Campaign {
     private List<Scene> scenes = new ArrayList<>();
 
     private String activeSceneId;
+
+    @Builder.Default
+    private Integer currentHour = 8;
+
+    @Builder.Default
+    private Integer currentMinute = 0;
+
+    @Builder.Default
+    private Integer currentDay = 1;
 }

@@ -35,7 +35,7 @@ import { Ability } from '../../models/ability';
       <div class="relative flex-1 bg-stone-950 overflow-hidden" #gridContainer
            [class.cursor-grab]="combat.isPanMode() && !isPanning"
            [class.cursor-grabbing]="isPanning">
-        <div class="absolute inset-0 origin-top-left transition-transform duration-75 ease-out"
+        <div class="absolute inset-0 origin-top-left"
              [style.transform]="'translate(' + combat.pan().x + 'px, ' + combat.pan().y + 'px) scale(' + combat.zoom() + ')'">
           
           <div class="relative" [style.width.px]="mapWidth()" [style.height.px]="mapHeight()" #boundary>
@@ -835,18 +835,27 @@ export class GridComponent {
       // If attack doesn't have an area shape, it's a direct targeting attack. 
       // It must be dropped onto an Enemy/Valid token to function.
       if (!ability.areaShape || ability.areaShape === 'none') {
-        const targetGrid = this.combat.previewTarget();
-        if (!targetGrid) {
-            this.combat.cancelPreview();
-            return;
-        }
+        const rect = this.gridContainer.nativeElement.getBoundingClientRect();
+        const clickX = (mouseEvent.clientX - rect.left - this.combat.pan().x) / this.combat.zoom();
+        const clickY = (mouseEvent.clientY - rect.top - this.combat.pan().y) / this.combat.zoom();
 
-        // The exact target token at the hovered grid coordinates:
         const gridSize = this.gridSize;
-        const targetGridX = Math.floor(targetGrid.x / gridSize);
-        const targetGridY = Math.floor(targetGrid.y / gridSize);
+        const targetGridX = Math.floor(clickX / gridSize);
+        const targetGridY = Math.floor(clickY / gridSize);
 
-        const targetToken = this.tokens().find(t => Math.floor(t.x) === targetGridX && Math.floor(t.y) === targetGridY && t.id !== originToken?.id);
+        // High precision check:
+        // First check visual bounds of any token.
+        // Fallback to grid coordinates.
+        const targetToken = this.tokens().find(t => {
+          if (t.id === originToken?.id || t.type === 'item') return false;
+          const tx = t.x * gridSize;
+          const ty = t.y * gridSize;
+          const tsize = this.getTokenSize(t);
+          return clickX >= tx && clickX <= tx + tsize &&
+                 clickY >= ty && clickY <= ty + tsize;
+        }) || this.tokens().find(t => {
+          return Math.floor(t.x) === targetGridX && Math.floor(t.y) === targetGridY && t.id !== originToken?.id && t.type !== 'item';
+        });
 
         if (!targetToken) {
            this.combat.addNotification(`Nenhum alvo válido nessa coordenada para um ataque direto.`, 'error');

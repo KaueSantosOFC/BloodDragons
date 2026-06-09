@@ -99,6 +99,10 @@ export class CombatService {
   isPlayMode = signal<boolean>(false); // Toggle between GM and Play mode for GMs
   rightPanelTab = signal<'sheet' | 'inventory' | 'actions'>('sheet'); // Control right panel tab
   triggerEditSheet = signal<number>(0); // Trigger to open sheet edit mode
+  currentHour = signal<number>(8);
+  currentMinute = signal<number>(0);
+  currentDay = signal<number>(1);
+  fullscreenSheetTokenId = signal<string | null>(null);
   
   // Fog of War State
   isFogEnabled = signal<boolean>(true);
@@ -171,6 +175,7 @@ export class CombatService {
   // Combat Tracker State
   combatActive = signal<boolean>(false);
   activeTurnIndex = signal<number>(0);
+  round = signal<number>(1);
   
   initiativeOrder = computed(() => {
     // Return tokens that are part of the initiative order, sorted descending
@@ -178,14 +183,23 @@ export class CombatService {
     return order.sort((a, b) => (b.initiative || 0) - (a.initiative || 0));
   });
   
+  activeTokenId = computed(() => {
+    const list = this.initiativeOrder();
+    const idx = this.activeTurnIndex();
+    if (list.length === 0 || idx < 0 || idx >= list.length) return null;
+    return list[idx].id;
+  });
+  
   startCombat() {
     this.combatActive.set(true);
     this.activeTurnIndex.set(0);
+    this.round.set(1);
   }
   
   endCombat() {
     this.combatActive.set(false);
     this.activeTurnIndex.set(0);
+    this.round.set(1);
     // Clear initiatives
     const updatedTokens = this.tokens().map(t => ({...t, initiative: undefined}));
     this.tokens.set(updatedTokens);
@@ -199,6 +213,9 @@ export class CombatService {
     const currentList = this.initiativeOrder();
     if (currentList.length === 0) return;
     const newIdx = (this.activeTurnIndex() + 1) % currentList.length;
+    if (newIdx === 0) {
+      this.round.update(r => r + 1);
+    }
     this.activeTurnIndex.set(newIdx);
   }
   
@@ -206,7 +223,10 @@ export class CombatService {
     const currentList = this.initiativeOrder();
     if (currentList.length === 0) return;
     let newIdx = this.activeTurnIndex() - 1;
-    if (newIdx < 0) newIdx = currentList.length - 1;
+    if (newIdx < 0) {
+      newIdx = currentList.length - 1;
+      this.round.update(r => Math.max(1, r - 1));
+    }
     this.activeTurnIndex.set(newIdx);
   }
 
@@ -294,6 +314,10 @@ export class CombatService {
         if (campaign.scenes) this.scenes.set(campaign.scenes);
         if (campaign.activeSceneId !== undefined) this.activeSceneId.set(campaign.activeSceneId);
         
+        this.currentHour.set(campaign.currentHour !== undefined ? campaign.currentHour : 8);
+        this.currentMinute.set(campaign.currentMinute !== undefined ? campaign.currentMinute : 0);
+        this.currentDay.set(campaign.currentDay !== undefined ? campaign.currentDay : 1);
+        
       } else if (!campaign) {
         this.currentCampaignId = null;
       }
@@ -332,7 +356,10 @@ export class CombatService {
         fogOfWar: untracked(() => this.fogOfWar()),
         isFogEnabled: untracked(() => this.isFogEnabled()),
         scenes: currentScenes,
-        activeSceneId: activeId
+        activeSceneId: activeId,
+        currentHour: untracked(() => this.currentHour()),
+        currentMinute: untracked(() => this.currentMinute()),
+        currentDay: untracked(() => this.currentDay())
       });
       
       // Update signal if changed
@@ -340,6 +367,26 @@ export class CombatService {
         this.scenes.set(currentScenes);
       }
     }
+  }
+
+  advanceTime(hours: number, minutes: number) {
+    let min = this.currentMinute() + minutes;
+    let hr = this.currentHour() + hours;
+    
+    if (min >= 60) {
+      hr += Math.floor(min / 60);
+      min = min % 60;
+    }
+    
+    if (hr >= 24) {
+      const days = Math.floor(hr / 24);
+      this.currentDay.update(d => d + days);
+      hr = hr % 24;
+    }
+    
+    this.currentMinute.set(min);
+    this.currentHour.set(hr);
+    this.saveToCampaign();
   }
 
   updateToken(id: string, updates: Partial<Token>) {

@@ -37,6 +37,13 @@ export interface CharacterSheet {
   pp?: number;
   backpack?: string;
   inventory?: { name: string; quantity: number; weight: number; isEquipped: boolean }[];
+  exhaustion?: number;
+  restLevel?: number;
+  rations?: number;
+  water?: number;
+  savingThrowProficiencies?: string[];
+  skillProficiencies?: string[];
+  expertiseSkills?: string[];
 }
 
 export interface TokenCondition {

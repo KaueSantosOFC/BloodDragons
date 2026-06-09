@@ -16,16 +16,16 @@ import { FormsModule } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (pendingLoot()) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-stone-900 border border-stone-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-stone-900 border border-stone-700 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
           <!-- Header -->
-          <div class="flex items-center gap-3 p-4 border-b border-stone-800 bg-stone-950">
+          <div class="flex items-center gap-3 p-4 border-b border-stone-800 bg-stone-950 shrink-0">
             <mat-icon class="text-amber-500">pan_tool</mat-icon>
             <h2 class="text-xl font-bold text-stone-100">Coletar item?</h2>
           </div>
           
           <!-- Content -->
-          <div class="p-6 flex flex-col gap-4">
+          <div class="p-6 flex flex-col gap-4 overflow-y-auto flex-1 custom-scrollbar">
             <h3 class="text-lg font-bold text-amber-500">{{ lootItem()?.name }}</h3>
             
             @if (lootItem()?.description) {
@@ -37,7 +37,7 @@ import { FormsModule } from '@angular/forms';
               <span class="text-stone-200 font-medium">{{ lootItem()?.weight || 0 }} kg</span>
             </div>
             
-            <div class="flex gap-4 mt-6">
+            <div class="flex gap-4 mt-6 shrink-0">
                <button 
                  class="flex-1 py-2 bg-stone-800 hover:bg-stone-700 text-white rounded font-medium border border-stone-600 transition-colors" 
                  (click)="cancelLoot()"
@@ -55,7 +55,7 @@ import { FormsModule } from '@angular/forms';
         </div>
       </div>
     } @else if (combat.selectedItemToken()) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-stone-900 border border-stone-700 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
           
           <!-- Header -->

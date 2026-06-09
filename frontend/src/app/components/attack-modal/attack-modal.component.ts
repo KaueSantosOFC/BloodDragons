@@ -12,11 +12,11 @@ import { DndCoreEngineService, AttackRollResult } from '../../services/dnd-core-
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (state()) {
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-        <div class="bg-stone-900 border border-stone-700 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-stone-900 border border-stone-700 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
           
           <!-- Header -->
-          <div class="bg-stone-800 p-4 border-b border-stone-700 flex items-center justify-between">
+          <div class="bg-stone-800 p-4 border-b border-stone-700 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full border-2 border-amber-500 overflow-hidden bg-stone-900">
                 @if (state()?.attacker?.imageUrl) {
@@ -34,7 +34,7 @@ import { DndCoreEngineService, AttackRollResult } from '../../services/dnd-core-
           </div>
 
           <!-- Body -->
-          <div class="p-5 space-y-4">
+          <div class="p-5 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
             
             <div class="flex items-center gap-3 bg-stone-800/50 p-3 rounded border border-stone-700/50">
               <mat-icon class="text-amber-500" [ngClass]="{'text-blue-400': isSpell()}">

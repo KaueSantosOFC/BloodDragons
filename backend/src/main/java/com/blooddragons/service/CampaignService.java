@@ -76,6 +76,9 @@ public class CampaignService {
         if (updates.getIsFogEnabled() != null) existing.setIsFogEnabled(updates.getIsFogEnabled());
         if (updates.getScenes() != null) existing.setScenes(updates.getScenes());
         if (updates.getActiveSceneId() != null) existing.setActiveSceneId(updates.getActiveSceneId());
+        if (updates.getCurrentHour() != null) existing.setCurrentHour(updates.getCurrentHour());
+        if (updates.getCurrentMinute() != null) existing.setCurrentMinute(updates.getCurrentMinute());
+        if (updates.getCurrentDay() != null) existing.setCurrentDay(updates.getCurrentDay());
         existing.setLastPlayedAt(LocalDateTime.now());
 
         campaigns.put(id, existing);

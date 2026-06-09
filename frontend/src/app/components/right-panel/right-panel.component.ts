@@ -18,7 +18,7 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
   imports: [CommonModule, MatIconModule, ReactiveFormsModule, FormsModule, ActionMenuComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    'class': 'flex flex-col h-full w-72 bg-stone-900 border-l border-stone-800 text-stone-300 relative z-20 shadow-2xl shrink-0'
+    'class': 'flex flex-col h-full w-96 md:w-[450px] bg-stone-900 border-l border-stone-800 text-stone-300 relative z-20 shadow-2xl shrink-0 transition-all duration-300'
   },
   template: `
       <!-- Tabs -->
@@ -1330,11 +1330,16 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                 <div class="border-b border-stone-700 pb-2">
                   <div class="flex justify-between items-start">
                     <h3 class="font-bold text-amber-500 text-lg">{{ selectedToken()?.name }}</h3>
-                    @if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="editSheet()" title="Editar Ficha">
-                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                    <div class="flex items-center gap-2">
+                      <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="combat.fullscreenSheetTokenId.set(selectedToken()?.id || null)" title="Maximizar Ficha">
+                        <mat-icon style="font-size: 16px; width: 16px; height: 16px;">open_in_full</mat-icon>
                       </button>
-                    }
+                      @if ((auth.currentUser()?.role === 'GM' && !combat.isPlayMode()) || selectedToken()?.controlledBy === auth.currentUser()?.id) {
+                        <button class="text-stone-500 hover:text-amber-500 transition-colors" (click)="editSheet()" title="Editar Ficha">
+                          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">edit</mat-icon>
+                        </button>
+                      }
+                    </div>
                   </div>
                 <div class="flex flex-col gap-1.5 mt-3 text-stone-400 bg-stone-900 border border-stone-800 rounded p-2 text-xs">
                     <div class="space-y-1">
