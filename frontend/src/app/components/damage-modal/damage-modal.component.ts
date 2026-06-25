@@ -68,10 +68,10 @@ import { DndMathService } from '../../services/dnd-math.service';
               }
             </div>
 
-            <!-- Parsing Display -->
+            <!-- Parsing Display: Primary Damage -->
             <div class="bg-stone-800 p-6 rounded border border-stone-700 text-center space-y-4 shadow-inner">
                 <p class="text-base text-amber-500 font-bold uppercase tracking-widest">
-                  {{ state()?.saveDC ? '1. Conjurador rola o Dano' : 'Role o Dano Físico' }}
+                  {{ state()?.saveDC ? '1. Conjurador rola o Dano' : 'Dano Primário' }}
                 </p>
                 
                 <div class="flex justify-center items-end gap-3 my-4">
@@ -106,14 +106,14 @@ import { DndMathService } from '../../services/dnd-math.service';
                 </div>
 
                 <p class="text-sm text-stone-500 mt-2 font-mono bg-stone-900/80 p-2 rounded border border-stone-700/50">
-                  Dano na Arma: <span class="text-stone-300 font-bold">"{{ state()?.ability?.damage }}"</span>
+                  {{ state()?.ability?.damageType || 'Dano' }}: <span class="text-stone-300 font-bold">"{{ state()?.ability?.damage }}"</span>
                 </p>
               </div>
 
-              <!-- Input Result -->
+              <!-- Input: Primary Damage -->
               <div class="space-y-4 pt-2 flex flex-col items-center">
                 <label for="manualRollInput" class="text-sm font-black text-stone-400 uppercase tracking-[0.2em] block text-center">
-                  Soma Total do Dano
+                  Soma do Dano Primário
                 </label>
                 <div class="w-2/3">
                   <input id="manualRollInput" type="number" [ngModel]="manualRoll()" (ngModelChange)="setManualDamageRoll($event)" 
@@ -133,6 +133,67 @@ import { DndMathService } from '../../services/dnd-math.service';
                   </p>
                 }
               </div>
+
+              <!-- EXTRA DAMAGE Section (if ability has extraDamage) -->
+              @if (hasExtraDamage()) {
+                <div class="bg-blue-950/30 p-4 rounded border border-blue-500/30 text-center space-y-3">
+                  <p class="text-sm text-blue-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                    <mat-icon style="font-size:16px;width:16px;height:16px;">bolt</mat-icon>
+                    Dano Extra ({{ getExtraDamageTypeName() }})
+                  </p>
+                  
+                  <div class="flex justify-center items-end gap-3 my-2">
+                    @if (parsedExtraDamage().diceType) {
+                      <div class="flex flex-col items-center">
+                        <span class="text-[10px] text-blue-300/60 uppercase font-black tracking-widest">Quant.</span>
+                        <span class="text-2xl font-black text-blue-200">
+                          {{ parsedExtraDamage().diceCount }}
+                        </span>
+                      </div>
+                      <span class="text-lg font-black text-stone-600 mb-1">x</span>
+                      <div class="flex flex-col items-center">
+                        <span class="text-[10px] text-blue-300/60 uppercase font-black tracking-widest">Dado</span>
+                        <span class="text-2xl font-black text-blue-400">{{ parsedExtraDamage().diceType }}</span>
+                      </div>
+                    } @else {
+                      <span class="text-2xl font-black text-blue-400">{{ parsedExtraDamage().modifier }}</span>
+                    }
+                    @if (parsedExtraDamage().modifier !== 0 && parsedExtraDamage().diceType) {
+                      <span class="text-lg font-black text-stone-600 mb-1">
+                        {{ parsedExtraDamage().modifier > 0 ? '+' : '-' }}
+                      </span>
+                      <span class="text-2xl font-black text-blue-200">{{ Math.abs(parsedExtraDamage().modifier) }}</span>
+                    }
+                  </div>
+
+                  <p class="text-xs text-blue-300/60 font-mono">
+                    {{ state()?.ability?.extraDamageType || 'Extra' }}: "{{ state()?.ability?.extraDamage }}"
+                  </p>
+
+                  <div class="flex flex-col items-center pt-1">
+                    <label for="extraDamageInput" class="text-[10px] font-black text-blue-300/80 uppercase tracking-widest mb-1">
+                      Soma do Dano Extra
+                    </label>
+                    <div class="w-1/2">
+                      <input id="extraDamageInput" type="number" [ngModel]="extraDamageRoll()" (ngModelChange)="extraDamageRoll.set($event)" 
+                             class="w-full bg-stone-950 border-2 border-blue-500/30 rounded-lg px-3 py-2 text-center font-mono font-black text-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                             placeholder="?"
+                             (keyup.enter)="applyDamage()">
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Secondary Effect Note (if present) -->
+              @if (state()?.ability?.secondaryEffect) {
+                <div class="bg-purple-950/20 p-3 rounded border border-purple-500/30 text-left">
+                  <p class="text-[10px] text-purple-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <mat-icon style="font-size:12px;width:12px;height:12px;">auto_awesome</mat-icon>
+                    Efeito Secundário
+                  </p>
+                  <p class="text-xs text-purple-300/80">{{ state()?.ability?.secondaryEffect }}</p>
+                </div>
+              }
 
             <!-- Flat Reductions / Modifiers that apply before Resistance -->
             <div class="bg-stone-800 p-4 rounded border border-stone-700">
@@ -196,7 +257,13 @@ import { DndMathService } from '../../services/dnd-math.service';
             
             <div class="flex justify-between items-center bg-stone-950 p-5 rounded-lg border border-stone-700 shadow-xl">
                <span class="text-base font-black text-stone-500 uppercase tracking-widest">Total Base</span>
-               <span class="text-4xl font-mono font-black text-amber-500">{{ calculatedTotal() }}</span>
+               <div class="text-right">
+                 <span class="text-4xl font-mono font-black text-amber-500">{{ calculatedTotal() }}</span>
+                 @if (hasExtraDamage() && (extraDamageRoll() || parsedExtraDamage().modifier > 0)) {
+                   <span class="text-lg font-mono font-bold text-blue-400 ml-2">+ {{ extraDamageTotal() }}</span>
+                   <span class="text-xs text-blue-300/60 ml-1">({{ getExtraDamageTypeName() }})</span>
+                 }
+               </div>
             </div>
 
             <!-- Applicator -->
@@ -225,6 +292,7 @@ export class DamageModalComponent {
 
   state = this.combat.damageModalState;
   manualRoll = signal<number | null>(null);
+  extraDamageRoll = signal<number | null>(null);
 
   protected Math = Math; // For the template
 
@@ -343,6 +411,7 @@ export class DamageModalComponent {
   close() {
     this.combat.closeDamageModal();
     this.manualRoll.set(null);
+    this.extraDamageRoll.set(null);
     this.flatReduction.set(0);
     this.targetDefenses.set({});
     this.targetSaveRolls.set({});
@@ -420,7 +489,16 @@ export class DamageModalComponent {
          targetFinalDamage = 0;
        }
 
-       this.combat.updateToken(target.id, { hp: Math.max(0, target.hp - targetFinalDamage) });
+       // Calcular dano extra (tipo de dano separado, pode ter defesa diferente)
+       let extraDmg = this.extraDamageTotal();
+       if (tier === 'critical' && extraDmg > 0 && this.extraDamageRoll()) {
+         // Crítico dobra os dados extras também (PHB p.196)
+         extraDmg = (this.extraDamageRoll()! * 2) + this.parsedExtraDamage().modifier;
+         extraDmg = Math.max(0, extraDmg);
+       }
+
+       const totalHpLoss = targetFinalDamage + extraDmg;
+       this.combat.updateToken(target.id, { hp: Math.max(0, target.hp - totalHpLoss) });
        
        let reason = '';
        if (tier === 'critical') reason += ' [CRÍTICO]';
@@ -434,7 +512,7 @@ export class DamageModalComponent {
           if (finalDef === 'immune') reason += ' (Imune)';
        }
 
-       const log = `Dano contra ${target.name} = ${targetFinalDamage} recebido!${reason}`;
+       const log = `Dano contra ${target.name} = ${targetFinalDamage}${extraDmg > 0 ? ' + ' + extraDmg + ' (' + (s.ability.extraDamageType || 'extra') + ')' : ''} recebido!${reason}`;
        this.combat.addNotification(log, 'info');
     });
 
@@ -490,4 +568,37 @@ export class DamageModalComponent {
 
     return { diceCount, diceType, modifier };
   }
+
+  /** Verifica se a habilidade tem dano extra */
+  hasExtraDamage = computed(() => {
+    return !!this.state()?.ability?.extraDamage;
+  });
+
+  /** Parse do dano extra */
+  parsedExtraDamage = computed(() => {
+    const s = this.state();
+    if (!s || !s.ability.extraDamage) return { diceCount: 0, diceType: '', modifier: 0 };
+    return this.parseDamageString(s.ability.extraDamage);
+  });
+
+  /** Nome traduzido do tipo de dano extra */
+  getExtraDamageTypeName(): string {
+    const type = this.state()?.ability?.extraDamageType || '';
+    const names: Record<string, string> = {
+      'fire': 'Fogo', 'cold': 'Frio', 'lightning': 'Elétrico', 'acid': 'Ácido',
+      'poison': 'Veneno', 'thunder': 'Trovejante', 'necrotic': 'Necrótico',
+      'radiant': 'Radiante', 'force': 'Força', 'psychic': 'Psíquico',
+      'bludgeoning': 'Pancada', 'piercing': 'Perfurante', 'slashing': 'Cortante'
+    };
+    return names[type] || type || 'Extra';
+  }
+
+  /** Total do dano extra calculado */
+  extraDamageTotal = computed(() => {
+    const parsed = this.parsedExtraDamage();
+    const roll = this.extraDamageRoll();
+    if (!parsed.diceType && parsed.modifier > 0) return parsed.modifier;
+    if (roll === null) return 0;
+    return Math.max(0, roll + parsed.modifier);
+  });
 }

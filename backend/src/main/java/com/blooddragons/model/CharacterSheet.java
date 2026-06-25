@@ -97,6 +97,13 @@ public class CharacterSheet {
     private Integer rations;
     private Integer water;
 
+    /** Resistências a tipos de dano (PHB p.197) — dano reduzido à metade */
+    private List<String> damageResistances;
+    /** Imunidades a tipos de dano — dano = 0 */
+    private List<String> damageImmunities;
+    /** Vulnerabilidades a tipos de dano — dano dobrado */
+    private List<String> damageVulnerabilities;
+
     // Death saves
     private int deathSaveSuccesses;
     private int deathSaveFailures;

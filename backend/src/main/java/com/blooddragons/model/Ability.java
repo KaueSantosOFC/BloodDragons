@@ -36,10 +36,21 @@ public class Ability {
     private String damage;
     private String damageType;
 
+    /** Dano secundário/extra (ex: "1d6" de dano elétrico na Katana Infundida) */
+    private String extraDamage;
+    /** Tipo do dano extra (ex: "lightning") */
+    private String extraDamageType;
+    
+    /** Efeito secundário condicional (ex: "Se o alvo se mover, toma 1d8 trovejante") */
+    private String secondaryEffect;
+
     /** Dados de cura, ex: "2d4+2" */
     private String healing;
 
     private String description;
+
+    /** Para habilidades com recarga (ex: "5-6" = Recarga em 5-6 no d6) */
+    private String rechargeOn;
 
     /** Condição aplicada no acerto */
     private ApplyCondition applyCondition;

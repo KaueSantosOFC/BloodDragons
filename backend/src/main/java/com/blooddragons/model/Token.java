@@ -45,4 +45,7 @@ public class Token {
 
     private CharacterSheet sheet;
     private Integer initiative;
+
+    /** XP concedido aos jogadores ao derrotar este token (baseado no ND do monstro, DMG p.280) */
+    private Integer xpReward;
 }

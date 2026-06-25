@@ -8,7 +8,65 @@ import { TokenCondition } from '../models/token';
 import { CampaignService } from './campaign.service';
 import { Scene } from '../models/campaign';
 
+/** Estado do turno atual no combate (PHB p.189) */
+export interface TurnState {
+  /** Células de movimento já usadas */
+  movementUsed: number;
+  /** Ação principal já foi usada? */
+  actionUsed: boolean;
+  /** Ação bônus já foi usada? */
+  bonusActionUsed: boolean;
+  /** Reação já foi usada nesta rodada? */
+  reactionUsed: boolean;
+  /** Ação de Disparada ativa (dobra deslocamento)? */
+  dashActive: boolean;
+}
+
+const DEFAULT_TURN_STATE: TurnState = {
+  movementUsed: 0,
+  actionUsed: false,
+  bonusActionUsed: false,
+  reactionUsed: false,
+  dashActive: false
+};
+
+/**
+ * Efeitos mecânicos de cada condição para tooltip (PHB Apêndice A).
+ */
+export const CONDITION_EFFECTS: Record<string, string> = {
+  // Condições
+  'blinded': 'Desvantagem nos próprios ataques. Vantagem em ataques contra. Falha auto. em testes de visão.',
+  'charmed': 'Não pode atacar quem enfeitiçou. Enfeitiçador tem vantagem em testes sociais.',
+  'deafened': 'Falha automática em testes que requerem audição.',
+  'frightened': 'Desvantagem em ataques e testes de habilidade. Não pode se aproximar da fonte do medo.',
+  'grappled': 'Deslocamento = 0. Encerra se o agarrador ficar incapacitado.',
+  'incapacitated': 'Não pode realizar ações ou reações.',
+  'invisible': 'Vantagem nos próprios ataques. Desvantagem em ataques contra.',
+  'paralyzed': 'Incapacitado. Falha auto. em saves de FOR/DES. Vantagem em ataques contra. Corpo-a-corpo que acerta = Crítico.',
+  'petrified': 'Incapacitado. Resistência a TODOS os danos. Imune a veneno/doença. Falha auto. FOR/DES.',
+  'prone': 'Desvantagem nos ataques. Corpo-a-corpo contra: vantagem. Distância contra: desvantagem. Levantar = ½ deslocamento.',
+  'restrained': 'Deslocamento = 0. Desvantagem nos ataques e saves de DES. Vantagem em ataques contra.',
+  'stunned': 'Incapacitado. Deslocamento = 0. Falha auto. FOR/DES. Vantagem em ataques contra.',
+  'unconscious': 'Incapacitado. Caído. Deslocamento = 0. Falha auto. FOR/DES. Vantagem contra. Corpo-a-corpo = Crítico.',
+  'exhaustion': 'Nv1: Desv. testes. Nv2: Veloc. ½. Nv3: Desv. ataques/saves. Nv4: PV máx. ½. Nv5: Veloc. 0. Nv6: MORTE.',
+  // Tipos de dano (não são condições mecânicas, mas mostrar contexto)
+  'fire': 'Dano de Fogo. Pode incendiar objetos inflamáveis.',
+  'cold': 'Dano de Frio. Pode congelar superfícies.',
+  'lightning': 'Dano de Relâmpago/Elétrico.',
+  'acid': 'Dano de Ácido. Pode corroer objetos.',
+  'poison': 'Dano de Veneno. Muitas criaturas têm resistência.',
+  'thunder': 'Dano Trovejante (sônico). Pode ser ouvido a grande distância.',
+  'necrotic': 'Dano Necrótico. Pode reduzir PV máximo.',
+  'radiant': 'Dano Radiante (divino/luz).',
+  'force': 'Dano de Força. Tipo mais raro e sem resistências comuns.',
+  'psychic': 'Dano Psíquico. Afeta a mente. Pode causar loucura (DMG p.258).',
+  'bludgeoning': 'Dano de Pancada/Contusão (físico).',
+  'piercing': 'Dano Perfurante (físico).',
+  'slashing': 'Dano Cortante (físico).'
+};
+
 export const AVAILABLE_CONDITIONS: TokenCondition[] = [
+  // Tipos de Dano Elemental/Mágico
   { id: 'fire', name: 'Fogo', icon: 'local_fire_department', color: '#ef4444' },
   { id: 'cold', name: 'Frio', icon: 'ac_unit', color: '#3b82f6' },
   { id: 'lightning', name: 'Elétrico', icon: 'bolt', color: '#eab308' },
@@ -19,7 +77,12 @@ export const AVAILABLE_CONDITIONS: TokenCondition[] = [
   { id: 'radiant', name: 'Radiante', icon: 'wb_sunny', color: '#fbbf24' },
   { id: 'force', name: 'Força', icon: 'flare', color: '#a855f7' },
   { id: 'psychic', name: 'Psíquico', icon: 'psychology', color: '#ec4899' },
+  // Tipos de Dano Físico (PHB p.196)
+  { id: 'bludgeoning', name: 'Pancada', icon: 'fitness_center', color: '#a1887f' },
+  { id: 'piercing', name: 'Perfurante', icon: 'push_pin', color: '#78909c' },
+  { id: 'slashing', name: 'Cortante', icon: 'content_cut', color: '#b0bec5' },
   
+  // Condições (PHB Apêndice A)
   { id: 'blinded', name: 'Cego', icon: 'visibility_off', color: '#737373' },
   { id: 'charmed', name: 'Enfeitiçado', icon: 'favorite', color: '#ec4899' },
   { id: 'deafened', name: 'Surdo', icon: 'hearing_disabled', color: '#737373' },
@@ -64,6 +127,19 @@ const XP_TABLE: Record<number, { xp: number, pb: number }> = {
   18: { xp: 265000, pb: 6 },
   19: { xp: 305000, pb: 6 },
   20: { xp: 355000, pb: 6 },
+};
+
+// Tabela de XP por Nível de Desafio (ND) — DMG p.280
+export const XP_BY_CR: Record<string, number> = {
+  '0': 10, '1/8': 25, '1/4': 50, '1/2': 100,
+  '1': 200, '2': 450, '3': 700, '4': 1100,
+  '5': 1800, '6': 2300, '7': 2900, '8': 3900,
+  '9': 5000, '10': 5900, '11': 7200, '12': 8400,
+  '13': 10000, '14': 11500, '15': 13000, '16': 15000,
+  '17': 18000, '18': 20000, '19': 22000, '20': 25000,
+  '21': 33000, '22': 41000, '23': 50000, '24': 62000,
+  '25': 75000, '26': 90000, '27': 105000, '28': 120000,
+  '29': 135000, '30': 155000
 };
 
 @Injectable({ providedIn: 'root' })
@@ -176,6 +252,7 @@ export class CombatService {
   combatActive = signal<boolean>(false);
   activeTurnIndex = signal<number>(0);
   round = signal<number>(1);
+  turnState = signal<TurnState>({...DEFAULT_TURN_STATE});
   
   initiativeOrder = computed(() => {
     // Return tokens that are part of the initiative order, sorted descending
@@ -189,34 +266,158 @@ export class CombatService {
     if (list.length === 0 || idx < 0 || idx >= list.length) return null;
     return list[idx].id;
   });
+
+  /** Deslocamento total em células do token ativo (speed / 1.5m por célula) */
+  activeTokenMaxMovement = computed(() => {
+    const tokenId = this.activeTokenId();
+    if (!tokenId) return 0;
+    const token = this.tokens().find(t => t.id === tokenId);
+    if (!token || !token.sheet) return 6; // padrão 9m = 6 células
+    const speedMeters = token.sheet.speed || 9;
+    let cells = Math.floor(speedMeters / 1.5);
+    // Exaustão nível 2: deslocamento à metade
+    if (token.sheet.exhaustion && token.sheet.exhaustion >= 2) {
+      cells = Math.floor(cells / 2);
+    }
+    // Exaustão nível 5: deslocamento = 0
+    if (token.sheet.exhaustion && token.sheet.exhaustion >= 5) {
+      cells = 0;
+    }
+    // Condições que bloqueiam movimento
+    const blockConditions = ['grappled', 'restrained', 'stunned', 'paralyzed', 'petrified', 'unconscious'];
+    if (token.conditions?.some(c => blockConditions.includes(c.id))) {
+      cells = 0;
+    }
+    // Disparada dobra deslocamento
+    if (this.turnState().dashActive) {
+      cells *= 2;
+    }
+    return cells;
+  });
+
+  /** Movimento restante em células */
+  remainingMovement = computed(() => {
+    return Math.max(0, this.activeTokenMaxMovement() - this.turnState().movementUsed);
+  });
   
   startCombat() {
     this.combatActive.set(true);
     this.activeTurnIndex.set(0);
     this.round.set(1);
+    this.turnState.set({...DEFAULT_TURN_STATE});
+  }
+  
+  /**
+   * Rola iniciativa automática para TODOS os tokens no mapa e inicia o combate.
+   * Regra D&D 5e PHB: Iniciativa = 1d20 + mod. Destreza. Ordem decrescente.
+   */
+  rollAllInitiativesAndStartCombat() {
+    const combatTokens = this.tokens().filter(t => t.type !== 'item' && t.hp > 0);
+    if (combatTokens.length === 0) {
+      this.addNotification('Nenhum combatente válido no mapa.', 'error');
+      return;
+    }
+    
+    const rollResults: { name: string, roll: number, dexMod: number, total: number }[] = [];
+    
+    const updatedTokens = this.tokens().map(t => {
+      if (t.type === 'item' || t.hp <= 0) return t;
+      
+      // Calcular mod de Destreza (PHB: floor((valor - 10) / 2))
+      const dexScore = t.sheet?.dex || 10;
+      const dexMod = this.engine.calculateModifier(dexScore);
+      
+      // Rolar 1d20 + mod. Destreza
+      const d20 = Math.floor(Math.random() * 20) + 1;
+      const initiativeTotal = d20 + dexMod;
+      
+      rollResults.push({ name: t.name, roll: d20, dexMod, total: initiativeTotal });
+      
+      return { ...t, initiative: initiativeTotal };
+    });
+    
+    this.tokens.set(updatedTokens);
+    
+    // Ordenar resultados para notificação
+    rollResults.sort((a, b) => b.total - a.total);
+    
+    this.addNotification(`⚔️ Batalha iniciada! Ordem de Iniciativa:\n${rollResults.map((r, i) => `${i + 1}° ${r.name} (${r.total})`).join(', ')}`, 'info');
+    
+    this.startCombat();
+    // Auto-pula tokens mortos no início
+    this.skipDeadTokens();
+    this.saveToCampaign();
   }
   
   endCombat() {
     this.combatActive.set(false);
     this.activeTurnIndex.set(0);
     this.round.set(1);
+    this.turnState.set({...DEFAULT_TURN_STATE});
     // Clear initiatives
     const updatedTokens = this.tokens().map(t => ({...t, initiative: undefined}));
     this.tokens.set(updatedTokens);
+    this.saveToCampaign();
   }
   
   setTokenInitiative(tokenId: string, value: number) {
     this.updateToken(tokenId, { initiative: value });
   }
-  
+
+  /** Pula automaticamente tokens mortos (hp <= 0) na ordem de iniciativa */
+  private skipDeadTokens() {
+    const list = this.initiativeOrder();
+    if (list.length === 0) return;
+    
+    let idx = this.activeTurnIndex();
+    let loopCount = 0;
+    // Tenta no máximo list.length vezes para evitar loop infinito
+    while (list[idx]?.hp <= 0 && loopCount < list.length) {
+      idx = (idx + 1) % list.length;
+      if (idx === 0) {
+        this.round.update(r => r + 1);
+      }
+      loopCount++;
+    }
+    
+    // Se todos estão mortos, encerrar combate
+    if (loopCount >= list.length) {
+      this.addNotification('Todos os combatentes foram derrotados. Combate encerrado.', 'info');
+      this.endCombat();
+      return;
+    }
+    
+    this.activeTurnIndex.set(idx);
+  }
+
+  /**
+   * Finaliza o turno atual e avança para o próximo combatente vivo.
+   * Regra D&D 5e: Ao final do turno, o jogador pode escolher encerrar.
+   */
   nextTurn() {
     const currentList = this.initiativeOrder();
     if (currentList.length === 0) return;
+    
+    // Notifica quem terminou o turno
+    const currentToken = currentList[this.activeTurnIndex()];
+    if (currentToken) {
+      this.addNotification(`${currentToken.name} finalizou o turno.`, 'info');
+    }
+    
+    // Avança o índice
     const newIdx = (this.activeTurnIndex() + 1) % currentList.length;
     if (newIdx === 0) {
       this.round.update(r => r + 1);
     }
     this.activeTurnIndex.set(newIdx);
+    
+    // Reset turn state para o novo turno
+    this.turnState.set({...DEFAULT_TURN_STATE});
+    
+    // Auto-pula tokens mortos
+    this.skipDeadTokens();
+    
+    this.saveToCampaign();
   }
   
   previousTurn() {
@@ -228,6 +429,39 @@ export class CombatService {
       this.round.update(r => Math.max(1, r - 1));
     }
     this.activeTurnIndex.set(newIdx);
+    this.turnState.set({...DEFAULT_TURN_STATE});
+    this.skipDeadTokens();
+  }
+
+  /** Consome a ação principal do turno */
+  consumeAction() {
+    this.turnState.update(s => ({...s, actionUsed: true}));
+  }
+
+  /** Consome a ação bônus do turno */
+  consumeBonusAction() {
+    this.turnState.update(s => ({...s, bonusActionUsed: true}));
+  }
+
+  /** Consome a reação */
+  consumeReaction() {
+    this.turnState.update(s => ({...s, reactionUsed: true}));
+  }
+
+  /** Registra movimento gasto (em células) */
+  consumeMovement(cells: number) {
+    this.turnState.update(s => ({...s, movementUsed: s.movementUsed + cells}));
+  }
+
+  /** Ativa ação de Disparada (dobra deslocamento, consome ação) */
+  useDash() {
+    this.turnState.update(s => ({...s, dashActive: true, actionUsed: true}));
+    this.addNotification('Disparada! Deslocamento dobrado neste turno.', 'info');
+  }
+
+  /** Reseta o estado do turno (usado internamente) */
+  resetTurnState() {
+    this.turnState.set({...DEFAULT_TURN_STATE});
   }
 
   // --- End Combat Tracker State ---
@@ -291,14 +525,58 @@ export class CombatService {
               ]
             },
             { 
-              id: 't3', name: 'Chefe Goblin', x: 8, y: 3, hp: 15, maxHp: 25, spellUses: 0, maxSpellUses: 0, conditions: [{ id: 'poison', name: 'Veneno', icon: 'science', color: '#84cc16' }], controlledBy: 'user_gm_1', color: '#22c55e', imageUrl: 'https://picsum.photos/seed/goblin/128/128', type: 'boss',
-              sheet: { class: 'Chefe', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 200, hitDie: 8, str: 14, dex: 14, con: 14, int: 10, wis: 10, cha: 10, ac: 15, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 10, hp: 15, maxHp: 25, spellUses: 0, maxSpellUses: 0 },
+              id: 't3', name: 'Chefe Goblin', x: 8, y: 3, hp: 15, maxHp: 25, spellUses: 0, maxSpellUses: 0, conditions: [{ id: 'poison', name: 'Veneno', icon: 'science', color: '#84cc16' }], controlledBy: 'user_gm_1', color: '#22c55e', imageUrl: 'https://picsum.photos/seed/goblin/128/128', type: 'boss', xpReward: 200,
+              sheet: { class: 'Chefe', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 0, hitDie: 8, str: 14, dex: 14, con: 14, int: 10, wis: 10, cha: 10, ac: 15, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 10, hp: 15, maxHp: 25, spellUses: 0, maxSpellUses: 0 },
               abilities: [
                 { id: 'a4', name: 'Fenda Goblin', type: 'action', category: 'weapon', properties: ['melee'], range: 1.5, areaShape: 'circle', radius: 1.5, damage: '2d6+2', damageType: 'slashing', description: 'Um ataque giratório selvagem atingindo todos por perto.' }
               ]
             },
-            { id: 't4', name: 'Lacaio Goblin', x: 9, y: 4, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [{ id: 'a5', name: 'Cimitarra', type: 'action', category: 'weapon', properties: ['finesse', 'melee'], range: 1.5, damage: '1d6+2', damageType: 'slashing', description: 'Ataque corpo-a-corpo.' }], sheet: { class: 'Lacaio', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 50, hitDie: 6, str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0 } },
-            { id: 't5', name: 'Lacaio Goblin', x: 7, y: 4, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', abilities: [{ id: 'a6', name: 'Cimitarra', type: 'action', category: 'weapon', properties: ['finesse', 'melee'], range: 1.5, damage: '1d6+2', damageType: 'slashing', description: 'Ataque corpo-a-corpo.' }], sheet: { class: 'Lacaio', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 50, hitDie: 6, str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0 } },
+            { id: 't4', name: 'Lacaio Goblin', x: 9, y: 4, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', xpReward: 50, abilities: [{ id: 'a5', name: 'Cimitarra', type: 'action', category: 'weapon', properties: ['finesse', 'melee'], range: 1.5, damage: '1d6+2', damageType: 'slashing', description: 'Ataque corpo-a-corpo.' }], sheet: { class: 'Lacaio', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 0, hitDie: 6, str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0 } },
+            { id: 't5', name: 'Lacaio Goblin', x: 7, y: 4, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0, conditions: [], controlledBy: 'user_gm_1', color: '#22c55e', type: 'enemy', xpReward: 50, abilities: [{ id: 'a6', name: 'Cimitarra', type: 'action', category: 'weapon', properties: ['finesse', 'melee'], range: 1.5, damage: '1d6+2', damageType: 'slashing', description: 'Ataque corpo-a-corpo.' }], sheet: { class: 'Lacaio', level: 1, background: 'Monstro', playerName: 'Mestre', race: 'Goblin', alignment: 'Neutro e Mau', xp: 0, hitDie: 6, str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8, ac: 13, initiative: 2, speed: 9, proficiencyBonus: 2, passivePerception: 9, hp: 7, maxHp: 7, spellUses: 0, maxSpellUses: 0 } },
+            {
+              id: 't6', name: 'Samurai da Tempestade', x: 3, y: 3, hp: 45, maxHp: 45, spellUses: 0, maxSpellUses: 0,
+              conditions: [], controlledBy: 'user_gm_1', color: '#7c3aed', type: 'npc', xpReward: 450,
+              sheet: {
+                class: 'Samurai', level: 4, background: 'Soldado', playerName: 'Mestre', race: 'Humano',
+                alignment: 'Leal e Bom', xp: 0, hitDie: 8, str: 16, dex: 12, con: 14, int: 10, wis: 14, cha: 12,
+                ac: 16, initiative: 1, speed: 9, proficiencyBonus: 2, passivePerception: 14,
+                hp: 45, maxHp: 45, spellUses: 0, maxSpellUses: 0,
+                skillProficiencies: ['athletics', 'perception', 'persuasion'],
+                damageResistances: ['lightning']
+              },
+              abilities: [
+                {
+                  id: 'sam1', name: 'Katana Infundida', type: 'action', category: 'weapon',
+                  properties: ['melee'], range: 1.5, attackBonus: 5,
+                  damage: '1d8+3', damageType: 'slashing',
+                  extraDamage: '1d6', extraDamageType: 'lightning',
+                  description: 'Ataque corpo a corpo com uma katana de energia pura elétrica.'
+                },
+                {
+                  id: 'sam2', name: 'Lâmina Estrondosa', type: 'action', category: 'weapon',
+                  properties: ['melee'], range: 1.5, attackBonus: 5,
+                  damage: '1d8+3', damageType: 'slashing',
+                  extraDamage: '1d6', extraDamageType: 'lightning',
+                  secondaryEffect: 'Se o alvo se mover voluntariamente antes do próximo turno do Samurai, toma 1d8 de dano trovejante adicional.',
+                  description: 'Ataque com a Katana que deixa uma descarga residual no alvo.'
+                },
+                {
+                  id: 'sam3', name: 'Espírito de Luta', type: 'bonus_action', category: 'feature',
+                  range: 0, uses: 3, maxUses: 3,
+                  description: 'Ganha 5 PV Temporários e Vantagem em todos os ataques corpo a corpo até o final do turno.'
+                },
+                {
+                  id: 'sam4', name: 'Surto de Ação', type: 'action', category: 'feature',
+                  range: 0, uses: 1, maxUses: 1,
+                  description: 'Ganha uma Ação extra neste turno. Ideal para combar com Espírito de Luta.'
+                },
+                {
+                  id: 'sam5', name: 'Pulo da Tempestade', type: 'reaction', category: 'feature',
+                  range: 3, rechargeOn: '5-6',
+                  description: 'Quando um inimigo erra um ataque corpo a corpo, teletransporta-se até 3m em um clarão de raios púrpuras, sem provocar ataques de oportunidade.'
+                }
+              ]
+            },
           ]);
         } else {
           this.tokens.set(campaign.tokens || []);
@@ -409,9 +687,10 @@ export class CombatService {
         if ('maxSpellUses' in updates) updatedToken.sheet.maxSpellUses = updates.maxSpellUses!;
       }
 
-      // Check for token death to distribute XP (any non-player with XP)
+      // Check for token death to distribute XP (any non-player)
+      // Prioridade: xpReward (definido pelo GM via ND) > sheet.xp como fallback
       if (t.type !== 'player' && oldHp > 0 && updatedToken.hp <= 0) {
-        xpToDistribute = updatedToken.sheet?.xp || 0;
+        xpToDistribute = updatedToken.xpReward || updatedToken.sheet?.xp || 0;
         enemyName = updatedToken.name;
       }
       
@@ -463,6 +742,47 @@ export class CombatService {
           hp: result.sheet.hp,
           maxHp: result.sheet.maxHp
         };
+      }
+      return t;
+    }));
+    this.saveToCampaign();
+  }
+
+  /**
+   * Retorna o XP necessário para o próximo nível de um personagem.
+   */
+  getXpForNextLevel(currentLevel: number): number {
+    if (currentLevel >= 20) return XP_TABLE[20].xp;
+    return XP_TABLE[currentLevel + 1]?.xp || 0;
+  }
+
+  /**
+   * Calcula a porcentagem de progresso de XP para o próximo nível.
+   */
+  getXpProgress(currentXp: number, currentLevel: number): number {
+    if (currentLevel >= 20) return 100;
+    const currentThreshold = XP_TABLE[currentLevel]?.xp || 0;
+    const nextThreshold = XP_TABLE[currentLevel + 1]?.xp || 1;
+    const progress = ((currentXp - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
+    return Math.min(100, Math.max(0, progress));
+  }
+
+  /**
+   * Concede XP manual a todos os jogadores vivos (para uso do GM).
+   */
+  grantXPToParty(amount: number, reason: string) {
+    const allPlayers = this.tokens().filter(t => t.type === 'player' && t.hp > 0);
+    if (allPlayers.length === 0) return;
+    const xpPerPlayer = Math.floor(amount / allPlayers.length);
+    
+    this.addNotification(`${reason}: ${amount} XP dividido entre ${allPlayers.length} jogadores (${xpPerPlayer} XP cada).`, 'xp');
+    
+    this.tokens.update(ts => ts.map(t => {
+      if (t.type === 'player' && t.hp > 0 && t.sheet) {
+        const newXp = t.sheet.xp + xpPerPlayer;
+        const updatedSheet = { ...t.sheet, xp: newXp };
+        const result = this.checkLevelUp(updatedSheet, t.name);
+        return { ...t, sheet: result.sheet, hp: result.sheet.hp, maxHp: result.sheet.maxHp };
       }
       return t;
     }));

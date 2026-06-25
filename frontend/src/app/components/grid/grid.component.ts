@@ -195,13 +195,16 @@ import { Ability } from '../../models/ability';
                      [class.!border-white]="selectedTokenId() === token.id && !isAffected(token)"
                      [class.shadow-[0_0_15px_rgba(255,255,255,0.8)]]="selectedTokenId() === token.id && !isAffected(token)"
                      [class.shadow-[0_0_15px_rgba(239,68,68,0.8)]]="isAffected(token)"
+                     [style.left.px]="token.x * gridSize + (gridSize - getTokenSize(token)) / 2"
+                     [style.top.px]="token.y * gridSize + (gridSize - getTokenSize(token)) / 2"
                      [style.backgroundColor]="token.color"
                      [style.width.px]="getTokenSize(token)"
                      [style.height.px]="getTokenSize(token)"
-                     [cdkDragFreeDragPosition]="{x: token.x * gridSize + (gridSize - getTokenSize(token)) / 2, y: token.y * gridSize + (gridSize - getTokenSize(token)) / 2}"
+                     [cdkDragFreeDragPosition]="{ x: 0, y: 0 }"
                      cdkDrag
                      [cdkDragScale]="combat.zoom()"
                      [cdkDragDisabled]="!canMove(token)"
+                     (cdkDragStarted)="onDragStarted($event, token)"
                      (cdkDragMoved)="onDragMoved($event, token)"
                      (cdkDragEnded)="onDragEnded($event, token)"
                      (click)="onTokenClick(token, $event)"
@@ -339,6 +342,8 @@ export class GridComponent {
 
   // State
   tokens = this.combat.tokens;
+  
+
   mapWidth = this.combat.mapWidth;
   mapHeight = this.combat.mapHeight;
   
@@ -844,18 +849,24 @@ export class GridComponent {
         const targetGridY = Math.floor(clickY / gridSize);
 
         // High precision check:
-        // First check visual bounds of any token.
-        // Fallback to grid coordinates.
-        const targetToken = this.tokens().find(t => {
-          if (t.id === originToken?.id || t.type === 'item') return false;
-          const tx = t.x * gridSize;
-          const ty = t.y * gridSize;
-          const tsize = this.getTokenSize(t);
-          return clickX >= tx && clickX <= tx + tsize &&
-                 clickY >= ty && clickY <= ty + tsize;
-        }) || this.tokens().find(t => {
-          return Math.floor(t.x) === targetGridX && Math.floor(t.y) === targetGridY && t.id !== originToken?.id && t.type !== 'item';
-        });
+        // Enhanced: Calculate Euclidean distance from click to token center, allowing a tolerance of 0.6 grid units (e.g. clicked slightly next to it or border)
+        const targetToken = this.tokens()
+          .filter(t => t.id !== originToken?.id && t.type !== 'item')
+          .map(t => {
+            const tx = t.x * gridSize;
+            const ty = t.y * gridSize;
+            const tsize = this.getTokenSize(t);
+            const centerX = tx + tsize / 2;
+            const centerY = ty + tsize / 2;
+            const dx = clickX - centerX;
+            const dy = clickY - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            // Raio do token + margem de tolerância de 0.6 unidades do grid
+            const maxAllowedDistance = (tsize / 2) + (gridSize * 0.6);
+            return { token: t, distance, maxAllowedDistance };
+          })
+          .filter(item => item.distance <= item.maxAllowedDistance)
+          .sort((a, b) => a.distance - b.distance)[0]?.token;
 
         if (!targetToken) {
            this.combat.addNotification(`Nenhum alvo válido nessa coordenada para um ataque direto.`, 'error');
@@ -880,6 +891,15 @@ export class GridComponent {
         }
 
         this.combat.cancelPreview();
+        
+        // Consumir ação do turno para ataques diretos
+        if (this.combat.combatActive() && originToken.id === this.combat.activeTokenId()) {
+          if (ability.type === 'bonus_action') {
+            this.combat.consumeBonusAction();
+          } else {
+            this.combat.consumeAction();
+          }
+        }
         return;
       }
 
@@ -922,6 +942,15 @@ export class GridComponent {
       }
       
       this.combat.cancelPreview();
+      
+      // Consumir ação do turno (PHB p.192: Atacar/Conjurar = Ação)
+      if (this.combat.combatActive() && originToken.id === this.combat.activeTokenId()) {
+        if (ability.type === 'bonus_action') {
+          this.combat.consumeBonusAction();
+        } else {
+          this.combat.consumeAction();
+        }
+      }
     } else {
       // If clicking on empty grid, deselect token
       this.combat.selectToken('');
@@ -948,10 +977,91 @@ export class GridComponent {
       return;
     }
 
-    if (this.combat.previewAbility()) {
-      // If in preview mode, let the grid handle the click
-      return;
+    const ability = this.combat.previewAbility();
+    const originPos = this.combat.previewOrigin();
+    if (ability && originPos) {
+      // Se for habilidade direta (sem área), o token clicado é o alvo direto
+      if (!ability.areaShape || ability.areaShape === 'none') {
+        let originToken: Token | undefined;
+        if (originPos.id) {
+           originToken = this.tokens().find(t => t.id === originPos.id);
+        } else {
+           originToken = this.tokens().find(t => t.x === originPos.x && t.y === originPos.y);
+        }
+
+        if (originToken) {
+          // Validar alvo
+          if (token.id === originToken.id || token.type === 'item') {
+            event.stopPropagation();
+            return;
+          }
+
+          // Validar usos
+          if (ability.category === 'spell' && originToken.spellUses !== undefined && originToken.spellUses <= 0) {
+            this.combat.addNotification(`${originToken.name} não possui mais usos de magia para usar ${ability.name}!`, 'error');
+            this.combat.cancelPreview();
+            event.stopPropagation();
+            return;
+          }
+
+          if (ability.maxUses && (ability.uses === undefined || ability.uses <= 0)) {
+            this.combat.addNotification(`${originToken.name} não possui mais usos de ${ability.name}!`, 'error');
+            this.combat.cancelPreview();
+            event.stopPropagation();
+            return;
+          }
+
+          // Deduzir usos
+          if (ability.category === 'spell' && originToken.spellUses !== undefined && originToken.spellUses > 0) {
+            this.combat.updateToken(originToken.id, { spellUses: originToken.spellUses - 1 });
+          }
+
+          if (ability.maxUses && ability.uses !== undefined && ability.uses > 0) {
+            const updatedAbilities = originToken.abilities?.map(a => 
+              a.id === ability.id ? { ...a, uses: a.uses! - 1 } : a
+            );
+            if (updatedAbilities) {
+              this.combat.updateToken(originToken.id, { abilities: updatedAbilities });
+            }
+          }
+
+          // Executar ação/ataque/cura
+          const isSave = !!ability.saveAttribute;
+          const isAttack = !isSave && (ability.category === 'weapon' || ability.attackBonus !== undefined || ability.damage);
+
+          if (isSave) {
+             const spellcastingAttr = originToken.sheet?.spellcastingAbility || 'int';
+             const attrScore = (originToken.sheet as any)?.[spellcastingAttr] || 10;
+             const dc = 8 + (originToken.sheet?.proficiencyBonus || 2) + this.mathService.calculateModifier(attrScore);
+             this.combat.openDamageModal(originToken, [token], ability, {}, dc);
+          } else if (isAttack) {
+             this.combat.openAttackModal(originToken, [token], ability);
+          } else if (ability.healing) {
+             const result = this.combat.resolveHealing(token, ability);
+             this.combat.addNotification(result.log, 'info');
+          }
+
+          this.combat.cancelPreview();
+          
+          // Consumir ação do turno
+          if (this.combat.combatActive() && originToken.id === this.combat.activeTokenId()) {
+            if (ability.type === 'bonus_action') {
+              this.combat.consumeBonusAction();
+            } else {
+              this.combat.consumeAction();
+            }
+          }
+          event.stopPropagation();
+          return;
+        }
+      } else {
+        // Se for habilidade de área, repassa o clique para o grid resolver a coordenada
+        this.onClick(event);
+        event.stopPropagation();
+        return;
+      }
     }
+
     event.stopPropagation();
     this.combat.selectToken(token.id);
   }
@@ -967,15 +1077,29 @@ export class GridComponent {
     this.combat.rightPanelTab.set('sheet');
   }
 
+  onDragStarted(event: any, token: Token) {
+    if (!this.canMove(token)) return;
+    const size = this.getTokenSize(token);
+    
+    const startPx = token.x * this.gridSize + (this.gridSize - size) / 2;
+    const startPy = token.y * this.gridSize + (this.gridSize - size) / 2;
+    
+    const px = startPx + size / 2;
+    const py = startPy + size / 2;
+    this.combat.draggedTokenPos.set({ id: token.id, px, py });
+  }
+
   onDragMoved(event: CdkDragMove, token: Token) {
     if (!this.canMove(token)) return;
     
-    const position = event.source.getFreeDragPosition();
+    const delta = event.source.getFreeDragPosition();
     const size = this.getTokenSize(token);
     
-    // The center of the token in pixels
-    const px = position.x + size / 2;
-    const py = position.y + size / 2;
+    const startPx = token.x * this.gridSize + (this.gridSize - size) / 2;
+    const startPy = token.y * this.gridSize + (this.gridSize - size) / 2;
+    
+    const px = startPx + delta.x + size / 2;
+    const py = startPy + delta.y + size / 2;
     
     this.combat.draggedTokenPos.set({ id: token.id, px, py });
   }
@@ -984,40 +1108,25 @@ export class GridComponent {
     this.combat.draggedTokenPos.set(null);
     
     const size = this.getTokenSize(token);
+    const delta = event.source.getFreeDragPosition();
     
-    // Prevent non-GM from moving tokens they do not own
-    if (!this.canMove(token)) {
-      const snappedX = token.x * this.gridSize + (this.gridSize - size) / 2;
-      const snappedY = token.y * this.gridSize + (this.gridSize - size) / 2;
-      event.source.setFreeDragPosition({ x: snappedX, y: snappedY });
-      return;
-    }
+    // Reseta o deslocamento temporário do CDK Drag para (0, 0)
+    event.source.setFreeDragPosition({ x: 0, y: 0 });
+    
+    if (!this.canMove(token)) return;
 
-    let centerX: number;
-    let centerY: number;
+    const startPx = token.x * this.gridSize + (this.gridSize - size) / 2;
+    const startPy = token.y * this.gridSize + (this.gridSize - size) / 2;
     
-    if (this.boundary && event.dropPoint) {
-      const rect = this.boundary.nativeElement.getBoundingClientRect();
-      const dropLocalX = (event.dropPoint.x - rect.left) / this.combat.zoom();
-      const dropLocalY = (event.dropPoint.y - rect.top) / this.combat.zoom();
-      
-      centerX = dropLocalX;
-      centerY = dropLocalY;
-    } else {
-      const position = event.source.getFreeDragPosition();
-      centerX = position.x + size / 2;
-      centerY = position.y + size / 2;
-    }
+    const centerX = startPx + delta.x + size / 2;
+    const centerY = startPy + delta.y + size / 2;
     
     let newGridX = Math.floor(centerX / this.gridSize);
     let newGridY = Math.floor(centerY / this.gridSize);
     
     if (this.boundary) {
-      // Calculate max grid cells
       const maxGridX = Math.max(0, Math.floor(this.mapWidth() / this.gridSize) - 1);
       const maxGridY = Math.max(0, Math.floor(this.mapHeight() / this.gridSize) - 1);
-      
-      // Strict boundary clipping to prevent sticking outside
       newGridX = Math.max(0, Math.min(newGridX, maxGridX));
       newGridY = Math.max(0, Math.min(newGridY, maxGridY));
     } else {
@@ -1025,24 +1134,21 @@ export class GridComponent {
       newGridY = Math.max(0, newGridY);
     }
     
-    // Visually Snap:
-    // Update the state so every other system (SVG rays, etc) immediately points to correct grid coordinates.
     this.combat.updateToken(token.id, { x: newGridX, y: newGridY });
     
-    const targetPx = newGridX * this.gridSize + (this.gridSize - size) / 2;
-    const targetPy = newGridY * this.gridSize + (this.gridSize - size) / 2;
-    
-    // Force the CDK Drag to reflect the exact new Snapped position, without breaking the state or dragging.
-    event.source.setFreeDragPosition({ x: targetPx, y: targetPy });
+    if (this.combat.combatActive() && token.id === this.combat.activeTokenId()) {
+      const cellsMoved = Math.abs(newGridX - token.x) + Math.abs(newGridY - token.y);
+      if (cellsMoved > 0) {
+        this.combat.consumeMovement(cellsMoved);
+      }
+    }
     
     this.syncToFirestore(token.id, newGridX, newGridY);
 
-    // Collision Detection for Loot
     if (token.type === 'player' || token.type === 'npc') {
       const collidedToken = this.combat.tokens().find(t => t.type === 'item' && t.x === newGridX && t.y === newGridY);
       
       if (collidedToken) {
-        // Encontra o item correspondente no array de itemTokens ou usa os dados do token como fallback
         const itemInfo = this.combat.itemTokens().find(i => i.id === collidedToken.id) || 
           { 
             id: collidedToken.id, 

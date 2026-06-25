@@ -58,48 +58,89 @@ import { Token } from '../../models/token';
 
         <!-- Combat / Round Tracker (If active) -->
         @if (combat.combatActive()) {
-          <div class="flex items-center gap-4 bg-red-950/20 border border-red-500/20 rounded-xl px-4 py-1.5 animate-pulse">
-            <mat-icon class="text-red-500 animate-spin" style="animation-duration: 3s;">gavel</mat-icon>
-            <div>
-              <div class="text-[9px] text-red-400 uppercase font-black tracking-widest leading-none">Combate Ativo</div>
-              <div class="text-xs text-stone-300 font-bold mt-1 font-mono leading-none">
-                Rodada {{ combat.round() }} • Turno de {{ activeTurnName() }}
+          <div class="flex items-center gap-3 bg-red-950/30 border border-red-500/30 rounded-xl px-4 py-2">
+            <mat-icon class="text-red-500" style="font-size:20px;">gavel</mat-icon>
+            <div class="flex flex-col">
+              <div class="text-[9px] text-red-400 uppercase font-black tracking-widest leading-none">
+                Rodada {{ combat.round() }}
+              </div>
+              <div class="text-xs text-stone-300 font-bold mt-0.5 font-mono leading-none">
+                {{ activeTurnName() }}
               </div>
             </div>
+
+            <!-- Mini Action Economy -->
+            <div class="flex items-center gap-1 ml-1">
+              <div class="w-2 h-2 rounded-full" 
+                   [class.bg-green-500]="!combat.turnState().actionUsed"
+                   [class.bg-stone-700]="combat.turnState().actionUsed"
+                   title="Ação"></div>
+              <div class="w-2 h-2 rounded-full" 
+                   [class.bg-amber-500]="!combat.turnState().bonusActionUsed"
+                   [class.bg-stone-700]="combat.turnState().bonusActionUsed"
+                   title="Ação Bônus"></div>
+              <div class="w-2 h-2 rounded-full" 
+                   [class.bg-purple-500]="!combat.turnState().reactionUsed"
+                   [class.bg-stone-700]="combat.turnState().reactionUsed"
+                   title="Reação"></div>
+            </div>
+            
+            <!-- Movement Indicator -->
+            <div class="text-[10px] font-mono text-blue-400 border border-blue-500/20 bg-blue-950/30 px-1.5 py-0.5 rounded" 
+                 [title]="'Movimento: ' + (combat.turnState().movementUsed * 1.5) + 'm / ' + (combat.activeTokenMaxMovement() * 1.5) + 'm'">
+              {{ combat.remainingMovement() * 1.5 }}m
+            </div>
+
             @if (isGM()) {
               <button 
                 (click)="combat.nextTurn()" 
-                class="px-2.5 py-1 bg-red-800/80 hover:bg-red-700 text-stone-200 font-semibold rounded text-[10px] transition-colors uppercase tracking-wider"
+                class="px-3 py-1.5 bg-red-700/80 hover:bg-red-600 text-white font-bold rounded text-[10px] transition-colors uppercase tracking-wider flex items-center gap-1 shadow-md"
               >
-                Próximo
+                <mat-icon style="font-size:12px;width:12px;height:12px;">skip_next</mat-icon>
+                Finalizar Turno
               </button>
             }
           </div>
         } @else {
-          <!-- Map / Slides Toggle Button -->
-          <div class="flex bg-stone-950 p-1 rounded-xl border border-stone-800 text-xs">
-            <button 
-              (click)="combat.showStorySlides.set(false)"
-              [class.bg-amber-600]="!combat.showStorySlides()"
-              [class.text-stone-950]="!combat.showStorySlides()"
-              [class.font-bold]="!combat.showStorySlides()"
-              [class.text-stone-400]="combat.showStorySlides()"
-              class="px-4 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5"
-            >
-              <mat-icon style="font-size:14px;width:14px;height:14px;">map</mat-icon>
-              Mapa
-            </button>
-            <button 
-              (click)="combat.showStorySlides.set(true)"
-              [class.bg-amber-600]="combat.showStorySlides()"
-              [class.text-stone-950]="combat.showStorySlides()"
-              [class.font-bold]="combat.showStorySlides()"
-              [class.text-stone-400]="!combat.showStorySlides()"
-              class="px-4 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5"
-            >
-              <mat-icon style="font-size:14px;width:14px;height:14px;">slideshow</mat-icon>
-              História
-            </button>
+          <!-- Center: Start Battle + Map/Slides Toggle -->
+          <div class="flex items-center gap-3">
+            <!-- Botão Iniciar Batalha -->
+            @if (isGM()) {
+              <button 
+                (click)="combat.rollAllInitiativesAndStartCombat()"
+                class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold rounded-xl text-xs transition-all duration-200 shadow-lg shadow-red-900/30 hover:shadow-red-800/40 border border-red-500/30 hover:scale-105 active:scale-95"
+                title="Rola iniciativa automática (1d20 + mod. DES) para todos os tokens e inicia o combate"
+              >
+                <mat-icon style="font-size:16px;width:16px;height:16px;">swords</mat-icon>
+                Iniciar Batalha
+              </button>
+            }
+            
+            <!-- Map / Slides Toggle Button -->
+            <div class="flex bg-stone-950 p-1 rounded-xl border border-stone-800 text-xs">
+              <button 
+                (click)="combat.showStorySlides.set(false)"
+                [class.bg-amber-600]="!combat.showStorySlides()"
+                [class.text-stone-950]="!combat.showStorySlides()"
+                [class.font-bold]="!combat.showStorySlides()"
+                [class.text-stone-400]="combat.showStorySlides()"
+                class="px-4 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5"
+              >
+                <mat-icon style="font-size:14px;width:14px;height:14px;">map</mat-icon>
+                Mapa
+              </button>
+              <button 
+                (click)="combat.showStorySlides.set(true)"
+                [class.bg-amber-600]="combat.showStorySlides()"
+                [class.text-stone-950]="combat.showStorySlides()"
+                [class.font-bold]="combat.showStorySlides()"
+                [class.text-stone-400]="!combat.showStorySlides()"
+                class="px-4 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5"
+              >
+                <mat-icon style="font-size:14px;width:14px;height:14px;">slideshow</mat-icon>
+                História
+              </button>
+            </div>
           </div>
         }
 
@@ -114,23 +155,31 @@ import { Token } from '../../models/token';
 
       </div>
       
-      <!-- Bottom Bar: Party Status Overlay -->
+      <!-- Bottom Bar: Party Status Overlay with XP Progress -->
       @if (partyTokens().length > 0 && combat.uiVisible()) {
         <div class="flex flex-wrap gap-3 justify-center w-full max-w-3xl pointer-events-auto">
           @for (p of partyTokens(); track p.id) {
             <div 
               (click)="selectAndOpenSheet(p.id)"
-              class="bg-stone-900/90 border border-stone-800 rounded-xl px-4 py-2 flex items-center gap-3 hover:border-amber-500/40 hover:bg-stone-800/90 transition-all duration-200 cursor-pointer shadow-lg select-none"
+              class="bg-stone-900/90 border border-stone-800 rounded-xl px-4 py-2 flex items-center gap-3 hover:border-amber-500/40 hover:bg-stone-800/90 transition-all duration-200 cursor-pointer shadow-lg select-none min-w-[160px]"
             >
-              <div 
-                class="w-7 h-7 rounded-full border-2 overflow-hidden bg-stone-950 flex-shrink-0"
-                [style.borderColor]="p.color || '#d6d3d1'"
-              >
-                @if (p.imageUrl) {
-                  <img [src]="p.imageUrl" alt="Avatar" class="w-full h-full object-cover">
-                } @else {
-                  <div class="w-full h-full flex items-center justify-center bg-stone-850 text-[10px] text-stone-500">
-                    {{ p.name.substring(0,2) }}
+              <div class="relative">
+                <div 
+                  class="w-7 h-7 rounded-full border-2 overflow-hidden bg-stone-950 flex-shrink-0"
+                  [style.borderColor]="p.color || '#d6d3d1'"
+                >
+                  @if (p.imageUrl) {
+                    <img [src]="p.imageUrl" alt="Avatar" class="w-full h-full object-cover">
+                  } @else {
+                    <div class="w-full h-full flex items-center justify-center bg-stone-850 text-[10px] text-stone-500">
+                      {{ p.name.substring(0,2) }}
+                    </div>
+                  }
+                </div>
+                <!-- Level Badge -->
+                @if (p.sheet) {
+                  <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-600 text-stone-950 text-[8px] font-black flex items-center justify-center border border-stone-900">
+                    {{ p.sheet.level }}
                   </div>
                 }
               </div>
@@ -143,10 +192,27 @@ import { Token } from '../../models/token';
                 <!-- Mini health bar -->
                 <div class="h-1 bg-stone-950 rounded-full overflow-hidden border border-stone-800">
                   <div 
-                    class="h-full rounded-full bg-red-500 transition-all duration-300"
+                    class="h-full rounded-full transition-all duration-300"
+                    [class.bg-red-500]="(p.hp / p.maxHp) <= 0.25"
+                    [class.bg-amber-500]="(p.hp / p.maxHp) > 0.25 && (p.hp / p.maxHp) <= 0.5"
+                    [class.bg-green-500]="(p.hp / p.maxHp) > 0.5"
                     [style.width.%]="(p.hp / p.maxHp) * 100"
                   ></div>
                 </div>
+                <!-- XP Progress Bar -->
+                @if (p.sheet) {
+                  <div class="flex items-center gap-1.5">
+                    <div class="flex-1 h-0.5 bg-stone-950 rounded-full overflow-hidden border border-stone-800/50">
+                      <div 
+                        class="h-full rounded-full bg-amber-500/80 transition-all duration-500"
+                        [style.width.%]="combat.getXpProgress(p.sheet.xp, p.sheet.level)"
+                      ></div>
+                    </div>
+                    <span class="text-[7px] font-mono text-amber-500/70 whitespace-nowrap" [title]="'XP: ' + p.sheet.xp + ' / ' + combat.getXpForNextLevel(p.sheet.level)">
+                      {{ p.sheet.xp | number }} XP
+                    </span>
+                  </div>
+                }
                 <!-- Exhaustion / Food status indicators -->
                 <div class="flex items-center gap-1.5 pt-0.5 text-[8px] text-stone-500 uppercase tracking-tight">
                   @if (p.sheet?.exhaustion) {
