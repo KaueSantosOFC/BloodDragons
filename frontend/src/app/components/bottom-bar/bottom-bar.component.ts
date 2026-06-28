@@ -23,7 +23,7 @@ import { Token } from '../../models/token';
             <mat-icon style="font-size: 20px; width: 20px; height: 20px;">exit_to_app</mat-icon>
           </button>
           <div class="flex flex-col">
-            <span class="text-sm font-bold text-stone-200">The <span class="text-blue-500">Elden</span> <span class="text-red-600">Blood</span><span class="text-yellow-500">Moon</span> 2.1.0</span>
+            <span class="text-sm font-bold text-stone-200">The <span class="text-blue-500">Elden</span> <span class="text-red-600">Blood</span><span class="text-yellow-500">Moon</span> 2.2.0</span>
           </div>
 
           <!-- GM / Play Toggle -->
@@ -427,7 +427,7 @@ export class BottomBarComponent {
     if (this.showRestMenu()) {
       this.showDiceTray.set(false);
       this.showSheetList.set(false);
-      
+
       // Pre-select currently selected token if any
       const selectedId = this.combat.selectedTokenId();
       if (selectedId) {
@@ -522,7 +522,7 @@ export class BottomBarComponent {
   shortRest() {
     const selectedIds = Array.from(this.selectedTokensForRest());
     if (selectedIds.length === 0) return;
-    
+
     // Placeholder for short rest logic
     this.showRestMenu.set(false);
   }
@@ -559,7 +559,7 @@ export class BottomBarComponent {
 
       this.combat.updateToken(token.id, updates);
     }
-    
+
     this.showRestMenu.set(false);
   }
 }

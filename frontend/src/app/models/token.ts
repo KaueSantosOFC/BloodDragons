@@ -44,6 +44,13 @@ export interface CharacterSheet {
   savingThrowProficiencies?: string[];
   skillProficiencies?: string[];
   expertiseSkills?: string[];
+  
+  /** Resistências a tipos de dano (PHB p.197) — dano reduzido à metade */
+  damageResistances?: string[];
+  /** Imunidades a tipos de dano — dano = 0 */
+  damageImmunities?: string[];
+  /** Vulnerabilidades a tipos de dano — dano dobrado */
+  damageVulnerabilities?: string[];
 }
 
 export interface TokenCondition {
@@ -75,4 +82,5 @@ export interface Token {
   abilities?: Ability[];
   sheet?: CharacterSheet;
   initiative?: number;
+  xpReward?: number; // XP concedido aos jogadores ao derrotar este inimigo (baseado no ND)
 }

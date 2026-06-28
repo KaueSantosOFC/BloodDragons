@@ -399,7 +399,18 @@ import { Ability } from '../../models/ability';
                         <div class="bg-stone-900 border border-stone-800/80 p-4 rounded-lg flex justify-between items-start hover:border-amber-500/30 transition-colors">
                           <div>
                             <h4 class="font-bold text-stone-200">{{ weapon.name }}</h4>
-                            <p class="text-[10px] text-stone-500 mt-1 uppercase font-semibold">Alcance: {{ weapon.range }}m | Dano: {{ weapon.damage }} {{ weapon.damageType }}</p>
+                            <p class="text-[10px] text-stone-500 mt-1 uppercase font-semibold">
+                              Alcance: {{ weapon.range }}m | Dano: {{ weapon.damage }} {{ weapon.damageType }}
+                              @if (weapon.extraDamage) {
+                                <span class="text-blue-400">+ {{ weapon.extraDamage }} {{ weapon.extraDamageType }}</span>
+                              }
+                            </p>
+                            @if (weapon.secondaryEffect) {
+                              <p class="text-[10px] text-purple-400 mt-1 italic">⚡ {{ weapon.secondaryEffect }}</p>
+                            }
+                            @if (weapon.rechargeOn) {
+                              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold mt-1 inline-block">Recarga {{ weapon.rechargeOn }}</span>
+                            }
                             <p class="text-xs text-stone-400 mt-2 leading-relaxed">{{ weapon.description }}</p>
                           </div>
                           
@@ -440,7 +451,15 @@ import { Ability } from '../../models/ability';
                               <h4 class="font-bold text-stone-200">{{ spell.name }}</h4>
                               <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-bold uppercase">Nível {{ spell.spellLevel }}</span>
                             </div>
-                            <p class="text-[10px] text-stone-500 mt-1 uppercase font-semibold">Alcance: {{ spell.range }}m | Dano: {{ spell.damage }} {{ spell.damageType }}</p>
+                            <p class="text-[10px] text-stone-500 mt-1 uppercase font-semibold">
+                              Alcance: {{ spell.range }}m | Dano: {{ spell.damage }} {{ spell.damageType }}
+                              @if (spell.extraDamage) {
+                                <span class="text-blue-400">+ {{ spell.extraDamage }} {{ spell.extraDamageType }}</span>
+                              }
+                            </p>
+                            @if (spell.secondaryEffect) {
+                              <p class="text-[10px] text-purple-400 mt-1 italic">⚡ {{ spell.secondaryEffect }}</p>
+                            }
                             <p class="text-xs text-stone-400 mt-2 leading-relaxed">{{ spell.description }}</p>
                           </div>
                           
@@ -467,6 +486,80 @@ import { Ability } from '../../models/ability';
                     </div>
                   }
                 </div>
+                
+                <!-- Class Features -->
+                @if (features().length > 0) {
+                  <div class="bg-stone-950 p-6 rounded-xl border border-stone-800">
+                    <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider border-b border-stone-800 pb-2 mb-4">Habilidades de Classe</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      @for (feat of features(); track feat.id) {
+                        <div class="bg-stone-900 border border-stone-800/80 p-4 rounded-lg hover:border-purple-500/30 transition-colors">
+                          <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-bold text-stone-200">{{ feat.name }}</h4>
+                            <span class="text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"
+                                  [class.bg-green-500/10]="feat.type === 'action'"
+                                  [class.text-green-400]="feat.type === 'action'"
+                                  [class.bg-amber-500/10]="feat.type === 'bonus_action'"
+                                  [class.text-amber-400]="feat.type === 'bonus_action'"
+                                  [class.bg-purple-500/10]="feat.type === 'reaction'"
+                                  [class.text-purple-400]="feat.type === 'reaction'"
+                                  [class.bg-stone-700/30]="feat.type === 'passive'"
+                                  [class.text-stone-400]="feat.type === 'passive'"
+                            >
+                              {{ feat.type === 'action' ? 'Ação' : feat.type === 'bonus_action' ? 'Bônus' : feat.type === 'reaction' ? 'Reação' : 'Passiva' }}
+                            </span>
+                            @if (feat.rechargeOn) {
+                              <span class="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold">Rec. {{ feat.rechargeOn }}</span>
+                            }
+                          </div>
+                          @if (feat.maxUses) {
+                            <p class="text-[10px] text-stone-500 font-mono">Usos: {{ feat.uses !== undefined ? feat.uses : feat.maxUses }}/{{ feat.maxUses }}</p>
+                          }
+                          <p class="text-xs text-stone-400 mt-1 leading-relaxed">{{ feat.description }}</p>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Damage Resistances/Immunities -->
+                @if (sheet()?.damageResistances?.length || sheet()?.damageImmunities?.length || sheet()?.damageVulnerabilities?.length) {
+                  <div class="bg-stone-950 p-6 rounded-xl border border-stone-800">
+                    <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider border-b border-stone-800 pb-2 mb-4">Defesas contra Dano</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      @if (sheet()?.damageResistances?.length) {
+                        <div class="bg-stone-900 p-3 rounded-lg border border-stone-800">
+                          <p class="text-[10px] text-blue-400 font-bold uppercase tracking-wider mb-2">Resistências (½ dano)</p>
+                          <div class="flex flex-wrap gap-1.5">
+                            @for (r of sheet()!.damageResistances!; track r) {
+                              <span class="text-[10px] px-2 py-0.5 bg-blue-500/10 text-blue-300 rounded border border-blue-500/20 font-semibold">{{ r }}</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                      @if (sheet()?.damageImmunities?.length) {
+                        <div class="bg-stone-900 p-3 rounded-lg border border-stone-800">
+                          <p class="text-[10px] text-green-400 font-bold uppercase tracking-wider mb-2">Imunidades (0 dano)</p>
+                          <div class="flex flex-wrap gap-1.5">
+                            @for (im of sheet()!.damageImmunities!; track im) {
+                              <span class="text-[10px] px-2 py-0.5 bg-green-500/10 text-green-300 rounded border border-green-500/20 font-semibold">{{ im }}</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                      @if (sheet()?.damageVulnerabilities?.length) {
+                        <div class="bg-stone-900 p-3 rounded-lg border border-stone-800">
+                          <p class="text-[10px] text-red-400 font-bold uppercase tracking-wider mb-2">Vulnerabilidades (2x dano)</p>
+                          <div class="flex flex-wrap gap-1.5">
+                            @for (v of sheet()!.damageVulnerabilities!; track v) {
+                              <span class="text-[10px] px-2 py-0.5 bg-red-500/10 text-red-300 rounded border border-red-500/20 font-semibold">{{ v }}</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
               </div>
             }
             
@@ -636,6 +729,12 @@ export class FullscreenSheetComponent {
     const t = this.token();
     if (!t || !t.abilities) return [];
     return t.abilities.filter(a => a.category === 'spell');
+  });
+
+  features = computed(() => {
+    const t = this.token();
+    if (!t || !t.abilities) return [];
+    return t.abilities.filter(a => a.category === 'feature');
   });
 
   inventoryItems = computed(() => {

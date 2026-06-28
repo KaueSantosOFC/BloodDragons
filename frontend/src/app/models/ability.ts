@@ -12,6 +12,15 @@ export interface Ability {
   radius?: number; // for circle
   damage?: string; // e.g., "8d6"
   damageType?: string;
+  
+  /** Dano secundário/extra (ex: "1d6" de dano elétrico na Katana Infundida) */
+  extraDamage?: string; // e.g., "1d6"
+  /** Tipo do dano extra (ex: "lightning") */
+  extraDamageType?: string;
+  
+  /** Efeito secundário condicional (ex: "Se o alvo se mover, toma 1d8 trovejante") */
+  secondaryEffect?: string;
+  
   healing?: string; // e.g., "2d4+2"
   description: string;
   
@@ -28,4 +37,7 @@ export interface Ability {
   spellLevel?: number;
   uses?: number;
   maxUses?: number;
+  
+  /** Para habilidades com recarga (ex: "5-6" = Recarga em 5-6 no d6) */
+  rechargeOn?: string;
 }

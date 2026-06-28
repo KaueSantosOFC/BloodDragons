@@ -31,6 +31,7 @@ public class CombatService {
     }
 
     public static final List<TokenCondition> AVAILABLE_CONDITIONS = List.of(
+        // Tipos de Dano Elemental/Mágico
         TokenCondition.builder().id("fire").name("Fogo").icon("local_fire_department").color("#ef4444").build(),
         TokenCondition.builder().id("cold").name("Frio").icon("ac_unit").color("#3b82f6").build(),
         TokenCondition.builder().id("lightning").name("Elétrico").icon("bolt").color("#eab308").build(),
@@ -41,6 +42,11 @@ public class CombatService {
         TokenCondition.builder().id("radiant").name("Radiante").icon("wb_sunny").color("#fbbf24").build(),
         TokenCondition.builder().id("force").name("Força").icon("flare").color("#a855f7").build(),
         TokenCondition.builder().id("psychic").name("Psíquico").icon("psychology").color("#ec4899").build(),
+        // Tipos de Dano Físico (PHB p.196)
+        TokenCondition.builder().id("bludgeoning").name("Pancada").icon("fitness_center").color("#a1887f").build(),
+        TokenCondition.builder().id("piercing").name("Perfurante").icon("push_pin").color("#78909c").build(),
+        TokenCondition.builder().id("slashing").name("Cortante").icon("content_cut").color("#b0bec5").build(),
+        // Condições (PHB Apêndice A)
         TokenCondition.builder().id("blinded").name("Cego").icon("visibility_off").color("#737373").build(),
         TokenCondition.builder().id("charmed").name("Enfeitiçado").icon("favorite").color("#ec4899").build(),
         TokenCondition.builder().id("deafened").name("Surdo").icon("hearing_disabled").color("#737373").build(),
