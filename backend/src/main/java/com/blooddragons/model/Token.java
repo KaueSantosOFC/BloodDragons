@@ -40,6 +40,10 @@ public class Token {
     /** player | enemy | npc | boss | item */
     private String type;
 
+    /** Status de vida do token para gerenciamento de listas: VIVO, MORTO, DESCONHECIDO */
+    @Builder.Default
+    private String lifeStatus = "VIVO";
+
     @Builder.Default
     private List<Ability> abilities = new ArrayList<>();
 

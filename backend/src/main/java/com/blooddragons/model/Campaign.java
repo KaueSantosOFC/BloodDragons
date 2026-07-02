@@ -42,6 +42,15 @@ public class Campaign {
     private String activeSceneId;
 
     @Builder.Default
+    private List<StorySlide> storySlides = new ArrayList<>();
+
+    @Builder.Default
+    private List<Chapter> chapterHistory = new ArrayList<>();
+
+    @Builder.Default
+    private Integer currentChapter = 1;
+
+    @Builder.Default
     private Integer currentHour = 8;
 
     @Builder.Default

@@ -265,4 +265,27 @@ export class ApiService {
   getMagicItemCraftingTable(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/dmg/crafting/magic-items`);
   }
+
+  // ==========================================
+  // Fichas Salvas & Bestiário
+  // ==========================================
+
+  /** Retorna fichas salvas de todas as campanhas para importação */
+  getSavedCharacters(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/campaigns/saved-characters`);
+  }
+
+  /** Retorna o bestiário SRD com monstros/NPCs prontos */
+  getBestiary(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/compendium/bestiary`);
+  }
+
+  // ==========================================
+  // Level Up (Progressão Automática)
+  // ==========================================
+
+  /** Calcula a progressão de nível com base nas regras SRD */
+  levelUp(sheet: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/character/level-up`, sheet);
+  }
 }

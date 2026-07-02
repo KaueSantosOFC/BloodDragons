@@ -6,7 +6,7 @@ import { DndMathService } from './dnd-math.service';
 import { ItemToken } from '../models/item-token';
 import { TokenCondition } from '../models/token';
 import { CampaignService } from './campaign.service';
-import { Scene } from '../models/campaign';
+import { Scene, Chapter } from '../models/campaign';
 
 /** Estado do turno atual no combate (PHB p.189) */
 export interface TurnState {
@@ -473,6 +473,11 @@ export class CombatService {
   // Story Slides State
   showStorySlides = signal<boolean>(false);
   
+  // Chapter System State
+  showChapterModal = signal<boolean>(false);
+  chapterHistory = signal<Chapter[]>([]);
+  currentChapterNumber = signal<number>(1);
+  
   // Scenes State
   scenes = signal<Scene[]>([]);
   activeSceneId = signal<string | null>(null);
@@ -596,6 +601,22 @@ export class CombatService {
         this.currentMinute.set(campaign.currentMinute !== undefined ? campaign.currentMinute : 0);
         this.currentDay.set(campaign.currentDay !== undefined ? campaign.currentDay : 1);
         
+        // Carregar slides da campanha (correção: antes não eram persistidos)
+        if (campaign.storySlides && campaign.storySlides.length > 0) {
+          this.storySlides.set(campaign.storySlides);
+        } else if (campaign.id !== 'test-campaign') {
+          // Campanha real sem slides — lista vazia
+          this.storySlides.set([]);
+        }
+        // Carregar capítulos e número atual
+        if (campaign.chapterHistory) this.chapterHistory.set(campaign.chapterHistory);
+        if (campaign.currentChapter !== undefined) this.currentChapterNumber.set(campaign.currentChapter);
+        
+        // Se campanha real tem slides, mostrar modal de capítulo
+        if (campaign.id !== 'test-campaign' && campaign.storySlides && campaign.storySlides.length > 0) {
+          this.showChapterModal.set(true);
+        }
+        
       } else if (!campaign) {
         this.currentCampaignId = null;
       }
@@ -635,6 +656,9 @@ export class CombatService {
         isFogEnabled: untracked(() => this.isFogEnabled()),
         scenes: currentScenes,
         activeSceneId: activeId,
+        storySlides: untracked(() => this.storySlides()),
+        chapterHistory: untracked(() => this.chapterHistory()),
+        currentChapter: untracked(() => this.currentChapterNumber()),
         currentHour: untracked(() => this.currentHour()),
         currentMinute: untracked(() => this.currentMinute()),
         currentDay: untracked(() => this.currentDay())
@@ -692,6 +716,13 @@ export class CombatService {
       if (t.type !== 'player' && oldHp > 0 && updatedToken.hp <= 0) {
         xpToDistribute = updatedToken.xpReward || updatedToken.sheet?.xp || 0;
         enemyName = updatedToken.name;
+        // Auto-setar status MORTO quando HP chega a 0
+        updatedToken.lifeStatus = 'MORTO';
+      }
+      
+      // Auto-setar status VIVO quando HP é restaurado de 0
+      if (oldHp <= 0 && updatedToken.hp > 0) {
+        updatedToken.lifeStatus = 'VIVO';
       }
       
       // Check if player moved
@@ -1079,14 +1110,17 @@ export class CombatService {
 
   addStorySlide(slide: {url: string, title: string, description: string}) {
     this.storySlides.update(slides => [...slides, slide]);
+    this.saveToCampaign();
   }
 
   addStorySlides(newSlides: {url: string, title: string, description: string}[]) {
     this.storySlides.update(slides => [...slides, ...newSlides]);
+    this.saveToCampaign();
   }
 
   deleteStorySlide(index: number) {
     this.storySlides.update(slides => slides.filter((_, i) => i !== index));
+    this.saveToCampaign();
   }
 
   toggleFogCell(x: number, y: number, hide: boolean) {
@@ -1169,6 +1203,46 @@ export class CombatService {
       newSlides.splice(toIndex, 0, movedSlide);
       return newSlides;
     });
+    this.saveToCampaign();
+  }
+
+  /**
+   * Arquiva os slides atuais como um capítulo e limpa a lista para nova narrativa.
+   * O histórico de capítulos é persistido na campanha.
+   */
+  archiveCurrentChapter() {
+    const currentSlides = this.storySlides();
+    if (currentSlides.length === 0) return;
+
+    const chapterNumber = this.currentChapterNumber();
+    const newChapter: Chapter = {
+      id: 'ch_' + Date.now(),
+      number: chapterNumber,
+      title: `Capítulo ${chapterNumber}`,
+      archivedAt: new Date().toISOString(),
+      slides: [...currentSlides]
+    };
+
+    this.chapterHistory.update(h => [...h, newChapter]);
+    this.currentChapterNumber.update(n => n + 1);
+    this.storySlides.set([]);
+    this.saveToCampaign();
+    this.addNotification(`Capítulo ${chapterNumber} arquivado com ${currentSlides.length} cenas.`, 'info');
+  }
+
+  /**
+   * Inicia um novo capítulo: arquiva o atual e limpa os slides.
+   */
+  startNewChapter() {
+    this.archiveCurrentChapter();
+    this.showChapterModal.set(false);
+  }
+
+  /**
+   * Continua o capítulo atual (mantém slides existentes).
+   */
+  continueCurrentChapter() {
+    this.showChapterModal.set(false);
   }
 
   // ==========================================

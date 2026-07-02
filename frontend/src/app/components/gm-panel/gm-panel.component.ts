@@ -19,7 +19,6 @@ import { ApiService } from '../../services/api.service';
       <div class="flex shrink-0 border-b border-stone-800 text-[10px] font-mono">
         <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="activeTab() === 'map'" [class.border-b-2]="activeTab() === 'map'" [class.border-amber-500]="activeTab() === 'map'" [class.bg-stone-800]="activeTab() === 'map'" (click)="activeTab.set('map')">MAPA</button>
         <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="activeTab() === 'tokens'" [class.border-b-2]="activeTab() === 'tokens'" [class.border-amber-500]="activeTab() === 'tokens'" [class.bg-stone-800]="activeTab() === 'tokens'" (click)="activeTab.set('tokens')">TOKENS</button>
-        <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="activeTab() === 'combat'" [class.border-b-2]="activeTab() === 'combat'" [class.border-amber-500]="activeTab() === 'combat'" [class.bg-stone-800]="activeTab() === 'combat'" (click)="activeTab.set('combat')">COMBATE</button>
         <button class="flex-1 py-3 transition-colors" [class.text-amber-500]="activeTab() === 'dmg'" [class.border-b-2]="activeTab() === 'dmg'" [class.border-amber-500]="activeTab() === 'dmg'" [class.bg-stone-800]="activeTab() === 'dmg'" (click)="activeTab.set('dmg')">REGRAS DMG</button>
       </div>
       
@@ -147,8 +146,39 @@ import { ApiService } from '../../services/api.service';
                         (click)="addToken(newTokenType.value)">
                   Adicionar Token ao Mapa
                 </button>
+                <button class="w-full py-1 bg-stone-800 hover:bg-stone-700 text-amber-500 font-bold rounded text-xs transition-colors border border-stone-700 flex items-center justify-center gap-1"
+                        (click)="showImportModal.set(true)">
+                  <mat-icon style="font-size:14px;width:14px;height:14px;">person_add</mat-icon>
+                  Importar Personagem Salvo
+                </button>
               </div>
             </div>
+
+            <!-- Import Character Modal -->
+            @if (showImportModal()) {
+              <div class="space-y-2 bg-stone-950/50 p-3 rounded-xl border border-amber-900/30">
+                <div class="flex justify-between items-center">
+                  <h3 class="font-bold text-amber-500 text-xs flex items-center gap-1"><mat-icon style="font-size:14px;width:14px;height:14px;">person_search</mat-icon>Fichas Salvas</h3>
+                  <button (click)="showImportModal.set(false)" class="text-stone-500 hover:text-stone-300">
+                    <mat-icon style="font-size:14px;width:14px;height:14px;">close</mat-icon>
+                  </button>
+                </div>
+                @if (savedCharacters().length === 0) {
+                  <div class="text-[10px] text-stone-500 italic text-center py-4">Nenhuma ficha salva encontrada nas campanhas.</div>
+                } @else {
+                  <div class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    @for (char of savedCharacters(); track char.id) {
+                      <button (click)="importCharacter(char)" 
+                              class="w-full text-left p-2 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-amber-500/50 rounded transition-colors">
+                        <div class="text-xs text-amber-500 font-bold">{{ char.characterName }} (Nível {{ char.level }})</div>
+                        <div class="text-[10px] text-stone-400">Jogador: {{ char.playerName }} | {{ char.className }} {{ char.race }}</div>
+                        <div class="text-[10px] text-stone-500">Campanha: {{ char.campaignName }} | Save: {{ char.saveDate }}</div>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
 
             <!-- Selected Token Settings -->
             <div class="space-y-2">
@@ -235,79 +265,59 @@ import { ApiService } from '../../services/api.service';
               }
             </div>
 
-          </div>
-        }
-        
-        @if (activeTab() === 'combat') {
-          <div class="p-4 space-y-6">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between border-b border-stone-700 pb-2">
-                <h3 class="font-bold text-amber-500 flex items-center gap-2">
-                  <mat-icon style="font-size: 18px; width: 18px; height: 18px;">swords</mat-icon>
-                  Rastreador de Combate
-                </h3>
-              </div>
-              
-              <div class="space-y-4">
-                @if (!combat.combatActive()) {
-                  <button class="w-full bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-2 px-4 rounded shadow transition-colors flex justify-center items-center gap-2"
-                          (click)="combat.startCombat()">
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">play_arrow</mat-icon>
-                    Iniciar Combate
-                  </button>
-                } @else {
-                  <div class="flex gap-2">
-                    <button class="flex-1 bg-stone-700 hover:bg-stone-600 text-white font-bold py-2 px-2 rounded shadow transition-colors text-xs flex justify-center items-center gap-1"
-                            (click)="combat.previousTurn()">
-                      <mat-icon style="font-size: 16px; width: 16px; height: 16px;">navigate_before</mat-icon> Anterior
-                    </button>
-                    <button class="flex-1 bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-2 px-2 rounded shadow transition-colors text-xs flex justify-center items-center gap-1"
-                            (click)="combat.nextTurn()">
-                      Próximo <mat-icon style="font-size: 16px; width: 16px; height: 16px;">navigate_next</mat-icon>
-                    </button>
-                  </div>
-                  <button class="w-full bg-red-900/50 hover:bg-red-800 text-red-100 font-bold py-2 px-4 rounded border border-red-900 transition-colors flex justify-center items-center gap-2"
-                          (click)="combat.endCombat()">
-                    <mat-icon style="font-size: 18px; width: 18px; height: 18px;">stop</mat-icon>
-                    Encerrar Combate
+            <!-- NPC/Enemy Status Filter -->
+            <div class="space-y-2 pt-4 border-t border-stone-800">
+              <h3 class="font-bold text-amber-500 border-b border-stone-700 pb-1 flex items-center gap-2 text-xs">
+                <mat-icon style="font-size:14px;width:14px;height:14px;">groups</mat-icon>NPCs e Inimigos
+              </h3>
+              <div class="flex gap-1">
+                @for (filter of statusFilters; track filter.value) {
+                  <button class="px-2 py-1 text-[10px] rounded-full border transition-colors"
+                          [class.bg-amber-600]="npcStatusFilter() === filter.value"
+                          [class.text-stone-900]="npcStatusFilter() === filter.value"
+                          [class.border-amber-500]="npcStatusFilter() === filter.value"
+                          [class.bg-stone-800]="npcStatusFilter() !== filter.value"
+                          [class.text-stone-400]="npcStatusFilter() !== filter.value"
+                          [class.border-stone-700]="npcStatusFilter() !== filter.value"
+                          (click)="npcStatusFilter.set(filter.value)">
+                    {{ filter.label }}
                   </button>
                 }
               </div>
-
-              <!-- List of tokens to set initiative -->
-              <div class="pt-4 border-t border-stone-800">
-                <h4 class="text-xs font-bold text-amber-500 mb-3 uppercase tracking-wider flex items-center gap-1.5"><mat-icon style="font-size:14px;width:14px;height:14px;">timer</mat-icon>Definir Iniciativas</h4>
-                <div class="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
-                  @for (token of combat.tokens(); track token.id) {
-                    @if (token.type !== 'item') {
-                      <div class="flex items-center gap-2 bg-stone-800/50 p-2 rounded border border-stone-700">
-                        <div class="w-6 h-6 rounded-full border border-stone-600 overflow-hidden shrink-0 bg-stone-900">
-                           @if (token.imageUrl) {
-                             <img [src]="token.imageUrl" class="w-full h-full object-cover" alt="Miniatura">
-                           } @else {
-                             <div class="w-full h-full" [style.backgroundColor]="token.color"></div>
-                           }
-                        </div>
-                        <span class="flex-1 text-xs truncate max-w-[120px]" 
-                              [class.text-red-400]="token.type === 'enemy' || token.type === 'boss'"
-                              [class.text-blue-400]="token.type === 'npc'"
-                              [class.text-stone-200]="token.type === 'player'">
-                          {{ token.name }}
-                        </span>
-                        <input type="number" 
-                               [value]="token.initiative !== undefined ? token.initiative : ''"
-                               (change)="updateInitiative(token.id, $event)"
-                               placeholder="10"
-                               class="w-16 bg-stone-900 border border-stone-600 rounded-lg px-1.5 py-1.5 text-xs text-center focus:outline-none focus:border-amber-500 font-mono text-amber-500 font-bold">
-                      </div>
-                    }
-                  }
-                </div>
+              <div class="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                @for (token of filteredNpcs(); track token.id) {
+                  <div class="flex items-center gap-2 p-1.5 bg-stone-800/50 rounded border border-stone-700 cursor-pointer hover:border-stone-600 transition-colors"
+                       (click)="combat.selectToken(token.id)">
+                    <div class="w-5 h-5 rounded-full border border-stone-600 overflow-hidden shrink-0 bg-stone-900">
+                       @if (token.imageUrl) {
+                         <img [src]="token.imageUrl" class="w-full h-full object-cover" alt="">
+                       } @else {
+                         <div class="w-full h-full" [style.backgroundColor]="token.color"></div>
+                       }
+                    </div>
+                    <span class="flex-1 text-[10px] truncate"
+                          [class.text-red-400]="token.type === 'enemy' || token.type === 'boss'"
+                          [class.text-blue-400]="token.type === 'npc'">{{ token.name }}</span>
+                    <button (click)="$event.stopPropagation(); toggleLifeStatus(token)" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold cursor-pointer hover:opacity-80 transition-opacity"
+                          [class.bg-green-900]="token.lifeStatus === 'VIVO' || !token.lifeStatus"
+                          [class.text-green-400]="token.lifeStatus === 'VIVO' || !token.lifeStatus"
+                          [class.bg-red-900]="token.lifeStatus === 'MORTO'"
+                          [class.text-red-400]="token.lifeStatus === 'MORTO'"
+                          [class.bg-stone-700]="token.lifeStatus === 'DESCONHECIDO'"
+                          [class.text-stone-400]="token.lifeStatus === 'DESCONHECIDO'"
+                          title="Clique para alternar status">{{ token.lifeStatus || 'VIVO' }}</button>
+                    <span class="text-[9px] text-stone-500 font-mono">{{ token.hp }}/{{ token.maxHp }}</span>
+                  </div>
+                } @empty {
+                  <div class="text-[10px] text-stone-500 italic text-center py-2">Nenhum NPC/Inimigo com esse filtro.</div>
+                }
               </div>
-
             </div>
+
           </div>
         }
+        
+
 
         @if (activeTab() === 'dmg') {
           <div class="p-4 space-y-6">
@@ -620,8 +630,30 @@ export class GmPanelComponent {
   combat = inject(CombatService);
   api = inject(ApiService);
 
-  activeTab = signal<'map' | 'tokens' | 'combat' | 'dmg'>('map');
+  activeTab = signal<'map' | 'tokens' | 'dmg'>('map');
   tokenToDelete = signal<string | null>(null);
+  
+  // Import Character Modal
+  showImportModal = signal<boolean>(false);
+  savedCharacters = signal<any[]>([]);
+  
+  // NPC Status Filter
+  npcStatusFilter = signal<'VIVO' | 'MORTO' | 'DESCONHECIDO' | 'TODOS'>('VIVO');
+  statusFilters = [
+    { label: 'Vivos', value: 'VIVO' as const },
+    { label: 'Mortos', value: 'MORTO' as const },
+    { label: '???', value: 'DESCONHECIDO' as const },
+    { label: 'Todos', value: 'TODOS' as const }
+  ];
+  
+  filteredNpcs = computed(() => {
+    const filter = this.npcStatusFilter();
+    const tokens = this.combat.tokens().filter(t => 
+      t.type === 'enemy' || t.type === 'npc' || t.type === 'boss'
+    );
+    if (filter === 'TODOS') return tokens;
+    return tokens.filter(t => (t.lifeStatus || 'VIVO') === filter);
+  });
 
   // Fall Damage
   fallDistance = signal<number>(10);
@@ -878,11 +910,7 @@ export class GmPanelComponent {
     this.combat.updateToken(id, { [field]: value });
   }
 
-  updateInitiative(tokenId: string, event: Event) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value ? parseInt(input.value, 10) : undefined;
-    this.combat.updateToken(tokenId, { initiative: value });
-  }
+
 
   hideAllFog() {
     this.combat.hideAllFog(this.combat.mapWidth(), this.combat.mapHeight(), 64);
@@ -926,5 +954,64 @@ export class GmPanelComponent {
       this.combat.clearFog();
       this.combat.saveToCampaign(); // Trigger save
     }
+  }
+
+  /**
+   * Carrega fichas salvas de todas as campanhas para importação.
+   * Varre os tokens de cada campanha buscando os que possuem sheet preenchido.
+   */
+  loadSavedCharacters() {
+    this.api.getSavedCharacters().subscribe({
+      next: (chars) => this.savedCharacters.set(chars),
+      error: () => {
+        // Fallback: não há endpoint ainda ou API offline
+        this.savedCharacters.set([]);
+      }
+    });
+  }
+
+  /**
+   * Importa um personagem salvo como novo token no mapa.
+   * O token é instanciado com a ficha exata da versão selecionada.
+   */
+  importCharacter(char: any) {
+    const id = 't' + Math.random().toString(36).substring(2, 9);
+    const sheet = char.sheet;
+    
+    this.combat.addToken({
+      id,
+      name: sheet.class ? `${char.characterName}` : char.characterName,
+      x: 0,
+      y: 0,
+      hp: sheet.hp || sheet.maxHp || 10,
+      maxHp: sheet.maxHp || 10,
+      spellUses: sheet.spellUses || 0,
+      maxSpellUses: sheet.maxSpellUses || 0,
+      conditions: [],
+      controlledBy: 'user_player_1',
+      color: '#3b82f6',
+      type: 'player',
+      lifeStatus: 'VIVO',
+      sheet: { ...sheet }
+    });
+
+    this.combat.selectToken(id);
+    this.combat.rightPanelTab.set('sheet');
+    this.showImportModal.set(false);
+    this.combat.addNotification(`${char.characterName} importado com sucesso!`, 'info');
+  }
+
+  /**
+   * Alterna o status de vida de um NPC/inimigo: VIVO -> MORTO -> DESCONHECIDO -> VIVO
+   */
+  toggleLifeStatus(token: any) {
+    const cycle: Record<string, string> = {
+      'VIVO': 'MORTO',
+      'MORTO': 'DESCONHECIDO',
+      'DESCONHECIDO': 'VIVO'
+    };
+    const currentStatus = token.lifeStatus || 'VIVO';
+    const newStatus = cycle[currentStatus] || 'VIVO';
+    this.combat.updateToken(token.id, { lifeStatus: newStatus as any });
   }
 }

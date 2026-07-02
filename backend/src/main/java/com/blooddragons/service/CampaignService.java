@@ -76,6 +76,9 @@ public class CampaignService {
         if (updates.getIsFogEnabled() != null) existing.setIsFogEnabled(updates.getIsFogEnabled());
         if (updates.getScenes() != null) existing.setScenes(updates.getScenes());
         if (updates.getActiveSceneId() != null) existing.setActiveSceneId(updates.getActiveSceneId());
+        if (updates.getStorySlides() != null) existing.setStorySlides(updates.getStorySlides());
+        if (updates.getChapterHistory() != null) existing.setChapterHistory(updates.getChapterHistory());
+        if (updates.getCurrentChapter() != null) existing.setCurrentChapter(updates.getCurrentChapter());
         if (updates.getCurrentHour() != null) existing.setCurrentHour(updates.getCurrentHour());
         if (updates.getCurrentMinute() != null) existing.setCurrentMinute(updates.getCurrentMinute());
         if (updates.getCurrentDay() != null) existing.setCurrentDay(updates.getCurrentDay());

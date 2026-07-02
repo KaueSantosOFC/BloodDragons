@@ -1,6 +1,7 @@
 package com.blooddragons.controller;
 
 import com.blooddragons.data.CompendiumData;
+import com.blooddragons.data.Dnd5eBestiaryData;
 import com.blooddragons.data.Dnd5eOptionsData;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,5 +44,13 @@ public class CompendiumController {
     @GetMapping("/backgrounds")
     public ResponseEntity<List<Dnd5eOptionsData.Dnd5eBackground>> getBackgrounds() {
         return ResponseEntity.ok(Dnd5eOptionsData.BACKGROUNDS);
+    }
+
+    /**
+     * Retorna o bestiário SRD com fichas prontas de monstros/NPCs.
+     */
+    @GetMapping("/bestiary")
+    public ResponseEntity<List<Dnd5eBestiaryData.BestiaryEntry>> getBestiary() {
+        return ResponseEntity.ok(Dnd5eBestiaryData.BESTIARY);
     }
 }

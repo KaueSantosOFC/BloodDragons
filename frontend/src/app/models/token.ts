@@ -79,6 +79,7 @@ export interface Token {
   imageOffsetX?: number;
   imageOffsetY?: number;
   type?: 'player' | 'enemy' | 'npc' | 'boss' | 'item';
+  lifeStatus?: 'VIVO' | 'MORTO' | 'DESCONHECIDO';
   abilities?: Ability[];
   sheet?: CharacterSheet;
   initiative?: number;

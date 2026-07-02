@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { ActionMenuComponent } from '../action-menu/action-menu.component';
 import { ActionResult, DndCoreEngineService } from '../../services/dnd-core-engine.service';
+import { ApiService } from '../../services/api.service';
 import { COMPENDIUM_WEAPONS, COMPENDIUM_SPELLS, WEAPON_PROPERTY_LABELS } from '../../data/compendium.data';
 import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findClassByName, Dnd5eSubRace } from '../../data/dnd5e-options.data';
 
@@ -1512,11 +1513,72 @@ import { DND5E_CLASSES, DND5E_RACES, DND5E_ALIGNMENTS, DND5E_BACKGROUNDS, findCl
                 <p class="text-sm text-stone-400">Este token não possui uma ficha de personagem preenchida.</p>
                 <p class="text-xs text-stone-500">Habilidades que requerem rolagens de ataque ou salvaguardas podem não funcionar corretamente sem CA e atributos.</p>
                 @if (auth.currentUser()?.role === 'GM' || selectedToken()?.controlledBy === auth.currentUser()?.id) {
-                  <button class="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold px-4 py-2 rounded text-xs transition-colors mt-2" (click)="editSheet()">
-                    Criar Ficha
-                  </button>
+                  <div class="flex flex-col gap-2 mt-2">
+                    <button class="bg-amber-600 hover:bg-amber-500 text-stone-900 font-bold px-4 py-2 rounded text-xs transition-colors" (click)="editSheet()">
+                      <mat-icon style="font-size:14px;width:14px;height:14px;vertical-align:middle;margin-right:4px;">add</mat-icon>Criar Ficha
+                    </button>
+                    <button class="bg-stone-700 hover:bg-stone-600 text-amber-500 font-bold px-4 py-2 rounded text-xs transition-colors border border-stone-600 flex items-center justify-center gap-1" (click)="openImportSheet()">
+                      <mat-icon style="font-size:14px;width:14px;height:14px;">file_download</mat-icon>Importar Ficha Salva
+                    </button>
+                    <button class="bg-stone-700 hover:bg-stone-600 text-blue-400 font-bold px-4 py-2 rounded text-xs transition-colors border border-stone-600 flex items-center justify-center gap-1" (click)="openBestiary()">
+                      <mat-icon style="font-size:14px;width:14px;height:14px;">menu_book</mat-icon>Adicionar do Livro
+                    </button>
+                  </div>
                 }
               </div>
+
+              <!-- Modal: Importar Ficha Salva -->
+              @if (showImportSheetModal()) {
+                <div class="bg-stone-950/50 p-3 rounded-xl border border-amber-900/30 space-y-2 mt-3">
+                  <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-amber-500 text-xs flex items-center gap-1"><mat-icon style="font-size:14px;width:14px;height:14px;">person_search</mat-icon>Fichas Salvas de Campanhas</h3>
+                    <button (click)="showImportSheetModal.set(false)" class="text-stone-500 hover:text-stone-300">
+                      <mat-icon style="font-size:14px;width:14px;height:14px;">close</mat-icon>
+                    </button>
+                  </div>
+                  <input type="text" [value]="importSearch()" (input)="importSearch.set($any($event.target).value)" placeholder="Buscar por nome, jogador ou campanha..." class="w-full bg-stone-800 border border-stone-700 rounded px-2 py-1 text-xs text-stone-300 focus:outline-none focus:border-amber-500">
+                  @if (filteredSavedCharacters().length === 0) {
+                    <div class="text-[10px] text-stone-500 italic text-center py-4">Nenhuma ficha salva encontrada nas campanhas.</div>
+                  } @else {
+                    <div class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                      @for (char of filteredSavedCharacters(); track char.id) {
+                        <button (click)="importSheetToToken(char)" class="w-full text-left p-2 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-amber-500/50 rounded transition-colors">
+                          <div class="text-xs text-amber-500 font-bold">{{ char.characterName }} (Nível {{ char.level }})</div>
+                          <div class="text-[10px] text-stone-400">Jogador: {{ char.playerName }} | {{ char.className }} {{ char.race }}</div>
+                          <div class="text-[10px] text-stone-500">Campanha: {{ char.campaignName }} | Save: {{ char.saveDate }}</div>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Modal: Adicionar do Livro (Bestiário) -->
+              @if (showBestiaryModal()) {
+                <div class="bg-stone-950/50 p-3 rounded-xl border border-blue-900/30 space-y-2 mt-3">
+                  <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-blue-400 text-xs flex items-center gap-1"><mat-icon style="font-size:14px;width:14px;height:14px;">menu_book</mat-icon>Bestiário SRD (Fichas Prontas)</h3>
+                    <button (click)="showBestiaryModal.set(false)" class="text-stone-500 hover:text-stone-300">
+                      <mat-icon style="font-size:14px;width:14px;height:14px;">close</mat-icon>
+                    </button>
+                  </div>
+                  <input type="text" [value]="bestiarySearch()" (input)="bestiarySearch.set($any($event.target).value)" placeholder="Buscar monstro por nome, tipo ou ND..." class="w-full bg-stone-800 border border-stone-700 rounded px-2 py-1 text-xs text-stone-300 focus:outline-none focus:border-blue-500">
+                  <div class="space-y-1.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                    @for (monster of filteredBestiary(); track monster.id) {
+                      <button (click)="importBestiaryToToken(monster)" class="w-full text-left p-2 bg-stone-900 hover:bg-stone-800 border border-stone-700 hover:border-blue-500/50 rounded transition-colors">
+                        <div class="flex justify-between items-center">
+                          <span class="text-xs text-blue-400 font-bold">{{ monster.name }}</span>
+                          <span class="text-[9px] bg-stone-800 text-stone-400 px-1.5 py-0.5 rounded border border-stone-700">ND {{ monster.cr }}</span>
+                        </div>
+                        <div class="text-[10px] text-stone-400">{{ monster.type }} | CA {{ monster.ac }} | PV {{ monster.hp }}</div>
+                        <div class="text-[10px] text-stone-500">FOR {{ monster.str }} DEX {{ monster.dex }} CON {{ monster.con }} INT {{ monster.intel }} SAB {{ monster.wis }} CAR {{ monster.cha }}</div>
+                      </button>
+                    } @empty {
+                      <div class="text-[10px] text-stone-500 italic text-center py-2">Nenhum monstro encontrado.</div>
+                    }
+                  </div>
+                </div>
+              }
             }
         </div>
       }
@@ -1531,6 +1593,31 @@ export class RightPanelComponent {
   combat = inject(CombatService);
   auth = inject(AuthService);
   engine = inject(DndCoreEngineService);
+  api = inject(ApiService);
+
+  // Import & Bestiary modals
+  showImportSheetModal = signal<boolean>(false);
+  showBestiaryModal = signal<boolean>(false);
+  savedCharactersForImport = signal<any[]>([]);
+  bestiaryEntries = signal<any[]>([]);
+  bestiarySearch = signal<string>('');
+  importSearch = signal<string>('');
+
+  filteredBestiary = computed(() => {
+    const q = this.bestiarySearch().toLowerCase();
+    if (!q) return this.bestiaryEntries();
+    return this.bestiaryEntries().filter((e: any) =>
+      e.name.toLowerCase().includes(q) || e.type.toLowerCase().includes(q) || e.cr.includes(q)
+    );
+  });
+
+  filteredSavedCharacters = computed(() => {
+    const q = this.importSearch().toLowerCase();
+    if (!q) return this.savedCharactersForImport();
+    return this.savedCharactersForImport().filter((c: any) =>
+      c.characterName.toLowerCase().includes(q) || c.playerName.toLowerCase().includes(q) || c.campaignName.toLowerCase().includes(q)
+    );
+  });
 
   Math = Math;
 
@@ -2372,5 +2459,106 @@ export class RightPanelComponent {
 
   cancelEditSheet() {
     this.isEditingSheet.set(false);
+  }
+
+  // ==========================================
+  // Importar Ficha Salva & Bestiário
+  // ==========================================
+
+  openImportSheet() {
+    this.showImportSheetModal.set(true);
+    this.showBestiaryModal.set(false);
+    this.importSearch.set('');
+    this.api.getSavedCharacters().subscribe({
+      next: (chars) => this.savedCharactersForImport.set(chars),
+      error: () => this.savedCharactersForImport.set([])
+    });
+  }
+
+  openBestiary() {
+    this.showBestiaryModal.set(true);
+    this.showImportSheetModal.set(false);
+    this.bestiarySearch.set('');
+    if (this.bestiaryEntries().length === 0) {
+      this.api.getBestiary().subscribe({
+        next: (entries) => this.bestiaryEntries.set(entries),
+        error: () => this.bestiaryEntries.set([])
+      });
+    }
+  }
+
+  importSheetToToken(char: any) {
+    const token = this.selectedToken();
+    if (!token) return;
+    const sheet = char.sheet;
+    this.combat.updateToken(token.id, {
+      name: char.characterName || token.name,
+      hp: sheet.hp || sheet.maxHp || 10,
+      maxHp: sheet.maxHp || 10,
+      spellUses: sheet.spellUses || 0,
+      maxSpellUses: sheet.maxSpellUses || 0,
+      sheet: { ...sheet }
+    });
+    this.showImportSheetModal.set(false);
+    this.combat.addNotification(`Ficha de ${char.characterName} importada com sucesso!`, 'info');
+  }
+
+  importBestiaryToToken(monster: any) {
+    const token = this.selectedToken();
+    if (!token) return;
+
+    const conMod = Math.floor((monster.con - 10) / 2);
+    const dexMod = Math.floor((monster.dex - 10) / 2);
+    const wisMod = Math.floor((monster.wis - 10) / 2);
+
+    const sheet: CharacterSheet = {
+      class: monster.type,
+      level: 1,
+      background: 'Monstro',
+      playerName: 'Mestre',
+      race: monster.name,
+      alignment: 'Neutro',
+      xp: 0,
+      hitDie: 8,
+      str: monster.str,
+      dex: monster.dex,
+      con: monster.con,
+      int: monster.intel,
+      wis: monster.wis,
+      cha: monster.cha,
+      ac: monster.ac,
+      initiative: dexMod,
+      speed: monster.speed,
+      proficiencyBonus: 2,
+      passivePerception: monster.passivePerception,
+      hp: monster.hp,
+      maxHp: monster.hp,
+      spellUses: 0,
+      maxSpellUses: 0
+    };
+
+    // Converter ataques do bestiário em Abilities
+    const abilities = (monster.abilities || []).map((a: any, i: number) => ({
+      id: 'bestiary_' + monster.id + '_' + i,
+      name: a.name,
+      type: a.type,
+      category: a.category,
+      damage: a.damage !== '0' ? a.damage : undefined,
+      damageType: a.damageType,
+      range: a.range,
+      description: a.description,
+      properties: a.range <= 1.5 ? ['melee'] : ['ranged']
+    }));
+
+    this.combat.updateToken(token.id, {
+      name: monster.name,
+      hp: monster.hp,
+      maxHp: monster.hp,
+      sheet,
+      abilities,
+      lifeStatus: 'VIVO'
+    });
+    this.showBestiaryModal.set(false);
+    this.combat.addNotification(`${monster.name} (ND ${monster.cr}) adicionado!`, 'info');
   }
 }
