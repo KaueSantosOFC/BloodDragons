@@ -71,7 +71,7 @@ public class CampaignController {
                 var sheet = token.getSheet();
                 Map<String, Object> entry = new LinkedHashMap<>();
                 entry.put("id", token.getId() + "_" + campaign.getId());
-                entry.put("characterName", sheet.getCharacterName() != null ? sheet.getCharacterName() : token.getName());
+                entry.put("characterName", token.getName() != null ? token.getName() : "");
                 entry.put("playerName", sheet.getPlayerName() != null ? sheet.getPlayerName() : "Mestre");
                 entry.put("className", sheet.getClassName() != null ? sheet.getClassName() : "");
                 entry.put("race", sheet.getRace() != null ? sheet.getRace() : "");
