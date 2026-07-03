@@ -15,7 +15,7 @@ import { AttackModalComponent } from '../attack-modal/attack-modal.component';
 import { DamageModalComponent } from '../damage-modal/damage-modal.component';
 import { LevelUpModalComponent } from '../level-up-modal/level-up-modal.component';
 
-
+import { CombatTrackerComponent } from '../combat-tracker/combat-tracker.component';
 import { FullscreenSheetComponent } from '../fullscreen-sheet/fullscreen-sheet.component';
 import { GameplayHudComponent } from '../gameplay-hud/gameplay-hud.component';
 
@@ -26,7 +26,7 @@ import { GameplayHudComponent } from '../gameplay-hud/gameplay-hud.component';
     GridComponent, GmPanelComponent, RightPanelComponent, BottomBarComponent, 
     StorySlidesComponent, SceneFilmstripComponent, MatIconModule, CommonModule, 
     ItemInteractionModalComponent, AttackModalComponent, DamageModalComponent, 
-    LevelUpModalComponent, FullscreenSheetComponent, 
+    LevelUpModalComponent, CombatTrackerComponent, FullscreenSheetComponent, 
     GameplayHudComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,7 +56,10 @@ import { GameplayHudComponent } from '../gameplay-hud/gameplay-hud.component';
             @if (combat.showStorySlides()) {
               <app-story-slides [slides]="combat.storySlides()"></app-story-slides>
             } @else {
-
+              <!-- Combat Tracker (Ancorado no mapa, lado esquerdo) -->
+              @if (combat.combatActive() && combat.uiVisible()) {
+                <app-combat-tracker class="absolute top-20 left-4 bottom-8 z-20"></app-combat-tracker>
+              }
               <app-grid></app-grid>
             }
           </div>

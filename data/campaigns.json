@@ -1,0 +1,18 @@
+[ {
+  "id" : "test-campaign",
+  "name" : "Campanha Teste (Tutorial)",
+  "createdAt" : [ 2026, 7, 3, 18, 14, 20, 913813721 ],
+  "lastPlayedAt" : [ 2026, 7, 3, 18, 14, 20, 913837671 ],
+  "tokens" : [ ],
+  "mapBackgroundImage" : null,
+  "fogOfWar" : [ ],
+  "isFogEnabled" : null,
+  "scenes" : [ ],
+  "activeSceneId" : null,
+  "storySlides" : [ ],
+  "chapterHistory" : [ ],
+  "currentChapter" : 1,
+  "currentHour" : 8,
+  "currentMinute" : 0,
+  "currentDay" : 1
+} ]
